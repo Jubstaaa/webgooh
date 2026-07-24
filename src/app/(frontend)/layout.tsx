@@ -33,7 +33,10 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.webgooh.com'
 const INDEXABLE = process.env.SITE_INDEXABLE === 'true'
 
 export const metadata: Metadata = {
-    alternates: { canonical: '/' },
+    alternates: {
+        canonical: '/',
+        types: { 'application/rss+xml': `${SITE_URL}/rss.xml` },
+    },
     description:
         'Markaları büyüten web yazılım, mobil uygulama, UX/UI, SEO, siber güvenlik ve DevOps çözümleri. İstanbul merkezli uçtan uca dijital mühendislik.',
     keywords: [
