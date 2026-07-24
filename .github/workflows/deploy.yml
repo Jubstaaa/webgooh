@@ -38,6 +38,13 @@ jobs:
                   registry: ghcr.io
                   username: ${{ github.actor }}
                   password: ${{ secrets.GITHUB_TOKEN }}
+            - name: Fetch live DB for SSG prerender
+              run: |
+                  mkdir -p ~/.ssh
+                  echo "${{ secrets.DO_SSH_KEY }}" > ~/.ssh/id_ed25519
+                  chmod 600 ~/.ssh/id_ed25519
+                  ssh-keyscan -H "${{ secrets.DO_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
+                  scp -i ~/.ssh/id_ed25519 "${{ secrets.DO_USER }}@${{ secrets.DO_HOST }}:/opt/webgooh/data/webgooh.db" ./webgooh.db
             - uses: docker/build-push-action@v6
               with:
                   context: .
