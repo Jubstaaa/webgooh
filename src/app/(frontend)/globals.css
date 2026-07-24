@@ -1,0 +1,160 @@
+@import 'tailwindcss';
+@plugin '@tailwindcss/typography';
+
+@theme {
+    --color-ink: #0b1020;
+    --color-ink-soft: #0e1428;
+    --color-surface: #11172a;
+    --color-surface-2: #161e38;
+    --color-paper: #f5f7ff;
+    --color-muted: #8a93b2;
+    --color-faint: #5b6483;
+    --color-brand: #8b5cf6;
+    --color-brand-bright: #a78bfa;
+    --color-accent: #22d3ee;
+    --color-magenta: #d946ef;
+    --color-line: rgba(148, 163, 214, 0.14);
+
+    --font-display: var(--font-space-grotesk);
+    --font-sans: var(--font-inter);
+    --font-mono: var(--font-jetbrains);
+
+    --radius-xl: 1.25rem;
+    --radius-2xl: 1.5rem;
+
+    --animate-marquee: marquee 32s linear infinite;
+}
+
+@keyframes marquee {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(-50%);
+    }
+}
+
+@keyframes spin-beam {
+    to {
+        transform: rotate(1turn);
+    }
+}
+
+@keyframes shimmer {
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+@layer base {
+    html {
+        scroll-behavior: smooth;
+        -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+        background-color: var(--color-ink);
+        color: var(--color-paper);
+        font-family: var(--font-sans);
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+    }
+
+    ::selection {
+        background-color: color-mix(
+            in oklab,
+            var(--color-brand) 40%,
+            transparent
+        );
+        color: var(--color-paper);
+    }
+
+    h1,
+    h2,
+    h3,
+    h4 {
+        font-family: var(--font-display);
+        letter-spacing: -0.02em;
+    }
+}
+
+@utility container-x {
+    width: 100%;
+    max-width: 76rem;
+    margin-inline: auto;
+    padding-inline: 1.25rem;
+}
+
+@utility eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+}
+
+@utility text-gradient {
+    background: linear-gradient(
+        100deg,
+        var(--color-accent) 0%,
+        var(--color-brand-bright) 50%,
+        var(--color-magenta) 100%
+    );
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+}
+
+@utility grid-backdrop {
+    background-image:
+        linear-gradient(var(--color-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--color-line) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(
+        ellipse 80% 60% at 50% 0%,
+        #000 40%,
+        transparent 100%
+    );
+}
+
+@utility glow {
+    background: radial-gradient(
+        50% 50% at 30% 50%,
+        color-mix(in oklab, var(--color-accent) 45%, transparent) 0%,
+        color-mix(in oklab, var(--color-magenta) 45%, transparent) 60%,
+        transparent 100%
+    );
+    filter: blur(60px);
+}
+
+@utility card-surface {
+    background: linear-gradient(
+        160deg,
+        var(--color-surface) 0%,
+        var(--color-ink-soft) 100%
+    );
+    border: 1px solid var(--color-line);
+}
+
+.prose-invert-brand {
+    --tw-prose-body: var(--color-muted);
+    --tw-prose-headings: var(--color-paper);
+    --tw-prose-links: var(--color-brand-bright);
+    --tw-prose-bold: var(--color-paper);
+    --tw-prose-bullets: var(--color-brand);
+    --tw-prose-quotes: var(--color-paper);
+    --tw-prose-quote-borders: var(--color-brand);
+    --tw-prose-hr: var(--color-line);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+        scroll-behavior: auto !important;
+    }
+}
