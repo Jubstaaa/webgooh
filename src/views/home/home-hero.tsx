@@ -1,6 +1,7 @@
 import { ArrowRight, ShieldCheck } from 'lucide-react'
 
 import { HeroIntro, HeroItem } from '@/components/motion/hero-intro'
+import { Magnetic } from '@/components/motion/magnetic'
 import { NeuralMesh } from '@/components/motion/neural-mesh'
 import { BorderBeam } from '@/components/ui/border-beam'
 import { ButtonLink } from '@/components/ui/button'
@@ -73,16 +74,20 @@ export async function HomeHero() {
                     </HeroItem>
 
                     <HeroItem className="flex flex-wrap items-center gap-3">
-                        <ButtonLink href="/iletisim" size="lg">
-                            Projenizi konuşalım
-                            <ArrowRight className="size-4" />
-                        </ButtonLink>
-                        <ButtonLink
-                            href="/hizmetlerimiz"
-                            size="lg"
-                            variant="outline">
-                            Hizmetleri keşfet
-                        </ButtonLink>
+                        <Magnetic>
+                            <ButtonLink href="/iletisim" size="lg">
+                                Projenizi konuşalım
+                                <ArrowRight className="size-4" />
+                            </ButtonLink>
+                        </Magnetic>
+                        <Magnetic>
+                            <ButtonLink
+                                href="/hizmetlerimiz"
+                                size="lg"
+                                variant="outline">
+                                Hizmetleri keşfet
+                            </ButtonLink>
+                        </Magnetic>
                     </HeroItem>
                 </HeroIntro>
 

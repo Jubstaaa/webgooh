@@ -1,5 +1,6 @@
 import { ArrowRight } from 'lucide-react'
 
+import { Magnetic } from '@/components/motion/magnetic'
 import { Reveal } from '@/components/motion/reveal'
 import type { CtaBandProps } from '@/components/sections/cta-band.types'
 import { BorderBeam } from '@/components/ui/border-beam'
@@ -25,10 +26,12 @@ export function CtaBand({
                     <p className="text-muted max-w-xl text-base leading-relaxed">
                         {description}
                     </p>
-                    <ButtonLink href="/iletisim" size="lg">
-                        Teklif alın
-                        <ArrowRight className="size-4" />
-                    </ButtonLink>
+                    <Magnetic>
+                        <ButtonLink href="/iletisim" size="lg">
+                            Teklif alın
+                            <ArrowRight className="size-4" />
+                        </ButtonLink>
+                    </Magnetic>
                 </div>
             </Reveal>
         </section>
