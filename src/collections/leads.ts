@@ -17,23 +17,35 @@ export const Leads: CollectionConfig = {
     fields: [
         {
             fields: [
-                { name: 'name', required: true, type: 'text' },
-                { name: 'email', required: true, type: 'email' },
+                {
+                    label: 'Ad Soyad',
+                    name: 'name',
+                    required: true,
+                    type: 'text',
+                },
+                {
+                    label: 'E-posta',
+                    name: 'email',
+                    required: true,
+                    type: 'email',
+                },
             ],
             type: 'row',
         },
         {
             fields: [
-                { name: 'phone', type: 'text' },
-                { name: 'company', type: 'text' },
+                { label: 'Telefon', name: 'phone', type: 'text' },
+                { label: 'Şirket', name: 'company', type: 'text' },
             ],
             type: 'row',
         },
         {
+            label: 'Hizmet',
             name: 'service',
             type: 'text',
         },
         {
+            label: 'Mesaj',
             name: 'message',
             required: true,
             type: 'textarea',

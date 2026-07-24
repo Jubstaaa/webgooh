@@ -3,9 +3,37 @@ import { ArrowRight, ShieldCheck } from 'lucide-react'
 import { HeroIntro, HeroItem } from '@/components/motion/hero-intro'
 import { BorderBeam } from '@/components/ui/border-beam'
 import { ButtonLink } from '@/components/ui/button'
-import { terminalLines } from '@/views/home/home.constants'
+import {
+    getCategories,
+    getPosts,
+    getProjects,
+    getServices,
+} from '@/lib/queries'
+import type { TerminalLine } from '@/views/home/home.types'
 
-export function HomeHero() {
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://ilkerbalcilar.xyz'
+
+export async function HomeHero() {
+    const [posts, services, projects, categories] = await Promise.all([
+        getPosts(),
+        getServices(),
+        getProjects(),
+        getCategories(),
+    ])
+
+    const pages =
+        6 + posts.length + services.length + projects.length + categories.length
+    const domain = SITE_URL.replace(/^https?:\/\//, '').replace(/\/$/, '')
+
+    const terminalLines: TerminalLine[] = [
+        { prompt: '~/webgooh', text: 'deploy --prod' },
+        { text: '✓ build           next@16 · turbopack', tone: 'ok' },
+        { text: '✓ audit           0 kritik açık', tone: 'ok' },
+        { text: '✓ lighthouse      performans 100 / seo 100', tone: 'ok' },
+        { text: `✓ ssg             ${pages} sayfa · edge cache`, tone: 'ok' },
+        { text: `→ canlı: https://${domain}`, tone: 'accent' },
+    ]
+
     return (
         <section className="relative overflow-hidden pt-20 pb-24 sm:pt-28">
             <div aria-hidden className="grid-backdrop absolute inset-0 -z-10" />
@@ -35,7 +63,7 @@ export function HomeHero() {
 
                     <HeroItem>
                         <p className="text-muted max-w-xl text-lg leading-relaxed">
-                            Web ve mobil uygulamalardan e-ticarete, UX/UI
+                            Web ve mobil uygulamalardan kurumsal yazılıma, UX/UI
                             tasarımdan siber güvenlik ve DevOps’a kadar;
                             fikrinizi ölçeklenebilir, hızlı ve güvenli ürünlere
                             dönüştürüyoruz.
