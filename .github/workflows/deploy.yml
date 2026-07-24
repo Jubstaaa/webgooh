@@ -1,29 +1,53 @@
 name: Deploy
 
-# DigitalOcean droplet üzerinde docker compose ile dağıtım.
-# Gerekli repository secrets:
-#   DO_HOST, DO_USER, DO_SSH_KEY  (SSH erişimi)
-# Uygulama sunucuda /opt/webgooh altında bulunur ve .env orada tutulur.
-
 on:
-    workflow_dispatch:
     push:
-        tags: ['v*']
+        branches: [main]
+    workflow_dispatch:
+
+concurrency:
+    group: deploy
+    cancel-in-progress: true
 
 jobs:
+    build:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            packages: write
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: docker/setup-buildx-action@v3
+
+            - uses: docker/login-action@v3
+              with:
+                  registry: ghcr.io
+                  username: ${{ github.actor }}
+                  password: ${{ secrets.GITHUB_TOKEN }}
+
+            - uses: docker/build-push-action@v6
+              with:
+                  context: .
+                  push: true
+                  tags: ghcr.io/jubstaaa/webgooh:latest
+                  cache-from: type=gha
+                  cache-to: type=gha,mode=max
+                  build-args: |
+                      NEXT_PUBLIC_TURNSTILE_SITE_KEY=${{ secrets.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
+                      NEXT_PUBLIC_SITE_URL=${{ secrets.NEXT_PUBLIC_SITE_URL }}
+
     deploy:
+        needs: build
         runs-on: ubuntu-latest
         steps:
-            - name: Deploy over SSH
-              uses: appleboy/ssh-action@v1
+            - uses: appleboy/ssh-action@v1
               with:
                   host: ${{ secrets.DO_HOST }}
                   username: ${{ secrets.DO_USER }}
                   key: ${{ secrets.DO_SSH_KEY }}
                   script: |
                       cd /opt/webgooh
-                      git pull origin main
-                      docker compose build
+                      docker compose pull
                       docker compose up -d
-                      docker compose exec -T web node -e "console.log('healthy')" || true
                       docker image prune -f

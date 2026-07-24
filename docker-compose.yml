@@ -1,15 +1,10 @@
 services:
     web:
-        build:
-            context: .
-            dockerfile: Dockerfile
-            args:
-                NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${NEXT_PUBLIC_TURNSTILE_SITE_KEY}
-        image: webgooh:latest
+        image: ghcr.io/jubstaaa/webgooh:latest
         container_name: webgooh
         restart: unless-stopped
-        ports:
-            - '3000:3000'
+        expose:
+            - '3000'
         environment:
             NODE_ENV: production
             NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL}
@@ -19,15 +14,24 @@ services:
             PREVIEW_SECRET: ${PREVIEW_SECRET}
             TURNSTILE_SECRET_KEY: ${TURNSTILE_SECRET_KEY}
         volumes:
-            - webgooh-db:/app/data
-            - webgooh-media:/app/media
-        healthcheck:
-            test: ['CMD', 'wget', '--spider', '-q', 'http://localhost:3000/']
-            interval: 30s
-            timeout: 5s
-            retries: 3
-            start_period: 20s
+            - /opt/webgooh/data:/app/data
+            - /opt/webgooh/media:/app/media
+
+    caddy:
+        image: caddy:2-alpine
+        container_name: webgooh-caddy
+        restart: unless-stopped
+        depends_on:
+            - web
+        ports:
+            - '80:80'
+            - '443:443'
+        volumes:
+            - /opt/webgooh/Caddyfile:/etc/caddy/Caddyfile:ro
+            - /opt/webgooh/certs:/etc/caddy/certs:ro
+            - caddy-data:/data
+            - caddy-config:/config
 
 volumes:
-    webgooh-db:
-    webgooh-media:
+    caddy-data:
+    caddy-config:
