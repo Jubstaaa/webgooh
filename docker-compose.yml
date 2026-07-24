@@ -1,10 +1,15 @@
+# Runtime stack on the droplet (/opt/webgooh). The app is published only on
+# localhost:3001; a shared Caddy in /opt/proxy terminates TLS (Cloudflare origin
+# cert) and reverse-proxies to it, so this droplet can host other apps behind the
+# same 80/443. The image is pulled from GHCR by the deploy workflow.
 services:
     web:
         image: ghcr.io/jubstaaa/webgooh:latest
         container_name: webgooh
         restart: unless-stopped
-        expose:
-            - '3000'
+        mem_limit: 256m
+        ports:
+            - '127.0.0.1:3001:3000'
         environment:
             NODE_ENV: production
             NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL}
@@ -16,22 +21,3 @@ services:
         volumes:
             - /opt/webgooh/data:/app/data
             - /opt/webgooh/media:/app/media
-
-    caddy:
-        image: caddy:2-alpine
-        container_name: webgooh-caddy
-        restart: unless-stopped
-        depends_on:
-            - web
-        ports:
-            - '80:80'
-            - '443:443'
-        volumes:
-            - /opt/webgooh/Caddyfile:/etc/caddy/Caddyfile:ro
-            - /opt/webgooh/certs:/etc/caddy/certs:ro
-            - caddy-data:/data
-            - caddy-config:/config
-
-volumes:
-    caddy-data:
-    caddy-config:
