@@ -1,6 +1,7 @@
 import { ArrowRight, ShieldCheck } from 'lucide-react'
 
 import { HeroIntro, HeroItem } from '@/components/motion/hero-intro'
+import { NeuralMesh } from '@/components/motion/neural-mesh'
 import { BorderBeam } from '@/components/ui/border-beam'
 import { ButtonLink } from '@/components/ui/button'
 import {
@@ -36,6 +37,7 @@ export async function HomeHero() {
 
     return (
         <section className="relative overflow-hidden pt-20 pb-24 sm:pt-28">
+            <NeuralMesh className="-z-20 opacity-70" />
             <div aria-hidden className="grid-backdrop absolute inset-0 -z-10" />
             <div
                 aria-hidden
