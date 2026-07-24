@@ -5,6 +5,7 @@ import { Inter, JetBrains_Mono, Space_Grotesk } from 'next/font/google'
 import { FloatingActions } from '@/components/layout/floating-actions'
 import { Footer } from '@/components/layout/footer'
 import { Header } from '@/components/layout/header'
+import { ScrollProgress } from '@/components/motion/scroll-progress'
 import { getSettings } from '@/lib/queries'
 
 import './globals.css'
@@ -76,6 +77,7 @@ export default async function FrontendLayout({
             data-scroll-behavior="smooth"
             lang="tr">
             <body className="min-h-dvh antialiased">
+                <ScrollProgress />
                 <Header />
                 <main className="pt-16">{children}</main>
                 <Footer />
