@@ -1,0 +1,33 @@
+services:
+    web:
+        build:
+            context: .
+            dockerfile: Dockerfile
+            args:
+                NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+        image: webgooh:latest
+        container_name: webgooh
+        restart: unless-stopped
+        ports:
+            - '3000:3000'
+        environment:
+            NODE_ENV: production
+            NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL}
+            PAYLOAD_SECRET: ${PAYLOAD_SECRET}
+            DATABASE_URI: file:/app/data/webgooh.db
+            REVALIDATION_SECRET: ${REVALIDATION_SECRET}
+            PREVIEW_SECRET: ${PREVIEW_SECRET}
+            TURNSTILE_SECRET_KEY: ${TURNSTILE_SECRET_KEY}
+        volumes:
+            - webgooh-db:/app/data
+            - webgooh-media:/app/media
+        healthcheck:
+            test: ['CMD', 'wget', '--spider', '-q', 'http://localhost:3000/']
+            interval: 30s
+            timeout: 5s
+            retries: 3
+            start_period: 20s
+
+volumes:
+    webgooh-db:
+    webgooh-media:

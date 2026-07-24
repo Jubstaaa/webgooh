@@ -1,0 +1,29 @@
+name: Deploy
+
+# DigitalOcean droplet üzerinde docker compose ile dağıtım.
+# Gerekli repository secrets:
+#   DO_HOST, DO_USER, DO_SSH_KEY  (SSH erişimi)
+# Uygulama sunucuda /opt/webgooh altında bulunur ve .env orada tutulur.
+
+on:
+    workflow_dispatch:
+    push:
+        tags: ['v*']
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Deploy over SSH
+              uses: appleboy/ssh-action@v1
+              with:
+                  host: ${{ secrets.DO_HOST }}
+                  username: ${{ secrets.DO_USER }}
+                  key: ${{ secrets.DO_SSH_KEY }}
+                  script: |
+                      cd /opt/webgooh
+                      git pull origin main
+                      docker compose build
+                      docker compose up -d
+                      docker compose exec -T web node -e "console.log('healthy')" || true
+                      docker image prune -f
