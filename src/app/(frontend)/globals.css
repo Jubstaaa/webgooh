@@ -34,9 +34,9 @@
     }
 }
 
-@keyframes spin-beam {
+@keyframes border-beam {
     to {
-        transform: rotate(1turn);
+        offset-distance: 100%;
     }
 }
 
@@ -135,6 +135,12 @@
         var(--color-ink-soft) 100%
     );
     border: 1px solid var(--color-line);
+}
+
+.cursor-ring--grow {
+    width: 3.5rem;
+    height: 3.5rem;
+    background-color: color-mix(in oklab, var(--color-brand) 22%, transparent);
 }
 
 .prose-invert-brand {

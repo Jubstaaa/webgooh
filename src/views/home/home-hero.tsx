@@ -1,6 +1,8 @@
 import { ArrowRight, ShieldCheck } from 'lucide-react'
 
 import { HeroIntro, HeroItem } from '@/components/motion/hero-intro'
+import { Magnetic } from '@/components/motion/magnetic'
+import { NeuralMesh } from '@/components/motion/neural-mesh'
 import { BorderBeam } from '@/components/ui/border-beam'
 import { ButtonLink } from '@/components/ui/button'
 import {
@@ -36,6 +38,7 @@ export async function HomeHero() {
 
     return (
         <section className="relative overflow-hidden pt-20 pb-24 sm:pt-28">
+            <NeuralMesh className="-z-20 opacity-70" />
             <div aria-hidden className="grid-backdrop absolute inset-0 -z-10" />
             <div
                 aria-hidden
@@ -71,16 +74,20 @@ export async function HomeHero() {
                     </HeroItem>
 
                     <HeroItem className="flex flex-wrap items-center gap-3">
-                        <ButtonLink href="/iletisim" size="lg">
-                            Projenizi konuşalım
-                            <ArrowRight className="size-4" />
-                        </ButtonLink>
-                        <ButtonLink
-                            href="/hizmetlerimiz"
-                            size="lg"
-                            variant="outline">
-                            Hizmetleri keşfet
-                        </ButtonLink>
+                        <Magnetic>
+                            <ButtonLink href="/iletisim" size="lg">
+                                Projenizi konuşalım
+                                <ArrowRight className="size-4" />
+                            </ButtonLink>
+                        </Magnetic>
+                        <Magnetic>
+                            <ButtonLink
+                                href="/hizmetlerimiz"
+                                size="lg"
+                                variant="outline">
+                                Hizmetleri keşfet
+                            </ButtonLink>
+                        </Magnetic>
                     </HeroItem>
                 </HeroIntro>
 

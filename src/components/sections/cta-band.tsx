@@ -1,5 +1,7 @@
 import { ArrowRight } from 'lucide-react'
 
+import { Magnetic } from '@/components/motion/magnetic'
+import { ParticleField } from '@/components/motion/particle-field'
 import { Reveal } from '@/components/motion/reveal'
 import type { CtaBandProps } from '@/components/sections/cta-band.types'
 import { BorderBeam } from '@/components/ui/border-beam'
@@ -12,7 +14,8 @@ export function CtaBand({
     return (
         <section className="container-x">
             <Reveal className="card-surface relative overflow-hidden rounded-3xl px-8 py-14 text-center sm:px-16">
-                <BorderBeam duration={9} />
+                <BorderBeam duration={4} />
+                <ParticleField className="opacity-60" />
                 <div
                     aria-hidden
                     className="glow absolute top-1/2 left-1/2 -z-0 h-72 w-[520px] -translate-x-1/2 -translate-y-1/2 opacity-40"
@@ -25,10 +28,12 @@ export function CtaBand({
                     <p className="text-muted max-w-xl text-base leading-relaxed">
                         {description}
                     </p>
-                    <ButtonLink href="/iletisim" size="lg">
-                        Teklif alın
-                        <ArrowRight className="size-4" />
-                    </ButtonLink>
+                    <Magnetic>
+                        <ButtonLink href="/iletisim" size="lg">
+                            Teklif alın
+                            <ArrowRight className="size-4" />
+                        </ButtonLink>
+                    </Magnetic>
                 </div>
             </Reveal>
         </section>
