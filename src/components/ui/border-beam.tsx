@@ -1,25 +1,41 @@
 import type { BorderBeamProps } from '@/components/ui/border-beam.types'
 import { cn } from '@/lib/utils'
 
-export function BorderBeam({ className, duration = 7 }: BorderBeamProps) {
+export function BorderBeam({
+    className,
+    delay = 0,
+    duration = 3,
+    size = 240,
+}: BorderBeamProps) {
     return (
         <span
             aria-hidden
             className={cn(
-                'pointer-events-none absolute inset-0 rounded-[inherit] motion-safe:animate-[spin-beam_var(--beam-duration)_linear_infinite]',
+                'pointer-events-none absolute inset-0 rounded-[inherit] border-[3px] border-transparent',
                 className
             )}
             style={{
-                ['--beam-duration' as string]: `${duration}s`,
-                background:
-                    'conic-gradient(from 0deg, transparent 0 60%, var(--color-accent) 74%, var(--color-brand-bright) 84%, var(--color-magenta) 94%, transparent 100%)',
-                mask: 'linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)',
-                maskComposite: 'exclude',
-                padding: '1px',
-                WebkitMask:
-                    'linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)',
-                WebkitMaskComposite: 'xor',
-            }}
-        />
+                maskClip: 'padding-box, border-box',
+                maskComposite: 'intersect',
+                maskImage:
+                    'linear-gradient(transparent, transparent), linear-gradient(#000, #000)',
+                WebkitMaskClip: 'padding-box, border-box',
+                WebkitMaskComposite: 'source-in',
+                WebkitMaskImage:
+                    'linear-gradient(transparent, transparent), linear-gradient(#000, #000)',
+            }}>
+            <span
+                className="absolute aspect-square motion-safe:animate-[border-beam_var(--beam-duration)_linear_infinite]"
+                style={{
+                    ['--beam-duration' as string]: `${duration}s`,
+                    animationDelay: `${delay}s`,
+                    background:
+                        'linear-gradient(to left, var(--color-accent), var(--color-brand-bright) 55%, transparent 92%)',
+                    filter: 'drop-shadow(0 0 6px var(--color-accent))',
+                    offsetPath: `rect(0 auto auto 0 round ${size}px)`,
+                    width: `${size}px`,
+                }}
+            />
+        </span>
     )
 }

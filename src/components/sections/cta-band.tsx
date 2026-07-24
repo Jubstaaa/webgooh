@@ -14,7 +14,7 @@ export function CtaBand({
     return (
         <section className="container-x">
             <Reveal className="card-surface relative overflow-hidden rounded-3xl px-8 py-14 text-center sm:px-16">
-                <BorderBeam duration={9} />
+                <BorderBeam duration={4} />
                 <ParticleField className="opacity-60" />
                 <div
                     aria-hidden

@@ -34,9 +34,9 @@
     }
 }
 
-@keyframes spin-beam {
+@keyframes border-beam {
     to {
-        transform: rotate(1turn);
+        offset-distance: 100%;
     }
 }
 
