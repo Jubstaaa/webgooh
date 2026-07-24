@@ -11,6 +11,7 @@ import { getPosts, getServices } from '@/lib/queries'
 import { HomeHero } from '@/views/home/home-hero'
 import { HomeMarquee } from '@/views/home/home-marquee'
 import { HomeProcess } from '@/views/home/home-process'
+import { HomeStats } from '@/views/home/home-stats'
 
 export async function Home() {
     const [services, posts] = await Promise.all([
@@ -23,6 +24,8 @@ export async function Home() {
             <HomeHero />
 
             <HomeMarquee />
+
+            <HomeStats />
 
             <section className="container-x flex flex-col gap-12">
                 <div className="flex flex-wrap items-end justify-between gap-6">
