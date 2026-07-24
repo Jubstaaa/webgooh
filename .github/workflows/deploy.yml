@@ -40,14 +40,21 @@ jobs:
     deploy:
         needs: build
         runs-on: ubuntu-latest
+        permissions:
+            packages: read
         steps:
             - uses: appleboy/ssh-action@v1
               with:
                   host: ${{ secrets.DO_HOST }}
                   username: ${{ secrets.DO_USER }}
                   key: ${{ secrets.DO_SSH_KEY }}
+                  envs: GHCR_TOKEN,GHCR_USER
                   script: |
+                      echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
                       cd /opt/webgooh
                       docker compose pull
                       docker compose up -d
                       docker image prune -f
+              env:
+                  GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  GHCR_USER: ${{ github.actor }}

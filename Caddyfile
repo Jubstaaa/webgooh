@@ -1,4 +1,4 @@
-webgooh.com, www.webgooh.com {
+ilkerbalcilar.xyz, www.ilkerbalcilar.xyz {
     tls /etc/caddy/certs/origin.pem /etc/caddy/certs/origin.key
     encode gzip zstd
     reverse_proxy web:3000
