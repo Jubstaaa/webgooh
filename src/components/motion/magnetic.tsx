@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 
 import { useReducedMotion } from 'motion/react'
 
@@ -10,19 +10,23 @@ interface MagneticProps {
     strength?: number
 }
 
-export function Magnetic({ children, className, strength = 0.3 }: MagneticProps) {
+export function Magnetic({
+    children,
+    className,
+    strength = 0.3,
+}: MagneticProps) {
     const ref = useRef<HTMLSpanElement>(null)
+    const enabledRef = useRef(false)
     const reduce = useReducedMotion()
 
-    const [enabled, setEnabled] = useState(false)
-
     useEffect(() => {
-        setEnabled(!reduce && window.matchMedia('(hover: hover)').matches)
+        enabledRef.current =
+            !reduce && window.matchMedia('(hover: hover)').matches
     }, [reduce])
 
     const handlePointerMove = (event: React.PointerEvent<HTMLSpanElement>) => {
         const el = ref.current
-        if (!el || !enabled) return
+        if (!el || !enabledRef.current) return
         const rect = el.getBoundingClientRect()
         const x = (event.clientX - rect.left - rect.width / 2) * strength
         const y = (event.clientY - rect.top - rect.height / 2) * strength

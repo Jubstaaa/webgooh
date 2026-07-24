@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 
 import { useReducedMotion } from 'motion/react'
 
@@ -13,19 +13,17 @@ interface TiltCardProps {
 
 export function TiltCard({ children, className }: TiltCardProps) {
     const ref = useRef<HTMLDivElement>(null)
+    const enabledRef = useRef(false)
     const reduce = useReducedMotion()
 
-    const [enabled, setEnabled] = useState(false)
-
     useEffect(() => {
-        setEnabled(
+        enabledRef.current =
             !reduce && window.matchMedia('(hover: hover)').matches
-        )
     }, [reduce])
 
     const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
         const el = ref.current
-        if (!el || !enabled) return
+        if (!el || !enabledRef.current) return
         const rect = el.getBoundingClientRect()
         const px = (event.clientX - rect.left) / rect.width
         const py = (event.clientY - rect.top) / rect.height
@@ -42,7 +40,10 @@ export function TiltCard({ children, className }: TiltCardProps) {
     return (
         <div
             ref={ref}
-            className={cn('relative transition-transform duration-200', className)}
+            className={cn(
+                'relative transition-transform duration-200',
+                className
+            )}
             onPointerLeave={handlePointerLeave}
             onPointerMove={handlePointerMove}>
             <span

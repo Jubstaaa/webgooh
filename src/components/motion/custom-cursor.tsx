@@ -29,10 +29,15 @@ export function CustomCursor() {
 
         const isInteractive = (target: EventTarget | null) =>
             target instanceof Element &&
-            !!target.closest('a, button, [role="button"], input, textarea, .cursor-grow')
+            !!target.closest(
+                'a, button, [role="button"], input, textarea, .cursor-grow'
+            )
 
         const onOver = (event: PointerEvent) => {
-            ring.classList.toggle('cursor-ring--grow', isInteractive(event.target))
+            ring.classList.toggle(
+                'cursor-ring--grow',
+                isInteractive(event.target)
+            )
         }
 
         const loop = () => {
@@ -60,7 +65,7 @@ export function CustomCursor() {
             <div
                 ref={ringRef}
                 aria-hidden
-                className="border-accent/70 pointer-events-none fixed top-0 left-0 z-[70] size-8 rounded-full border opacity-0 mix-blend-screen transition-[width,height,background-color] duration-200 [transition-property:width,height,background-color] max-[820px]:hidden"
+                className="border-accent/70 pointer-events-none fixed top-0 left-0 z-[70] size-8 rounded-full border opacity-0 mix-blend-screen transition-[width,height,background-color] [transition-property:width,height,background-color] duration-200 max-[820px]:hidden"
             />
             <div
                 ref={dotRef}

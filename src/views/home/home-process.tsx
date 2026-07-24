@@ -63,13 +63,13 @@ function TimelineStep({ index, step }: { index: number; step: ProcessStep }) {
             ref={ref}
             className="relative"
             initial={reduce ? false : { opacity: 0, y: 24 }}
+            viewport={{ margin: '-80px', once: true }}
+            whileInView={{ opacity: 1, y: 0 }}
             transition={{
                 delay: index * 0.05,
                 duration: 0.6,
                 ease: [0.22, 1, 0.36, 1],
-            }}
-            viewport={{ margin: '-80px', once: true }}
-            whileInView={{ opacity: 1, y: 0 }}>
+            }}>
             <span
                 className={cn(
                     'bg-ink absolute top-0.5 -left-10 grid size-6 place-items-center rounded-full border-2 font-mono text-[0.7rem] transition-all duration-300',
