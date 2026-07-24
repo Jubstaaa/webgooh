@@ -30,6 +30,7 @@ const jetbrainsMono = JetBrains_Mono({
 })
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.webgooh.com'
+const INDEXABLE = process.env.SITE_INDEXABLE === 'true'
 
 export const metadata: Metadata = {
     alternates: { canonical: '/' },
@@ -52,7 +53,14 @@ export const metadata: Metadata = {
         type: 'website',
         url: SITE_URL,
     },
-    robots: { follow: true, index: true },
+    robots: INDEXABLE
+        ? { follow: true, index: true }
+        : {
+              follow: false,
+              googleBot: { follow: false, index: false },
+              index: false,
+              nocache: true,
+          },
     title: {
         default: 'Webgooh — Web Yazılım, Mobil ve Siber Güvenlik Ajansı',
         template: '%s — Webgooh',
