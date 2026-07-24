@@ -1,0 +1,62 @@
+{
+    "name": "webgooh",
+    "version": "1.0.0",
+    "private": true,
+    "type": "module",
+    "engines": {
+        "node": ">=20.9.0"
+    },
+    "scripts": {
+        "dev": "next dev",
+        "build": "next build",
+        "start": "next start",
+        "lint": "eslint .",
+        "format": "prettier . --write",
+        "format:check": "prettier . --check",
+        "type-check": "tsc --noEmit",
+        "generate:types": "payload generate:types",
+        "generate:importmap": "payload generate:importmap",
+        "payload": "payload"
+    },
+    "dependencies": {
+        "@payloadcms/db-sqlite": "^3.86.0",
+        "@payloadcms/next": "^3.86.0",
+        "@payloadcms/richtext-lexical": "^3.86.0",
+        "@payloadcms/ui": "^3.86.0",
+        "class-variance-authority": "^0.7.1",
+        "clsx": "^2.1.1",
+        "graphql": "^16.10.0",
+        "lucide-react": "^0.468.0",
+        "motion": "^12.0.0",
+        "next": "^16.2.6",
+        "payload": "^3.86.0",
+        "react": "^19.2.0",
+        "react-dom": "^19.2.0",
+        "sharp": "^0.34.1",
+        "tailwind-merge": "^3.0.1",
+        "zod": "^3.25.76"
+    },
+    "devDependencies": {
+        "@eslint/js": "^9.18.0",
+        "@tailwindcss/postcss": "^4.1.0",
+        "@tailwindcss/typography": "^0.5.16",
+        "@types/node": "^22.10.0",
+        "@types/react": "^19.0.0",
+        "@types/react-dom": "^19.0.0",
+        "eslint": "^9.18.0",
+        "eslint-config-next": "^16.2.6",
+        "eslint-config-prettier": "^10.0.1",
+        "eslint-plugin-import": "^2.31.0",
+        "eslint-plugin-perfectionist": "^4.7.0",
+        "eslint-plugin-prettier": "^5.2.1",
+        "eslint-plugin-react": "^7.37.4",
+        "prettier": "^3.4.2",
+        "prettier-plugin-tailwindcss": "^0.6.11",
+        "tailwindcss": "^4.1.0",
+        "typescript": "^5.7.3",
+        "typescript-eslint": "^8.20.0"
+    },
+    "trustedDependencies": [
+        "unrs-resolver"
+    ]
+}
