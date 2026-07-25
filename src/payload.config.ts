@@ -51,7 +51,11 @@ export default buildConfig({
         },
         meta: {
             icons: [
-                { rel: 'icon', type: 'image/png', url: '/webgooh-mark.png' },
+                {
+                    rel: 'icon',
+                    type: 'image/png',
+                    url: `${CDN_BASE}/static/webgooh-mark.png`,
+                },
             ],
             titleSuffix: '— Webgooh Panel',
         },

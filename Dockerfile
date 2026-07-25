@@ -36,7 +36,8 @@ ENV PORT=3000
 RUN addgroup --system --gid 1001 nodejs \
     && adduser --system --uid 1001 nextjs
 
-COPY --from=builder /app/public ./public
+# No public/ to copy: every static asset lives in the Spaces bucket, and the
+# favicon/robots/sitemap come from Next's src/app file conventions.
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
