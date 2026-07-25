@@ -37,7 +37,7 @@ export async function HomeHero() {
     ]
 
     return (
-        <section className="relative overflow-hidden pt-20 pb-24 sm:pt-28">
+        <section className="relative overflow-hidden pt-20 pb-0 sm:pt-28 sm:pb-24">
             <NeuralMesh className="-z-20 opacity-70" />
             <div aria-hidden className="grid-backdrop absolute inset-0 -z-10" />
             <div
