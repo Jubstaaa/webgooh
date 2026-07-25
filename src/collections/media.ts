@@ -32,13 +32,14 @@ export const Media: CollectionConfig = {
     },
     slug: 'media',
     upload: {
-        adminThumbnail: 'thumbnail',
         focalPoint: true,
-        imageSizes: [
-            { height: 300, name: 'thumbnail', position: 'centre', width: 400 },
-            { height: 512, name: 'card', position: 'centre', width: 768 },
-            { height: 900, name: 'feature', position: 'centre', width: 1400 },
-        ],
+        formatOptions: { format: 'webp', options: { quality: 78 } },
         mimeTypes: ['image/*'],
+        resizeOptions: {
+            fit: 'inside',
+            height: 2000,
+            width: 2000,
+            withoutEnlargement: true,
+        },
     },
 }

@@ -25,8 +25,7 @@ export function buildMetadata({
 }: BuildMetadataArgs): Metadata {
     const metaTitle = seo?.title || title
     const metaDescription = seo?.description || description
-    const ogImage =
-        mediaUrl(seo?.image, 'feature') || mediaUrl(image, 'feature')
+    const ogImage = mediaUrl(seo?.image) || mediaUrl(image)
 
     return {
         alternates: { canonical: path },
