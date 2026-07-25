@@ -24,7 +24,6 @@ services:
             S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY}
         volumes:
             - /opt/webgooh/data:/app/data
-            - /opt/webgooh/media:/app/media
             # Persist Next's optimized-image cache so it survives redeploys
             # (otherwise every deploy resets it and images go cold again).
             - /opt/webgooh/cache/images:/app/.next/cache/images
