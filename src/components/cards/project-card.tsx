@@ -13,7 +13,7 @@ interface ProjectCardProps {
 }
 
 export function ProjectCard({ priority = false, project }: ProjectCardProps) {
-    const image = mediaUrl(project.image, 'card')
+    const image = mediaUrl(project.image)
 
     return (
         <Link

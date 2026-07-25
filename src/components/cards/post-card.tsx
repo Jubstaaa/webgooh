@@ -17,7 +17,7 @@ interface PostCardProps {
 export function PostCard({ post, priority = false }: PostCardProps) {
     const cat =
         typeof post.category === 'object' ? (post.category as Category) : null
-    const cover = mediaUrl(post.coverImage, 'card')
+    const cover = mediaUrl(post.coverImage)
 
     return (
         <Link

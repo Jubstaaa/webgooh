@@ -23,7 +23,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.webgooh.com'
 export function BlogDetail({ post, related }: BlogDetailProps) {
     const cat =
         typeof post.category === 'object' ? (post.category as Category) : null
-    const cover = mediaUrl(post.coverImage, 'feature')
+    const cover = mediaUrl(post.coverImage)
 
     return (
         <article className="flex flex-col gap-16 pb-8">

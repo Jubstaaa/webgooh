@@ -27,6 +27,12 @@ const nextConfig = {
         remotePatterns: [
             { protocol: 'https', hostname: 'www.webgooh.com' },
             { protocol: 'https', hostname: 'webgooh.com' },
+            // Payload media + public assets, served from the Spaces CDN edge.
+            // Keep in sync with S3_BUCKET/S3_REGION in src/payload.config.ts.
+            {
+                protocol: 'https',
+                hostname: 'webgooh.fra1.cdn.digitaloceanspaces.com',
+            },
         ],
     },
     async headers() {

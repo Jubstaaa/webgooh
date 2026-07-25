@@ -18,7 +18,7 @@ interface ServiceDetailProps {
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.webgooh.com'
 
 export function ServiceDetail({ service }: ServiceDetailProps) {
-    const cover = mediaUrl(service.coverImage, 'feature')
+    const cover = mediaUrl(service.coverImage)
 
     return (
         <div className="flex flex-col gap-20 pb-8">

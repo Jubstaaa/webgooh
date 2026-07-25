@@ -15,7 +15,7 @@ interface ReferenceDetailProps {
 }
 
 export function ReferenceDetail({ project }: ReferenceDetailProps) {
-    const image = mediaUrl(project.image, 'feature')
+    const image = mediaUrl(project.image)
 
     return (
         <article className="flex flex-col gap-16 pb-8">
