@@ -18,6 +18,9 @@ ENV NEXT_PUBLIC_TURNSTILE_SITE_KEY=$NEXT_PUBLIC_TURNSTILE_SITE_KEY
 ARG NEXT_PUBLIC_SITE_URL=https://ilkerbalcilar.xyz
 ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
 ENV NEXT_TELEMETRY_DISABLED=1
+# Explicit so payload.config's production branch (Spaces-backed media URLs) is
+# what the SSG prerender bakes into the HTML.
+ENV NODE_ENV=production
 ENV PAYLOAD_SECRET=build-time-placeholder
 ENV DATABASE_URI=file:./webgooh.db
 RUN bun run build
