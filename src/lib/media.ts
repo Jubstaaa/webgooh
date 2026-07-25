@@ -2,7 +2,7 @@ import type { Media } from '@payload-types'
 
 export type MediaLike = Media | number | null | undefined
 
-export function resolveMedia(value: MediaLike) {
+function resolveMedia(value: MediaLike) {
     if (!value || typeof value === 'number') return null
 
     return value
