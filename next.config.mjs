@@ -23,7 +23,12 @@ const nextConfig = {
     reactStrictMode: true,
     poweredByHeader: false,
     images: {
-        formats: ['image/avif', 'image/webp'],
+        // webp only, deliberately. On this 1 vCPU droplet an AVIF encode costs
+        // ~3.7x the CPU of the equivalent WebP (0.58s vs 0.16s at w=828) for
+        // roughly 10% fewer bytes. The blog index asks for 17 images at once,
+        // so those encodes serialise: AVIF made the last one land at ~11s,
+        // WebP brings the whole batch under 3s.
+        formats: ['image/webp'],
         remotePatterns: [
             { protocol: 'https', hostname: 'www.webgooh.com' },
             { protocol: 'https', hostname: 'webgooh.com' },
