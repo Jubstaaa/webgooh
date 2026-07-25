@@ -15,7 +15,7 @@ export function Logo({ className }: LogoProps) {
                 alt="Webgooh — Web'in Van Gogh'u"
                 className="h-8 w-auto sm:h-9"
                 height={310}
-                src="/webgooh-logo.webp"
+                src="https://webgooh.fra1.cdn.digitaloceanspaces.com/static/webgooh-logo.webp"
                 width={2164}
             />
         </Link>
