@@ -36,6 +36,16 @@ services:
             S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY}
         volumes:
             - /opt/webgooh/data:/app/data
-            # Persist Next's optimized-image cache so it survives redeploys
-            # (otherwise every deploy resets it and images go cold again).
-            - /opt/webgooh/cache/images:/app/.next/cache/images
+            # The whole cache directory, not just cache/images. Mounting only the
+            # subdirectory makes Docker create the parent inside the container,
+            # and it creates it as root — the app runs as uid 1001, so Next cannot
+            # add its own subdirectories and the data cache silently falls back to
+            # memory. That bit acwistanbul.com on 2026-07-26: content saved in
+            # Payload lived only in the running process, and a container recreate
+            # reverted the site to its build-time HTML while the admin panel still
+            # showed the changes.
+            #
+            # Mounting the parent gives it the host directory's 1001 ownership, so
+            # revalidated pages persist to disk and survive redeploys alongside
+            # the image cache.
+            - /opt/webgooh/cache:/app/.next/cache
