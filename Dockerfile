@@ -41,8 +41,24 @@ RUN addgroup --system --gid 1001 nodejs \
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-RUN mkdir -p /app/data /app/media \
-    && chown -R nextjs:nodejs /app/data /app/media
+# Next creates .next/cache itself at runtime, but only if it is allowed to: the
+# app runs as nextjs, and standalone output does not ship the directory. Bind
+# mounting anything under it makes Docker materialise the missing parents first,
+# as root and before USER applies, and Next's own mkdir then fails with EACCES.
+# It falls back to an in-memory cache that a container recreate throws away —
+# that cost acwistanbul.com a day of CMS edits on 2026-07-26, and this image had
+# the same gap.
+#
+# The compose file currently mounts the whole directory, whose host ownership
+# already makes this writable, so this is defence in depth rather than load
+# bearing: it keeps the image correct on its own, and correct again if the mount
+# is ever narrowed back to a subdirectory. Next's with-docker example does the
+# same thing and calls it "set the correct permission for prerender cache".
+#
+# /app/media is gone: uploads go to Spaces via @payloadcms/storage-s3, the host
+# bind mount was already dropped, and the directory sat empty in the container.
+RUN mkdir -p /app/data /app/.next/cache/images \
+    && chown -R nextjs:nodejs /app/data /app/.next/cache
 
 USER nextjs
 EXPOSE 3000
