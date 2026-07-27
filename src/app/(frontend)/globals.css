@@ -137,6 +137,11 @@
     border: 1px solid var(--color-line);
 }
 
+.custom-cursor-active,
+.custom-cursor-active * {
+    cursor: none;
+}
+
 .cursor-ring--grow {
     width: 3.5rem;
     height: 3.5rem;

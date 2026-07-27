@@ -49,12 +49,14 @@ export function CustomCursor() {
 
         ring.style.opacity = '1'
         dot.style.opacity = '1'
+        document.documentElement.classList.add('custom-cursor-active')
         window.addEventListener('pointermove', onMove, { passive: true })
         window.addEventListener('pointerover', onOver, { passive: true })
         loop()
 
         return () => {
             cancelAnimationFrame(frame)
+            document.documentElement.classList.remove('custom-cursor-active')
             window.removeEventListener('pointermove', onMove)
             window.removeEventListener('pointerover', onOver)
         }
