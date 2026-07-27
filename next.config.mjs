@@ -2,7 +2,38 @@ import { withPayload } from '@payloadcms/next/withPayload'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.webgooh.com'
 
+const isDev = process.env.NODE_ENV !== 'production'
+
+const CDN_HOST = 'https://webgooh.fra1.cdn.digitaloceanspaces.com'
+const TURNSTILE_HOST = 'https://challenges.cloudflare.com'
+
+// Deliberately nonce-free. A nonce has to be minted per request, which would
+// drag every blog and service page out of the static cache and onto the 1 vCPU
+// droplet. So inline scripts stay allowed and the value of the policy is in the
+// origin allowlist: only this host, the Spaces CDN and Turnstile.
+const contentSecurityPolicy = [
+    "default-src 'self'",
+    `script-src 'self' 'unsafe-inline' ${TURNSTILE_HOST}${isDev ? " 'unsafe-eval'" : ''}`,
+    "style-src 'self' 'unsafe-inline'",
+    `img-src 'self' blob: data: ${CDN_HOST}`,
+    "font-src 'self' data:",
+    // blob: for the admin panel, which previews uploads and runs the editor's
+    // workers off blob URLs.
+    "worker-src 'self' blob:",
+    `media-src 'self' blob: ${CDN_HOST}`,
+    `connect-src 'self' ${TURNSTILE_HOST}${isDev ? ' ws:' : ''}`,
+    `frame-src ${TURNSTILE_HOST}`,
+    // 'self' rather than 'none': Payload's live preview iframes the site back
+    // into the admin panel.
+    "frame-ancestors 'self'",
+    "form-action 'self'",
+    "base-uri 'self'",
+    "object-src 'none'",
+    'upgrade-insecure-requests',
+].join('; ')
+
 const securityHeaders = [
+    { key: 'Content-Security-Policy', value: contentSecurityPolicy },
     { key: 'X-Content-Type-Options', value: 'nosniff' },
     { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
     { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },

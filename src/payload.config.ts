@@ -40,6 +40,9 @@ const s3Enabled = process.env.NODE_ENV === 'production'
 
 export default buildConfig({
     admin: {
+        // Payload defaults to Gravatar, which the CSP blocks — and which would
+        // hand a hash of every editor's email to a third party.
+        avatar: 'default',
         components: {
             graphics: {
                 Icon: '/components/payload/icon#Icon',
