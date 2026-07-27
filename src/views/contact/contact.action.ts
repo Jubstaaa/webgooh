@@ -6,9 +6,15 @@ import { getPayloadClient } from '@/lib/payload'
 import { contactSchema } from '@/views/contact/contact.validations'
 
 export interface ContactState {
+    // Bumped on every failed submit. A <select> only picks up defaultValue when
+    // it mounts, so the form keys it off this to restore the chosen service.
+    attempt?: number
     errors?: Record<string, string>
     message?: string
     status: 'idle' | 'success' | 'error'
+    // React resets an uncontrolled form once the action resolves, so a failed
+    // submit has to hand the typed values back as the new defaults.
+    values?: Record<string, string>
 }
 
 const RATE_LIMIT = 5
@@ -52,13 +58,20 @@ async function verifyTurnstile(token: string, ip: string) {
 }
 
 export async function submitContact(
-    _prev: ContactState,
+    prev: ContactState,
     formData: FormData
 ): Promise<ContactState> {
     // Honeypot: bots fill the hidden field — respond with a silent success.
     if (formData.get('company_website')) {
         return { message: 'Talebiniz alındı.', status: 'success' }
     }
+
+    const attempt = (prev.attempt ?? 0) + 1
+    const values = Object.fromEntries(
+        ['name', 'email', 'phone', 'company', 'service', 'message'].map(
+            field => [field, String(formData.get(field) ?? '')]
+        )
+    )
 
     const headersList = await headers()
     const ip =
@@ -68,9 +81,11 @@ export async function submitContact(
 
     if (isRateLimited(ip)) {
         return {
+            attempt,
             message:
                 'Çok fazla deneme yaptınız. Lütfen biraz sonra tekrar deneyin.',
             status: 'error',
+            values,
         }
     }
 
@@ -78,9 +93,10 @@ export async function submitContact(
     const verified = await verifyTurnstile(token, ip)
     if (!verified) {
         return {
-            message:
-                'Güvenlik doğrulaması başarısız. Sayfayı yenileyip tekrar deneyin.',
+            attempt,
+            message: 'Güvenlik doğrulaması başarısız. Lütfen tekrar deneyin.',
             status: 'error',
+            values,
         }
     }
 
@@ -99,7 +115,7 @@ export async function submitContact(
             errors[String(issue.path[0])] = issue.message
         }
 
-        return { errors, status: 'error' }
+        return { attempt, errors, status: 'error', values }
     }
 
     try {
@@ -112,8 +128,10 @@ export async function submitContact(
         }
     } catch {
         return {
+            attempt,
             message: 'Bir hata oluştu. Lütfen tekrar deneyin.',
             status: 'error',
+            values,
         }
     }
 }

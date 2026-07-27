@@ -1,12 +1,12 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useEffect } from 'react'
 
 import { useFormStatus } from 'react-dom'
 
 import { CheckCircle2, Send } from 'lucide-react'
 
-import { Turnstile } from '@/components/form/turnstile'
+import { resetTurnstile, Turnstile } from '@/components/form/turnstile'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import {
@@ -41,6 +41,10 @@ function SubmitButton() {
 export function ContactForm({ services }: ContactFormProps) {
     const [state, formAction] = useActionState(submitContact, initialState)
 
+    useEffect(() => {
+        if (state.status === 'error') resetTurnstile()
+    }, [state])
+
     if (state.status === 'success') {
         return (
             <div className="card-surface flex flex-col items-center gap-4 rounded-2xl p-10 text-center">
@@ -65,6 +69,7 @@ export function ContactForm({ services }: ContactFormProps) {
                     <input
                         required
                         className={inputClass}
+                        defaultValue={state.values?.name ?? ''}
                         id="name"
                         name="name"
                         placeholder="Adınız"
@@ -85,6 +90,7 @@ export function ContactForm({ services }: ContactFormProps) {
                     <input
                         required
                         className={inputClass}
+                        defaultValue={state.values?.email ?? ''}
                         id="email"
                         name="email"
                         placeholder="ornek@email.com"
@@ -105,6 +111,7 @@ export function ContactForm({ services }: ContactFormProps) {
                     </label>
                     <input
                         className={inputClass}
+                        defaultValue={state.values?.phone ?? ''}
                         id="phone"
                         name="phone"
                         placeholder="+90 5xx xxx xx xx"
@@ -119,6 +126,7 @@ export function ContactForm({ services }: ContactFormProps) {
                     </label>
                     <input
                         className={inputClass}
+                        defaultValue={state.values?.company ?? ''}
                         id="company"
                         name="company"
                         placeholder="Şirketiniz"
@@ -133,7 +141,9 @@ export function ContactForm({ services }: ContactFormProps) {
                     İlgilendiğiniz hizmet
                 </label>
                 <select
+                    key={state.attempt}
                     className={cn(inputClass, 'appearance-none')}
+                    defaultValue={state.values?.service ?? ''}
                     id="service"
                     name="service">
                     <option value="">Seçiniz</option>
@@ -154,6 +164,7 @@ export function ContactForm({ services }: ContactFormProps) {
                 <textarea
                     required
                     className={cn(inputClass, 'min-h-32 resize-none')}
+                    defaultValue={state.values?.message ?? ''}
                     id="message"
                     name="message"
                     placeholder="Projenizden kısaca bahsedin…"
