@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { publishedOrAuthenticated } from '@/access'
+import { authenticated } from '@/access'
 import { seoField } from '@/fields/seo'
 import { slugField } from '@/fields/slug'
 import {
@@ -10,10 +10,10 @@ import {
 
 export const Posts: CollectionConfig = {
     access: {
-        create: publishedOrAuthenticated,
-        delete: publishedOrAuthenticated,
-        read: publishedOrAuthenticated,
-        update: publishedOrAuthenticated,
+        create: authenticated,
+        delete: authenticated,
+        read: authenticated,
+        update: authenticated,
     },
     admin: {
         defaultColumns: ['title', 'category', 'publishedAt', '_status'],

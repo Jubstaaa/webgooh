@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { anyone, authenticated } from '@/access'
+import { authenticated } from '@/access'
 import { slugField } from '@/fields/slug'
 import { revalidateCollection } from '@/hooks/revalidate-simple'
 import { cacheTags } from '@/lib/cache-tags'
@@ -11,7 +11,7 @@ export const Categories: CollectionConfig = {
     access: {
         create: authenticated,
         delete: authenticated,
-        read: anyone,
+        read: authenticated,
         update: authenticated,
     },
     admin: {

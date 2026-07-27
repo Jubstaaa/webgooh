@@ -1,12 +1,12 @@
 import type { GlobalConfig } from 'payload'
 
-import { anyone, authenticated } from '@/access'
+import { authenticated } from '@/access'
 import { revalidateGlobal } from '@/hooks/revalidate-simple'
 import { cacheTags } from '@/lib/cache-tags'
 
 export const SiteSettings: GlobalConfig = {
     access: {
-        read: anyone,
+        read: authenticated,
         update: authenticated,
     },
     admin: {

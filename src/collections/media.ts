@@ -6,6 +6,9 @@ export const Media: CollectionConfig = {
     access: {
         create: authenticated,
         delete: authenticated,
+        // The only public read left: in dev, uploads are served from disk
+        // through /api/media/file/*, which goes through access control. In
+        // production the S3 plugin serves them off the CDN instead.
         read: anyone,
         update: authenticated,
     },

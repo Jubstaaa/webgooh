@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { anyone, authenticated } from '@/access'
+import { authenticated } from '@/access'
 import { seoField } from '@/fields/seo'
 import { slugField } from '@/fields/slug'
 import {
@@ -12,7 +12,7 @@ export const Services: CollectionConfig = {
     access: {
         create: authenticated,
         delete: authenticated,
-        read: anyone,
+        read: authenticated,
         update: authenticated,
     },
     admin: {

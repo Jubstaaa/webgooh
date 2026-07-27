@@ -1,10 +1,10 @@
 import type { CollectionConfig } from 'payload'
 
-import { anyone, authenticated } from '@/access'
+import { authenticated } from '@/access'
 
 export const Leads: CollectionConfig = {
     access: {
-        create: anyone,
+        create: authenticated,
         delete: authenticated,
         read: authenticated,
         update: authenticated,
