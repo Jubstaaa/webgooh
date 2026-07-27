@@ -12,26 +12,25 @@ export const Media: CollectionConfig = {
         read: anyone,
         update: authenticated,
     },
-    admin: {
-        group: 'İçerik',
-    },
     fields: [
         {
             admin: {
                 description: 'Erişilebilirlik ve SEO için görsel açıklaması.',
             },
+            label: 'Alternatif Metin',
             name: 'alt',
             required: true,
             type: 'text',
         },
         {
+            label: 'Açıklama (Caption)',
             name: 'caption',
             type: 'text',
         },
     ],
     labels: {
         plural: 'Medya',
-        singular: 'Görsel',
+        singular: 'Medya',
     },
     slug: 'media',
     upload: {

@@ -208,10 +208,15 @@ export interface Post {
   id: number;
   title: string;
   /**
-   * Kart ve liste görünümündeki özet.
+   * Boş bırakılırsa başlıktan otomatik üretilir.
+   */
+  slug?: string | null;
+  /**
+   * Kart ve liste görünümündeki özet. Google açıklaması olarak da kullanılır.
    */
   excerpt: string;
   coverImage: number | Media;
+  category: number | Category;
   content: {
     root: {
       type: string;
@@ -227,28 +232,7 @@ export interface Post {
     };
     [k: string]: unknown;
   };
-  category: number | Category;
   publishedAt?: string | null;
-  author?: string | null;
-  /**
-   * Tahmini okuma süresi (dakika).
-   */
-  readingMinutes?: number | null;
-  /**
-   * Boş bırakılırsa başlıktan otomatik üretilir.
-   */
-  slug?: string | null;
-  seo?: {
-    /**
-     * Boş bırakılırsa sayfa başlığı kullanılır.
-     */
-    title?: string | null;
-    description?: string | null;
-    /**
-     * Sosyal paylaşım görseli (OG image).
-     */
-    image?: (number | null) | Media;
-  };
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -287,6 +271,9 @@ export interface Service {
       }[]
     | null;
   coverImage?: (number | null) | Media;
+  /**
+   * Küçükten büyüğe sıralanır.
+   */
   order?: number | null;
   /**
    * Boş bırakılırsa başlıktan otomatik üretilir.
@@ -350,6 +337,9 @@ export interface Project {
     [k: string]: unknown;
   } | null;
   featured?: boolean | null;
+  /**
+   * Küçükten büyüğe sıralanır.
+   */
   order?: number | null;
   /**
    * Boş bırakılırsa başlıktan otomatik üretilir.
@@ -539,21 +529,12 @@ export interface CategoriesSelect<T extends boolean = true> {
  */
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
+  slug?: T;
   excerpt?: T;
   coverImage?: T;
-  content?: T;
   category?: T;
+  content?: T;
   publishedAt?: T;
-  author?: T;
-  readingMinutes?: T;
-  slug?: T;
-  seo?:
-    | T
-    | {
-        title?: T;
-        description?: T;
-        image?: T;
-      };
   updatedAt?: T;
   createdAt?: T;
   _status?: T;

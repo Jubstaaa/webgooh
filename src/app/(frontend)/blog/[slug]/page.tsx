@@ -32,7 +32,6 @@ export async function generateMetadata({
         description: post.excerpt,
         image: post.coverImage,
         path: `/blog/${slug}`,
-        seo: post.seo,
         title: post.title,
     })
 }

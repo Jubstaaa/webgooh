@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge'
 import { RichText } from '@/components/ui/rich-text'
 import { SectionHeading } from '@/components/ui/section-heading'
 import { mediaAlt, mediaUrl } from '@/lib/media'
+import { readingMinutes } from '@/lib/reading-time'
 import { formatDate } from '@/lib/utils'
 
 interface BlogDetailProps {
@@ -19,11 +20,13 @@ interface BlogDetailProps {
 }
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.webgooh.com'
+const AUTHOR = 'Webgooh'
 
 export function BlogDetail({ post, related }: BlogDetailProps) {
     const cat =
         typeof post.category === 'object' ? (post.category as Category) : null
     const cover = mediaUrl(post.coverImage)
+    const minutes = readingMinutes(post.content)
 
     return (
         <article className="flex flex-col gap-16 pb-8">
@@ -33,7 +36,7 @@ export function BlogDetail({ post, related }: BlogDetailProps) {
                     '@type': 'BlogPosting',
                     'author': {
                         '@type': 'Organization',
-                        'name': post.author ?? 'Webgooh',
+                        'name': AUTHOR,
                     },
                     'datePublished': post.publishedAt,
                     'description': post.excerpt,
@@ -65,10 +68,10 @@ export function BlogDetail({ post, related }: BlogDetailProps) {
                                     {formatDate(post.publishedAt)}
                                 </time>
                             ) : null}
-                            {post.readingMinutes ? (
+                            {minutes ? (
                                 <span className="flex items-center gap-1">
-                                    <Clock className="size-3" />{' '}
-                                    {post.readingMinutes} dk okuma
+                                    <Clock className="size-3" /> {minutes} dk
+                                    okuma
                                 </span>
                             ) : null}
                         </span>

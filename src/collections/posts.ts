@@ -1,7 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
 import { authenticated } from '@/access'
-import { seoField } from '@/fields/seo'
 import { slugField } from '@/fields/slug'
 import {
     revalidatePostAfterChange,
@@ -16,8 +15,7 @@ export const Posts: CollectionConfig = {
         update: authenticated,
     },
     admin: {
-        defaultColumns: ['title', 'category', 'publishedAt', '_status'],
-        group: 'İçerik',
+        defaultColumns: ['title', 'slug', 'publishedAt', '_status'],
         livePreview: {
             url: ({ data }) => `/blog/${data?.slug}`,
         },
@@ -25,87 +23,67 @@ export const Posts: CollectionConfig = {
     },
     fields: [
         {
-            tabs: [
-                {
-                    fields: [
-                        {
-                            name: 'title',
-                            required: true,
-                            type: 'text',
-                        },
-                        {
-                            admin: {
-                                description:
-                                    'Kart ve liste görünümündeki özet.',
-                            },
-                            maxLength: 260,
-                            name: 'excerpt',
-                            required: true,
-                            type: 'textarea',
-                        },
-                        {
-                            name: 'coverImage',
-                            relationTo: 'media',
-                            required: true,
-                            type: 'upload',
-                        },
-                        {
-                            name: 'content',
-                            required: true,
-                            type: 'richText',
-                        },
-                    ],
-                    label: 'İçerik',
-                },
-            ],
-            type: 'tabs',
+            label: 'Başlık',
+            name: 'title',
+            required: true,
+            type: 'text',
+        },
+        slugField(),
+        {
+            admin: {
+                description:
+                    'Kart ve liste görünümündeki özet. Google açıklaması olarak da kullanılır.',
+            },
+            label: 'Özet',
+            maxLength: 260,
+            name: 'excerpt',
+            required: true,
+            type: 'textarea',
         },
         {
-            admin: { position: 'sidebar' },
+            label: 'Kapak Görseli',
+            name: 'coverImage',
+            relationTo: 'media',
+            required: true,
+            type: 'upload',
+        },
+        {
+            label: 'Kategori',
             name: 'category',
             relationTo: 'categories',
             required: true,
             type: 'relationship',
         },
         {
+            label: 'İçerik',
+            name: 'content',
+            required: true,
+            type: 'richText',
+        },
+        {
             admin: {
-                date: { pickerAppearance: 'dayOnly' },
+                date: { pickerAppearance: 'dayAndTime' },
                 position: 'sidebar',
             },
             defaultValue: () => new Date().toISOString(),
+            label: 'Yayın Tarihi',
             name: 'publishedAt',
             type: 'date',
         },
-        {
-            admin: { position: 'sidebar' },
-            defaultValue: 'Webgooh',
-            name: 'author',
-            type: 'text',
-        },
-        {
-            admin: {
-                description: 'Tahmini okuma süresi (dakika).',
-                position: 'sidebar',
-            },
-            name: 'readingMinutes',
-            type: 'number',
-        },
-        slugField(),
-        seoField,
     ],
     hooks: {
         afterChange: [revalidatePostAfterChange],
         afterDelete: [revalidatePostAfterDelete],
     },
     labels: {
-        plural: 'Blog Yazıları',
-        singular: 'Blog Yazısı',
+        plural: 'Yazılar',
+        singular: 'Yazı',
     },
     slug: 'posts',
+    // No autosave, matching the ACW panel: the same editors write for both sites,
+    // so they get the same "Taslağı kaydet / Değişiklikleri yayınla" buttons here.
     versions: {
-        drafts: {
-            autosave: { interval: 375 },
-        },
+        drafts: true,
         maxPerDoc: 20,
     },
 }

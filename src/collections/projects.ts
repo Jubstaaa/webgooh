@@ -17,7 +17,6 @@ export const Projects: CollectionConfig = {
     },
     admin: {
         defaultColumns: ['title', 'client', 'order'],
-        group: 'İçerik',
         useAsTitle: 'title',
     },
     defaultSort: 'order',
@@ -28,8 +27,17 @@ export const Projects: CollectionConfig = {
                     fields: [
                         {
                             fields: [
-                                { name: 'title', required: true, type: 'text' },
-                                { name: 'client', type: 'text' },
+                                {
+                                    label: 'Başlık',
+                                    name: 'title',
+                                    required: true,
+                                    type: 'text',
+                                },
+                                {
+                                    label: 'Müşteri',
+                                    name: 'client',
+                                    type: 'text',
+                                },
                             ],
                             type: 'row',
                         },
@@ -38,12 +46,14 @@ export const Projects: CollectionConfig = {
                                 description:
                                     'Kart ve liste görünümündeki kısa özet.',
                             },
+                            label: 'Özet',
                             maxLength: 260,
                             name: 'summary',
                             required: true,
                             type: 'textarea',
                         },
                         {
+                            label: 'Görsel',
                             name: 'image',
                             relationTo: 'media',
                             required: true,
@@ -51,11 +61,13 @@ export const Projects: CollectionConfig = {
                         },
                         {
                             hasMany: true,
+                            label: 'Etiketler',
                             name: 'tags',
                             type: 'text',
                         },
                         {
                             admin: { description: 'Canlı proje adresi.' },
+                            label: 'Bağlantı (URL)',
                             name: 'url',
                             type: 'text',
                         },
@@ -72,11 +84,13 @@ export const Projects: CollectionConfig = {
                                 {
                                     fields: [
                                         {
+                                            label: 'Değer',
                                             name: 'value',
                                             required: true,
                                             type: 'text',
                                         },
                                         {
+                                            label: 'Açıklama',
                                             name: 'label',
                                             required: true,
                                             type: 'text',
@@ -85,6 +99,7 @@ export const Projects: CollectionConfig = {
                                     type: 'row',
                                 },
                             ],
+                            label: 'Metrikler',
                             labels: {
                                 plural: 'Metrikler',
                                 singular: 'Metrik',
@@ -93,7 +108,7 @@ export const Projects: CollectionConfig = {
                             type: 'array',
                         },
                         {
-                            label: 'Detaylı anlatım',
+                            label: 'Detaylı Anlatım',
                             name: 'content',
                             type: 'richText',
                         },
@@ -106,16 +121,21 @@ export const Projects: CollectionConfig = {
         {
             admin: { position: 'sidebar' },
             defaultValue: false,
+            label: 'Öne Çıkan',
             name: 'featured',
             type: 'checkbox',
         },
         {
-            admin: { position: 'sidebar' },
+            admin: {
+                description: 'Küçükten büyüğe sıralanır.',
+                position: 'sidebar',
+            },
             defaultValue: 0,
+            label: 'Sıra',
             name: 'order',
             type: 'number',
         },
-        slugField(),
+        slugField({ sidebar: true }),
         seoField,
     ],
     hooks: {

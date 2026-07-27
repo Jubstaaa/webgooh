@@ -9,10 +9,12 @@ export const seoField: Field = {
             admin: {
                 description: 'Boş bırakılırsa sayfa başlığı kullanılır.',
             },
+            label: 'SEO Başlık',
             name: 'title',
             type: 'text',
         },
         {
+            label: 'SEO Açıklama',
             maxLength: 180,
             name: 'description',
             type: 'textarea',
@@ -21,6 +23,7 @@ export const seoField: Field = {
             admin: {
                 description: 'Sosyal paylaşım görseli (OG image).',
             },
+            label: 'Paylaşım Görseli',
             name: 'image',
             relationTo: 'media',
             type: 'upload',

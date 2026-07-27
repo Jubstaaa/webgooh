@@ -10,7 +10,7 @@ export const SiteSettings: GlobalConfig = {
         update: authenticated,
     },
     admin: {
-        group: 'Sistem',
+        group: 'Ayarlar',
     },
     fields: [
         {

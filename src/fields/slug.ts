@@ -2,11 +2,19 @@ import type { Field } from 'payload'
 
 import { slugify } from '@/lib/utils'
 
-export function slugField(sourceField = 'title'): Field {
+interface SlugFieldOptions {
+    sidebar?: boolean
+    sourceField?: string
+}
+
+export function slugField({
+    sidebar = false,
+    sourceField = 'title',
+}: SlugFieldOptions = {}): Field {
     return {
         admin: {
             description: 'Boş bırakılırsa başlıktan otomatik üretilir.',
-            position: 'sidebar',
+            ...(sidebar ? { position: 'sidebar' as const } : {}),
         },
         hooks: {
             beforeValidate: [
@@ -26,6 +34,7 @@ export function slugField(sourceField = 'title'): Field {
             ],
         },
         index: true,
+        label: 'URL (Slug)',
         name: 'slug',
         type: 'text',
         unique: true,

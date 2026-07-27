@@ -17,7 +17,6 @@ export const Services: CollectionConfig = {
     },
     admin: {
         defaultColumns: ['title', 'slug', 'order'],
-        group: 'İçerik',
         useAsTitle: 'title',
     },
     defaultSort: 'order',
@@ -25,6 +24,7 @@ export const Services: CollectionConfig = {
         {
             fields: [
                 {
+                    label: 'Başlık',
                     name: 'title',
                     required: true,
                     type: 'text',
@@ -34,6 +34,7 @@ export const Services: CollectionConfig = {
                         description: 'Kartta gösterilecek ikon.',
                         width: '40%',
                     },
+                    label: 'İkon',
                     name: 'icon',
                     options: [
                         { label: 'Kod', value: 'code' },
@@ -52,23 +53,27 @@ export const Services: CollectionConfig = {
             type: 'row',
         },
         {
+            label: 'Özet',
             maxLength: 220,
             name: 'summary',
             required: true,
             type: 'textarea',
         },
         {
+            label: 'İçerik',
             name: 'content',
             type: 'richText',
         },
         {
             fields: [
                 {
+                    label: 'Madde',
                     name: 'label',
                     required: true,
                     type: 'text',
                 },
             ],
+            label: 'Özellikler',
             labels: {
                 plural: 'Özellikler',
                 singular: 'Özellik',
@@ -77,17 +82,22 @@ export const Services: CollectionConfig = {
             type: 'array',
         },
         {
+            label: 'Kapak Görseli',
             name: 'coverImage',
             relationTo: 'media',
             type: 'upload',
         },
         {
-            admin: { position: 'sidebar' },
+            admin: {
+                description: 'Küçükten büyüğe sıralanır.',
+                position: 'sidebar',
+            },
             defaultValue: 0,
+            label: 'Sıra',
             name: 'order',
             type: 'number',
         },
-        slugField(),
+        slugField({ sidebar: true }),
         seoField,
     ],
     hooks: {

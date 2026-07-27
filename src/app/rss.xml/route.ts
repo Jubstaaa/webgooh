@@ -23,12 +23,12 @@ export async function GET() {
     for (const post of posts) {
         const url = `${SITE_URL}/blog/${post.slug}`
         feed.addItem({
+            author: [{ name: 'Webgooh' }],
             date: new Date(post.publishedAt ?? post.updatedAt),
             description: post.excerpt,
             id: url,
             link: url,
             title: post.title,
-            ...(post.author ? { author: [{ name: post.author }] } : {}),
         })
     }
 

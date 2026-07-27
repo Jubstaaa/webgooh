@@ -7,6 +7,7 @@ import type { Category, Post } from '@payload-types'
 
 import { Badge } from '@/components/ui/badge'
 import { mediaAlt, mediaUrl } from '@/lib/media'
+import { readingMinutes } from '@/lib/reading-time'
 import { formatDate } from '@/lib/utils'
 
 interface PostCardProps {
@@ -18,6 +19,7 @@ export function PostCard({ post, priority = false }: PostCardProps) {
     const cat =
         typeof post.category === 'object' ? (post.category as Category) : null
     const cover = mediaUrl(post.coverImage)
+    const minutes = readingMinutes(post.content)
 
     return (
         <Link
@@ -49,10 +51,10 @@ export function PostCard({ post, priority = false }: PostCardProps) {
                             {formatDate(post.publishedAt)}
                         </time>
                     ) : null}
-                    {post.readingMinutes ? (
+                    {minutes ? (
                         <span className="flex items-center gap-1">
                             <Clock className="size-3" />
-                            {post.readingMinutes} dk
+                            {minutes} dk
                         </span>
                     ) : null}
                 </div>

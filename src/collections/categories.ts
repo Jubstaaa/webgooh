@@ -16,17 +16,18 @@ export const Categories: CollectionConfig = {
     },
     admin: {
         defaultColumns: ['title', 'slug'],
-        group: 'İçerik',
         useAsTitle: 'title',
     },
     fields: [
         {
+            label: 'Ad',
             name: 'title',
             required: true,
             type: 'text',
         },
         slugField(),
         {
+            label: 'Açıklama',
             name: 'description',
             type: 'textarea',
         },
@@ -34,6 +35,7 @@ export const Categories: CollectionConfig = {
             admin: {
                 description: 'HEX renk (örn. #6366f1) — rozet rengi.',
             },
+            label: 'Renk',
             name: 'color',
             type: 'text',
         },

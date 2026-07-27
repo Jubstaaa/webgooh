@@ -11,7 +11,6 @@ export const Leads: CollectionConfig = {
     },
     admin: {
         defaultColumns: ['name', 'email', 'phone', 'createdAt'],
-        group: 'Sistem',
         useAsTitle: 'name',
     },
     fields: [
