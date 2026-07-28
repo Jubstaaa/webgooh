@@ -17,21 +17,6 @@ export interface ContactState {
     values?: Record<string, string>
 }
 
-const RATE_LIMIT = 5
-const RATE_WINDOW_MS = 10 * 60 * 1000
-const attempts = new Map<string, number[]>()
-
-function isRateLimited(ip: string) {
-    const now = Date.now()
-    const recent = (attempts.get(ip) ?? []).filter(
-        t => now - t < RATE_WINDOW_MS
-    )
-    recent.push(now)
-    attempts.set(ip, recent)
-
-    return recent.length > RATE_LIMIT
-}
-
 async function verifyTurnstile(token: string, ip: string) {
     const secret =
         process.env.TURNSTILE_SECRET_KEY ||
@@ -78,16 +63,6 @@ export async function submitContact(
         headersList.get('x-forwarded-for')?.split(',')[0]?.trim() ??
         headersList.get('x-real-ip') ??
         'unknown'
-
-    if (isRateLimited(ip)) {
-        return {
-            attempt,
-            message:
-                'Çok fazla deneme yaptınız. Lütfen biraz sonra tekrar deneyin.',
-            status: 'error',
-            values,
-        }
-    }
 
     const token = String(formData.get('cf-turnstile-response') ?? '')
     const verified = await verifyTurnstile(token, ip)
