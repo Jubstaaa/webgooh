@@ -75,6 +75,10 @@ export default buildConfig({
     }),
     editor: lexicalEditor(),
     globals: [SiteSettings],
+    // Nothing consumes it: the admin panel talks to the REST API and the site
+    // reads through the Local API, so this only ever exposed a second query
+    // surface — and one that can nest arbitrarily deep — to the internet.
+    graphQL: { disable: true },
     i18n: {
         fallbackLanguage: 'tr',
         supportedLanguages: { tr },
