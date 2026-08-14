@@ -48,6 +48,9 @@ export default buildConfig({
                 Icon: '/components/payload/icon#Icon',
                 Logo: '/components/payload/logo#Logo',
             },
+            logout: {
+                Button: '/components/payload/logout-button#LogoutButton',
+            },
         },
         importMap: {
             baseDir: path.resolve(dirname),
