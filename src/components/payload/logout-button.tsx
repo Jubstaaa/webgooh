@@ -5,18 +5,16 @@ import { useCallback } from 'react'
 // Signing out of Payload alone achieves nothing here: the Cloudflare Access
 // header would authenticate the very next request, so the panel reopened as if
 // nothing had happened. Ending the Cloudflare session is what actually signs
-// someone out, and both of its cookies have to go — the one scoped to this host
-// first, then the account-wide session that provides single sign-on — or the
-// panel still opens until the visitor reloads.
+// someone out, and one call does it — Cloudflare revokes the session across every
+// application it protects. Asking a second endpoint to repeat it only earns a
+// "Failed to log out" page, because the session it looks for is already gone.
 //
 // Payload's own token is cleared before leaving, because it outlives the
 // Cloudflare session by up to its expiry and would otherwise still be sitting
 // there, valid, when the visitor came back.
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://ilkerbalcilar.xyz'
-const ACCESS_TEAM_URL = 'https://webgooh.cloudflareaccess.com'
 
-const accountLogout = `${ACCESS_TEAM_URL}/cdn-cgi/access/logout?returnTo=${encodeURIComponent(`${SITE_URL}/admin`)}`
-const logoutUrl = `${SITE_URL}/cdn-cgi/access/logout?returnTo=${encodeURIComponent(accountLogout)}`
+const logoutUrl = `${SITE_URL}/cdn-cgi/access/logout?returnTo=${encodeURIComponent(`${SITE_URL}/admin`)}`
 
 export function LogoutButton() {
     const handleClick = useCallback(
