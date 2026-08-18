@@ -13,7 +13,7 @@ import {
 } from '@/lib/queries'
 import type { TerminalLine } from '@/views/home/home.types'
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://ilkerbalcilar.xyz'
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://webgooh.tech'
 
 export async function HomeHero() {
     const [posts, services, projects, categories] = await Promise.all([

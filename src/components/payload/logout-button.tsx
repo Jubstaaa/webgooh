@@ -12,7 +12,7 @@ import { useCallback } from 'react'
 // Payload's own token is cleared before leaving, because it outlives the
 // Cloudflare session by up to its expiry and would otherwise still be sitting
 // there, valid, when the visitor came back.
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://ilkerbalcilar.xyz'
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://webgooh.tech'
 
 const logoutUrl = `${SITE_URL}/cdn-cgi/access/logout?returnTo=${encodeURIComponent(`${SITE_URL}/admin`)}`
 

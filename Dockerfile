@@ -15,7 +15,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ARG NEXT_PUBLIC_TURNSTILE_SITE_KEY=1x00000000000000000000AA
 ENV NEXT_PUBLIC_TURNSTILE_SITE_KEY=$NEXT_PUBLIC_TURNSTILE_SITE_KEY
-ARG NEXT_PUBLIC_SITE_URL=https://ilkerbalcilar.xyz
+ARG NEXT_PUBLIC_SITE_URL=https://webgooh.tech
 ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
 ENV NEXT_TELEMETRY_DISABLED=1
 # Explicit so payload.config's production branch (Spaces-backed media URLs) is
