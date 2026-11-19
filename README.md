@@ -87,8 +87,6 @@ src/
 
 ## Dependency audit
 
-CI runs `bun run audit` (`bun audit --audit-level=high`) and fails on any high or critical advisory, except these reviewed ones:
+CI runs `bun run audit` (`bun audit --audit-level=high`) and fails on any high or critical advisory, with no exceptions.
 
-| Advisory                                 | Package                                                                | Why it is ignored                                                                                                                                                                                                      | Remove when                     |
-| ---------------------------------------- | ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
-| GHSA-834v-8h66-3h79, GHSA-c8p4-j97h-3vg8 | `happy-dom` (via `@payloadcms/richtext-lexical` → `@lexical/headless`) | Only exploitable when parsing untrusted HTML; here only admins write content. Payload pins `@lexical/headless` 0.50, which requires `happy-dom` 20; the fix (21.0.4) arrives with a Payload release on lexical ≥ 0.53. | Payload moves to lexical ≥ 0.53 |
+`package.json` overrides `happy-dom` to `^21.0.4`: Payload 3.x pins `@lexical/headless` 0.50, which asks for `happy-dom` 20 (GHSA-834v-8h66-3h79, GHSA-c8p4-j97h-3vg8). Lexical 0.53 already uses `happy-dom` 21, and the site never runs Lexical's server-side HTML conversion, so the newer version is a drop-in. Drop the override once Payload ships `@lexical/headless` ≥ 0.53.
