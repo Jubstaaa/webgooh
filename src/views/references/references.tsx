@@ -19,9 +19,10 @@ export async function References() {
                 {projects.length ? (
                     <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                         {projects.map((project, index) => (
-                            <Reveal key={project.id} delay={(index % 3) * 0.06}>
+                            <Reveal key={project.id}>
                                 <ProjectCard
-                                    priority={index === 0}
+                                    eager={index === 0}
+                                    headingLevel="h2"
                                     project={project}
                                 />
                             </Reveal>

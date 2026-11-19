@@ -2,13 +2,7 @@
 
 import { useRef } from 'react'
 
-import {
-    motion,
-    useInView,
-    useReducedMotion,
-    useScroll,
-    useSpring,
-} from 'motion/react'
+import { motion, useInView, useScroll, useSpring } from 'motion/react'
 
 import { SectionHeading } from '@/components/ui/section-heading'
 import { cn } from '@/lib/utils'
@@ -55,21 +49,10 @@ export function HomeProcess() {
 
 function TimelineStep({ index, step }: { index: number; step: ProcessStep }) {
     const ref = useRef<HTMLDivElement>(null)
-    const reduce = useReducedMotion()
     const active = useInView(ref, { margin: '0px 0px -55% 0px' })
 
     return (
-        <motion.div
-            ref={ref}
-            className="relative"
-            initial={reduce ? false : { opacity: 0, y: 24 }}
-            viewport={{ margin: '-80px', once: true }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{
-                delay: index * 0.05,
-                duration: 0.6,
-                ease: [0.22, 1, 0.36, 1],
-            }}>
+        <div ref={ref} className="reveal relative">
             <span
                 className={cn(
                     'bg-ink absolute top-0.5 -left-10 grid size-6 place-items-center rounded-full border-2 font-mono text-[0.7rem] transition-all duration-300',
@@ -83,6 +66,6 @@ function TimelineStep({ index, step }: { index: number; step: ProcessStep }) {
             <p className="text-muted mt-2 max-w-2xl text-sm leading-relaxed">
                 {step.description}
             </p>
-        </motion.div>
+        </div>
     )
 }

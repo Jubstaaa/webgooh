@@ -71,9 +71,10 @@ export function ReferenceDetail({ project }: ReferenceDetailProps) {
                     <div className="border-line relative mx-auto aspect-[16/9] max-w-5xl overflow-hidden rounded-2xl border">
                         <Image
                             fill
-                            priority
                             alt={mediaAlt(project.image, project.title)}
                             className="object-cover object-top"
+                            fetchPriority="high"
+                            loading="eager"
                             sizes="(max-width: 1024px) 100vw, 1024px"
                             src={image}
                         />

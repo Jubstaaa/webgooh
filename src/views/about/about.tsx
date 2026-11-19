@@ -43,11 +43,10 @@ export function About() {
                     title="Bizi biz yapan ilkeler"
                 />
                 <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-                    {values.map((value, index) => (
+                    {values.map(value => (
                         <Reveal
                             key={value.title}
-                            className="card-surface flex flex-col gap-3 rounded-2xl p-6"
-                            delay={index * 0.06}>
+                            className="card-surface flex flex-col gap-3 rounded-2xl p-6">
                             <div className="bg-brand/12 text-brand-bright ring-brand/25 grid size-11 place-items-center rounded-xl ring-1">
                                 <value.icon
                                     className="size-5"

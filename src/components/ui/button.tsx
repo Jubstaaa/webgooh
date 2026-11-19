@@ -23,7 +23,7 @@ export const buttonVariants = cva(
                 outline:
                     'border border-line bg-surface/40 text-paper hover:border-brand/60 hover:bg-surface',
                 primary:
-                    'bg-brand text-paper shadow-[0_8px_30px_-8px] shadow-brand/60 hover:bg-brand-bright hover:-translate-y-0.5',
+                    'bg-brand-deep text-paper shadow-[0_8px_30px_-8px] shadow-brand/60 hover:bg-brand hover:-translate-y-0.5',
             },
         },
     }

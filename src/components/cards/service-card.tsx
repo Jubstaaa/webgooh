@@ -9,10 +9,15 @@ import { BorderBeam } from '@/components/ui/border-beam'
 import { ServiceIcon } from '@/components/ui/service-icon'
 
 interface ServiceCardProps {
+    // h2 when the card list sits directly under the page's h1.
+    headingLevel?: 'h2' | 'h3'
     service: Service
 }
 
-export function ServiceCard({ service }: ServiceCardProps) {
+export function ServiceCard({
+    headingLevel: Heading = 'h3',
+    service,
+}: ServiceCardProps) {
     return (
         <Link
             className="group block h-full [perspective:800px]"
@@ -25,9 +30,9 @@ export function ServiceCard({ service }: ServiceCardProps) {
                 </div>
 
                 <div className="flex flex-col gap-2">
-                    <h3 className="text-paper group-hover:text-brand-bright text-lg font-semibold transition-colors">
+                    <Heading className="text-paper group-hover:text-brand-bright text-lg font-semibold transition-colors">
                         {service.title}
-                    </h3>
+                    </Heading>
                     <p className="text-muted text-sm leading-relaxed">
                         {service.summary}
                     </p>

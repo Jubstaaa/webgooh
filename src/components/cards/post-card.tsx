@@ -11,11 +11,18 @@ import { readingMinutes } from '@/lib/reading-time'
 import { formatDate } from '@/lib/utils'
 
 interface PostCardProps {
+    // Above-the-fold cards load their image eagerly and at high priority.
+    eager?: boolean
+    // h2 when the card list sits directly under the page's h1.
+    headingLevel?: 'h2' | 'h3'
     post: Post
-    priority?: boolean
 }
 
-export function PostCard({ post, priority = false }: PostCardProps) {
+export function PostCard({
+    eager = false,
+    headingLevel: Heading = 'h3',
+    post,
+}: PostCardProps) {
     const cat =
         typeof post.category === 'object' ? (post.category as Category) : null
     const cover = mediaUrl(post.coverImage)
@@ -31,7 +38,8 @@ export function PostCard({ post, priority = false }: PostCardProps) {
                         fill
                         alt={mediaAlt(post.coverImage, post.title)}
                         className="object-cover transition-transform duration-500 group-hover:scale-105"
-                        priority={priority}
+                        fetchPriority={eager ? 'high' : 'auto'}
+                        loading={eager ? 'eager' : 'lazy'}
                         sizes="(max-width: 768px) 100vw, 400px"
                         src={cover}
                     />
@@ -59,9 +67,9 @@ export function PostCard({ post, priority = false }: PostCardProps) {
                     ) : null}
                 </div>
 
-                <h3 className="text-paper group-hover:text-brand-bright line-clamp-2 text-lg leading-snug font-semibold transition-colors">
+                <Heading className="text-paper group-hover:text-brand-bright line-clamp-2 text-lg leading-snug font-semibold transition-colors">
                     {post.title}
-                </h3>
+                </Heading>
 
                 <p className="text-muted line-clamp-2 text-sm leading-relaxed">
                     {post.excerpt}

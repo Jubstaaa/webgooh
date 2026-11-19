@@ -35,8 +35,12 @@ export async function Blog({ categorySlug }: BlogProps) {
                 {posts.length ? (
                     <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                         {posts.map((post, index) => (
-                            <Reveal key={post.id} delay={(index % 3) * 0.06}>
-                                <PostCard post={post} priority={index < 3} />
+                            <Reveal key={post.id}>
+                                <PostCard
+                                    eager={index < 3}
+                                    headingLevel="h2"
+                                    post={post}
+                                />
                             </Reveal>
                         ))}
                     </div>
