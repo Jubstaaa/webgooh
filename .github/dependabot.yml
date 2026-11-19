@@ -28,6 +28,9 @@ updates:
           # alias key to 7. TS 7 itself updates through `@typescript/native`.
           - dependency-name: typescript
             update-types: ['version-update:semver-major']
+          # Payload declares graphql ^16 as a peer; take 17 once Payload supports it.
+          - dependency-name: graphql
+            update-types: ['version-update:semver-major']
     - package-ecosystem: github-actions
       directory: /
       schedule:
