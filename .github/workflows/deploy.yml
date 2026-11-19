@@ -42,9 +42,13 @@ jobs:
                   key: ${{ secrets.DO_SSH_KEY }}
                   known-hosts: ${{ secrets.DO_KNOWN_HOSTS }}
             # SSG prerenders against the live content, so the build reads a copy of it.
+            # It goes in its own directory, passed as a named build context and only
+            # bind-mounted for the build step (see Dockerfile), so the leads table never
+            # enters an image layer or the GHA cache.
             - name: Fetch live DB for SSG prerender
               run: |
-                  scp droplet:/opt/webgooh/data/webgooh.db ./webgooh.db
+                  mkdir -p .prerender-db
+                  scp droplet:/opt/webgooh/data/webgooh.db .prerender-db/webgooh.db
             - id: meta
               uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
               with:
@@ -60,6 +64,7 @@ jobs:
             - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
               with:
                   context: .
+                  build-contexts: prerender-db=.prerender-db
                   push: true
                   tags: ${{ steps.meta.outputs.tags }}
                   labels: ${{ steps.meta.outputs.labels }}

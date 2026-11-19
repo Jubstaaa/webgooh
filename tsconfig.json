@@ -13,6 +13,7 @@
         "isolatedModules": true,
         "jsx": "react-jsx",
         "incremental": true,
+        "types": ["node", "bun"],
         "plugins": [
             {
                 "name": "next"
@@ -29,8 +30,7 @@
         "**/*.ts",
         "**/*.tsx",
         ".next/types/**/*.ts",
-        "redirects.js",
         ".next/dev/types/**/*.ts"
     ],
-    "exclude": ["node_modules", "src/scripts"]
+    "exclude": ["node_modules"]
 }

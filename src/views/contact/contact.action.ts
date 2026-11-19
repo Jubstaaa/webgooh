@@ -3,7 +3,9 @@
 import { headers } from 'next/headers'
 
 import { getPayloadClient } from '@/lib/payload'
-import { contactSchema } from '@/views/contact/contact.validations'
+import { getServices } from '@/lib/queries'
+import { createContactSchema } from '@/views/contact/contact.validations'
+import { clientIp, verifyTurnstile } from '@/views/contact/verify-turnstile'
 
 export interface ContactState {
     // Bumped on every failed submit. A <select> only picks up defaultValue when
@@ -15,31 +17,6 @@ export interface ContactState {
     // React resets an uncontrolled form once the action resolves, so a failed
     // submit has to hand the typed values back as the new defaults.
     values?: Record<string, string>
-}
-
-async function verifyTurnstile(token: string, ip: string) {
-    const secret =
-        process.env.TURNSTILE_SECRET_KEY ||
-        '1x0000000000000000000000000000000AA'
-
-    try {
-        const res = await fetch(
-            'https://challenges.cloudflare.com/turnstile/v0/siteverify',
-            {
-                body: new URLSearchParams({
-                    remoteip: ip,
-                    response: token,
-                    secret,
-                }),
-                method: 'POST',
-            }
-        )
-        const data = (await res.json()) as { success?: boolean }
-
-        return data.success === true
-    } catch {
-        return false
-    }
 }
 
 export async function submitContact(
@@ -58,14 +35,11 @@ export async function submitContact(
         )
     )
 
-    const headersList = await headers()
-    const ip =
-        headersList.get('x-forwarded-for')?.split(',')[0]?.trim() ??
-        headersList.get('x-real-ip') ??
-        'unknown'
-
-    const token = String(formData.get('cf-turnstile-response') ?? '')
-    const verified = await verifyTurnstile(token, ip)
+    const verified = await verifyTurnstile({
+        ip: clientIp(await headers()),
+        secret: process.env.TURNSTILE_SECRET_KEY,
+        token: String(formData.get('cf-turnstile-response') ?? ''),
+    })
     if (!verified) {
         return {
             attempt,
@@ -75,14 +49,10 @@ export async function submitContact(
         }
     }
 
-    const parsed = contactSchema.safeParse({
-        company: formData.get('company') ?? undefined,
-        email: formData.get('email'),
-        message: formData.get('message'),
-        name: formData.get('name'),
-        phone: formData.get('phone') ?? undefined,
-        service: formData.get('service') ?? undefined,
-    })
+    const services = await getServices()
+    const parsed = createContactSchema(
+        services.map(service => service.title)
+    ).safeParse(values)
 
     if (!parsed.success) {
         const errors: Record<string, string> = {}
@@ -101,7 +71,9 @@ export async function submitContact(
             message: 'Talebiniz alındı. En kısa sürede size dönüş yapacağız.',
             status: 'success',
         }
-    } catch {
+    } catch (error) {
+        console.error('Saving a contact lead failed', error)
+
         return {
             attempt,
             message: 'Bir hata oluştu. Lütfen tekrar deneyin.',

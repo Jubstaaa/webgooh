@@ -36,7 +36,9 @@ export const Media: CollectionConfig = {
     upload: {
         focalPoint: true,
         formatOptions: { format: 'webp', options: { quality: 78 } },
-        mimeTypes: ['image/*'],
+        // Raster formats only: SVG is script-capable, and every upload is
+        // re-encoded to WebP anyway.
+        mimeTypes: ['image/avif', 'image/jpeg', 'image/png', 'image/webp'],
         resizeOptions: {
             fit: 'inside',
             height: 2000,
