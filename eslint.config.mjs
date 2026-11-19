@@ -11,6 +11,7 @@ const eslintConfig = [
             '.next/**',
             'node_modules/**',
             'src/payload-types.ts',
+            'src/migrations/**',
             'src/app/(payload)/**',
             'next-env.d.ts',
         ],

@@ -31,8 +31,16 @@ ENV PAYLOAD_SECRET=build-time-placeholder
 # away with the mount.
 #   docker build --build-context prerender-db=./data .
 ENV DATABASE_URI=file:/prerender-db/webgooh.db
+# Pending Payload migrations are applied to the database copy once, before the
+# build: Next's page-data workers each initialise Payload in parallel, and left
+# to prodMigrations they race for SQLite's write lock (SQLITE_BUSY) or apply the
+# same migration twice. They then find nothing pending. Payload's CLI needs Node
+# (its tsx loader hooks fail under Bun), so the binary is copied in off PATH and
+# `bun run build` still runs on Bun.
+COPY --from=node:26-alpine /usr/local/bin/node /opt/node/bin/node
 RUN --mount=type=bind,from=prerender-db,target=/prerender-db,rw \
-    bun run build
+    /opt/node/bin/node node_modules/payload/bin.js migrate \
+    && bun run build
 
 # ─── runner ──────────────────────────────────────────────────────────────
 FROM node:26-alpine AS runner
