@@ -6,8 +6,7 @@ import {
     getProjects,
     getServices,
 } from '@/lib/queries'
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.webgooh.com'
+import { SITE_URL } from '@/lib/site.mjs'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const [posts, services, categories, projects] = await Promise.all([

@@ -1,3 +1,4 @@
+import slugifyText from '@sindresorhus/slugify'
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 
@@ -5,30 +6,21 @@ export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs))
 }
 
+// Turkish locale so ü/ö/ç become u/o/c (not the German ue/oe); "&" is dropped
+// rather than spelled "and" on a Turkish site.
 export function slugify(value: string) {
-    const map: Record<string, string> = {
-        ç: 'c',
-        ğ: 'g',
-        İ: 'i',
-        ı: 'i',
-        ö: 'o',
-        ş: 's',
-        ü: 'u',
-    }
-
-    return value
-        .replace(/[çğıİöşü]/g, char => map[char] ?? char)
-        .toLowerCase()
-        .normalize('NFKD')
-        .replace(/[̀-ͯ]/g, '')
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-+|-+$/g, '')
+    return slugifyText(value, {
+        customReplacements: [['&', ' ']],
+        locale: 'tr',
+    })
 }
 
+const dateFormat = new Intl.DateTimeFormat('tr-TR', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+})
+
 export function formatDate(value: Date | string) {
-    return new Intl.DateTimeFormat('tr-TR', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-    }).format(new Date(value))
+    return dateFormat.format(new Date(value))
 }

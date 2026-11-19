@@ -16,20 +16,12 @@ import { Projects } from '@/collections/projects'
 import { Services } from '@/collections/services'
 import { Users } from '@/collections/users'
 import { SiteSettings } from '@/globals/site-settings'
+import { CDN_BASE, S3_BUCKET, S3_REGION, SITE_URL } from '@/lib/site.mjs'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
-
-// Uploads live in a DigitalOcean Spaces bucket and are served straight from its
-// CDN edge, so the droplet never streams image bytes. Bucket and region are
-// fixed deployment constants — the CDN hostname derived from them is also
-// hardcoded in next.config.mjs remotePatterns, so change both together.
-const S3_REGION = 'fra1'
-const S3_BUCKET = 'webgooh'
 const S3_MEDIA_PREFIX = 'media'
-const CDN_BASE = `https://${S3_BUCKET}.${S3_REGION}.cdn.digitaloceanspaces.com`
 
 // Keyed off NODE_ENV rather than the credentials: the Docker build prerenders
 // SSG pages against the live DB, and it has no credentials, so gating on those

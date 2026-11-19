@@ -8,7 +8,7 @@ import {
 } from 'jose'
 import type { Payload } from 'payload'
 
-import { createCloudflareAccessStrategy } from '@/lib/cloudflare-access'
+import { createCloudflareAccessStrategy } from './cloudflare-access'
 
 const TEAM_DOMAIN = 'https://team.cloudflareaccess.com'
 const AUDIENCE = 'test-audience-tag'

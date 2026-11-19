@@ -81,17 +81,21 @@ only; `.dockerignore` keeps every `*.db` out of the build context.
 
 ## Project structure
 
+Grouped by route, colocated: code lives next to the only route that uses it and
+moves to a shared folder once a second user appears.
+
 ```
 src/
-  app/(frontend)/   # public site (thin route files → views)
-  app/(payload)/    # Payload admin + REST/GraphQL (generated)
-  views/            # feature/screen-level components (flat, dot-suffix)
-  components/       # shared UI, cards, layout, motion, sections, form
-  collections/      # Payload collections
-  globals/          # Payload globals (site settings)
-  hooks/            # Payload revalidation hooks
-  lib/              # queries, cache-tags, media, seo, utils
-  fields/           # reusable Payload fields (slug, seo)
+  app/(frontend)/            # public site
+    _components/             # site-wide layout parts (header, footer, nav, cursor)
+      home/                  # home page sections (page.tsx is the group root)
+    blog/_components/        # parts used only by /blog (likewise hakkimizda/,
+                             # hizmetlerimiz/, iletisim/, referanslar/)
+  app/(payload)/             # Payload admin + REST (generated)
+  components/                # UI used by more than one route
+  collections/ globals/ fields/ hooks/   # Payload config, per Payload's layout
+  lib/                       # queries, cache tags, media, seo, site constants
+  access.ts                  # Payload access helpers
 ```
 
 ## Dependency audit

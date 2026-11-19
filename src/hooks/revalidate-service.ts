@@ -3,10 +3,9 @@ import type {
     CollectionAfterDeleteHook,
 } from 'payload'
 
-import type { Service } from '@payload-types'
-
 import { cacheTags } from '@/lib/cache-tags'
 import { safeRevalidatePath, safeRevalidateTag } from '@/lib/revalidate'
+import type { Service } from '@payload-types'
 
 function revalidateService(doc: Partial<Service>) {
     safeRevalidateTag(cacheTags.services)

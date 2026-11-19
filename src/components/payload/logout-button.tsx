@@ -2,6 +2,8 @@
 
 import { useCallback } from 'react'
 
+import { SITE_URL } from '@/lib/site.mjs'
+
 // Signing out of Payload alone achieves nothing here: the Cloudflare Access
 // header would authenticate the very next request, so the panel reopened as if
 // nothing had happened. Ending the Cloudflare session is what actually signs
@@ -12,8 +14,6 @@ import { useCallback } from 'react'
 // Payload's own token is cleared before leaving, because it outlives the
 // Cloudflare session by up to its expiry and would otherwise still be sitting
 // there, valid, when the visitor came back.
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://webgooh.tech'
-
 const logoutUrl = `${SITE_URL}/cdn-cgi/access/logout?returnTo=${encodeURIComponent(`${SITE_URL}/admin`)}`
 
 export function LogoutButton() {

@@ -1,10 +1,9 @@
 import type { Metadata } from 'next'
-
 import { notFound } from 'next/navigation'
 
+import { ServiceDetail } from '@/app/(frontend)/hizmetlerimiz/_components/service-detail'
 import { getServiceBySlug, getServices } from '@/lib/queries'
 import { buildMetadata } from '@/lib/seo'
-import { ServiceDetail } from '@/views/services/service-detail'
 
 interface PageProps {
     params: Promise<{ slug: string }>

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 
-import { References } from '@/views/references/references'
+import { References } from '@/app/(frontend)/referanslar/_components/references'
 
 export const metadata: Metadata = {
     alternates: { canonical: '/referanslar' },
