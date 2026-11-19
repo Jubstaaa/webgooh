@@ -23,11 +23,10 @@ updates:
           eslint:
               patterns: ['eslint', '@eslint/*']
       ignore:
-          # typescript-eslint does not support TypeScript 7 yet.
+          # `typescript` here is the alias for @typescript/typescript6 (the TS 6 API
+          # that typescript-eslint and next build need); Dependabot would bump the
+          # alias key to 7. TS 7 itself updates through `@typescript/native`.
           - dependency-name: typescript
-            versions: ['>=7']
-          # Must match the Node.js major the code runs on, not the newest one.
-          - dependency-name: '@types/node'
             update-types: ['version-update:semver-major']
     - package-ecosystem: github-actions
       directory: /
