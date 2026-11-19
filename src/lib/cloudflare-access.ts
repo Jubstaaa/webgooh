@@ -1,7 +1,69 @@
+import { createRemoteJWKSet, jwtVerify, type JWTVerifyGetKey } from 'jose'
 import { generatePayloadCookie, getFieldsToSign, jwtSign } from 'payload'
 import type { AuthStrategy, Payload } from 'payload'
+import { z } from 'zod'
 
-const IDENTITY_HEADER = 'cf-access-authenticated-user-email'
+// Only the signed assertion is trusted. The plain
+// cf-access-authenticated-user-email header is just as easy to send by hand on
+// any path Access does not cover, so it is never read.
+const ASSERTION_HEADER = 'cf-access-jwt-assertion'
+
+const accessClaims = z.object({ email: z.email() })
+
+interface AccessConfig {
+    audience: string
+    issuer: string
+    keys: JWTVerifyGetKey
+}
+
+let fromEnv: AccessConfig | null | undefined
+
+// Lazy so the build, which loads this config without the Access settings, does
+// not need them; at runtime a missing value disables the strategy (password
+// login still works) instead of trusting anything.
+function accessConfigFromEnv(): AccessConfig | null {
+    if (fromEnv !== undefined) return fromEnv
+
+    const teamDomain = process.env.CF_ACCESS_TEAM_DOMAIN
+    const audience = process.env.CF_ACCESS_AUD
+
+    if (!teamDomain || !audience) {
+        if (process.env.NODE_ENV === 'production') {
+            console.error(
+                'Cloudflare Access sign-in is disabled: set CF_ACCESS_TEAM_DOMAIN and CF_ACCESS_AUD.'
+            )
+        }
+        fromEnv = null
+
+        return fromEnv
+    }
+
+    const issuer = new URL(teamDomain).origin
+    fromEnv = {
+        audience,
+        issuer,
+        keys: createRemoteJWKSet(new URL('/cdn-cgi/access/certs', issuer)),
+    }
+
+    return fromEnv
+}
+
+async function verifiedEmail(token: string, config: AccessConfig) {
+    try {
+        const { payload } = await jwtVerify(token, config.keys, {
+            algorithms: ['RS256'],
+            audience: config.audience,
+            issuer: config.issuer,
+        })
+        const claims = accessClaims.safeParse(payload)
+
+        return claims.success ? claims.data.email.toLowerCase() : null
+    } catch {
+        // A bad signature, audience, issuer or expiry is an ordinary
+        // unauthenticated request, not a server fault.
+        return null
+    }
+}
 
 // The Access policy is the only list of people worth keeping, so an address it
 // allows that has never signed in here gets an account on arrival rather than a
@@ -42,53 +104,65 @@ async function register({
     }
 }
 
-export const cloudflareAccess: AuthStrategy = {
-    authenticate: async ({ canSetHeaders, headers, payload }) => {
-        const email = headers.get(IDENTITY_HEADER)?.trim().toLowerCase()
+export function createCloudflareAccessStrategy(
+    getConfig: () => AccessConfig | null
+): AuthStrategy {
+    return {
+        authenticate: async ({ canSetHeaders, headers, payload }) => {
+            const assertion = headers.get(ASSERTION_HEADER)
+            const config = getConfig()
 
-        if (!email) return { user: null }
+            if (!assertion || !config) return { user: null }
 
-        const { docs } = await payload.find({
-            collection: 'users',
-            depth: 0,
-            limit: 1,
-            overrideAccess: true,
-            where: { email: { equals: email } },
-        })
+            const email = await verifiedEmail(assertion, config)
 
-        const found = docs[0] ?? (await register({ email, payload }))
+            if (!email) return { user: null }
 
-        if (!found) return { user: null }
+            const { docs } = await payload.find({
+                collection: 'users',
+                depth: 0,
+                limit: 1,
+                overrideAccess: true,
+                where: { email: { equals: email } },
+            })
 
-        const user = { ...found, collection: 'users' as const }
+            const found = docs[0] ?? (await register({ email, payload }))
 
-        if (!canSetHeaders) return { user }
+            if (!found) return { user: null }
 
-        // Access guards /admin only, so the panel's own requests to /api would
-        // arrive without the header and read as logged out. Issuing the normal
-        // Payload session on the way in means everything after this behaves like
-        // an ordinary login.
-        const collection = payload.collections.users
-        const { token } = await jwtSign({
-            fieldsToSign: getFieldsToSign({
-                collectionConfig: collection.config,
-                email,
-                user,
-            }),
-            secret: payload.secret,
-            tokenExpiration: collection.config.auth.tokenExpiration,
-        })
+            const user = { ...found, collection: 'users' as const }
 
-        return {
-            responseHeaders: new Headers({
-                'Set-Cookie': generatePayloadCookie({
-                    collectionAuthConfig: collection.config.auth,
-                    cookiePrefix: payload.config.cookiePrefix,
-                    token,
+            if (!canSetHeaders) return { user }
+
+            // Access guards /admin only, so the panel's own requests to /api would
+            // arrive without the header and read as logged out. Issuing the normal
+            // Payload session on the way in means everything after this behaves like
+            // an ordinary login.
+            const collection = payload.collections.users
+            const { token } = await jwtSign({
+                fieldsToSign: getFieldsToSign({
+                    collectionConfig: collection.config,
+                    email,
+                    user,
                 }),
-            }),
-            user,
-        }
-    },
-    name: 'cloudflare-access',
+                secret: payload.secret,
+                tokenExpiration: collection.config.auth.tokenExpiration,
+            })
+
+            return {
+                responseHeaders: new Headers({
+                    'Set-Cookie': generatePayloadCookie({
+                        collectionAuthConfig: collection.config.auth,
+                        cookiePrefix: payload.config.cookiePrefix,
+                        token,
+                    }),
+                }),
+                user,
+            }
+        },
+        name: 'cloudflare-access',
+    }
 }
+
+export const cloudflareAccess =
+    createCloudflareAccessStrategy(accessConfigFromEnv)

@@ -13,7 +13,6 @@ const eslintConfig = [
             'node_modules/**',
             'src/payload-types.ts',
             'src/app/(payload)/**',
-            'src/scripts/**',
             'next-env.d.ts',
         ],
     },
@@ -35,9 +34,14 @@ const eslintConfig = [
         },
         rules: {
             'prettier/prettier': 'error',
-            '@typescript-eslint/no-unused-vars': 'off',
+            // The core rule cannot read TypeScript: it flags parameter names
+            // inside function types.
+            '@typescript-eslint/no-unused-vars': [
+                'error',
+                { argsIgnorePattern: '^_' },
+            ],
             'no-console': ['warn', { allow: ['error'] }],
-            'no-unused-vars': 'error',
+            'no-unused-vars': 'off',
             '@typescript-eslint/consistent-type-imports': 'error',
             '@typescript-eslint/no-empty-object-type': 'off',
             '@typescript-eslint/no-unused-expressions': 'off',
@@ -151,10 +155,6 @@ const eslintConfig = [
                 },
             ],
         },
-    },
-    {
-        files: ['**/*.types.ts', '**/*.types.tsx', '**/*.d.ts'],
-        rules: { 'no-unused-vars': 'off' },
     },
     prettierConfig,
 ]

@@ -6,8 +6,9 @@ import Script from 'next/script'
 
 import type { TurnstileApi } from '@/components/form/turnstile.types'
 
-const SITE_KEY =
-    process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '1x00000000000000000000AA'
+// next.config.mjs fails a production build without it, so an empty value
+// only reaches the dev server, where the widget then shows its own error.
+const SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? ''
 
 // The page never renders more than one widget, so the id lives at module scope
 // and the form can reset it without threading a ref through the tree.

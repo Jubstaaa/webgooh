@@ -37,6 +37,7 @@ user through the panel’s sign-up screen.
 | `bun run start`          | Production server                        |
 | `bun run lint`           | ESLint (type-aware)                      |
 | `bun run type-check`     | `tsc --noEmit`                           |
+| `bun run test`           | Unit tests (`bun test`)                  |
 | `bun run format`         | Prettier                                 |
 | `bun run generate:types` | Generate Payload TypeScript types        |
 
@@ -47,23 +48,31 @@ All public pages are statically generated. Data access is tagged via
 hooks invalidate only the affected tags (`src/hooks/*`, `src/lib/cache-tags.ts`),
 so editing content in the panel refreshes just the impacted pages.
 
-On-demand invalidation endpoint for external triggers (e.g. Cloudflare):
-`POST /revalidate` with header `x-revalidate-secret: $REVALIDATION_SECRET` and body
-`{ "tags": ["posts"], "paths": ["/blog"] }`.
+There is no external revalidation endpoint: invalidation happens in-process from
+the Payload hooks.
 
 ## Security
 
-- Contact form protected with Cloudflare Turnstile, a honeypot field and per-IP
-  rate limiting.
+- Contact form protected with Cloudflare Turnstile (fails closed: no secret, no
+  submit; a production build fails without the site key), a honeypot field and
+  length-capped, schema-validated input. Per-IP rate limiting belongs at the
+  Cloudflare edge (WAF rate-limiting rule), not in the app.
+- Admin sign-in through Cloudflare Access trusts only the signed
+  `Cf-Access-Jwt-Assertion`, verified against the team's JWKS with the
+  application's audience (`CF_ACCESS_TEAM_DOMAIN`, `CF_ACCESS_AUD`).
 - Security headers (HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy)
   configured in `next.config.mjs`.
 
 ## Docker
 
 ```bash
-docker compose build
+docker build --build-context prerender-db=./data \
+    --build-arg NEXT_PUBLIC_TURNSTILE_SITE_KEY=... .
 docker compose up -d
 ```
+
+The build prerenders against `./data/webgooh.db`, bind-mounted for that one step
+only; `.dockerignore` keeps every `*.db` out of the build context.
 
 - The SQLite file lives on the `webgooh-db` volume (`/app/data/webgooh.db`).
 - Uploaded media lives on the `webgooh-media` volume (`/app/media`).

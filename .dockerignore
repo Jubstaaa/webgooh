@@ -10,7 +10,9 @@ README.md
 .env
 .env*.local
 coverage
+*.db
 *.db-shm
 *.db-wal
+.prerender-db
 media
 .DS_Store

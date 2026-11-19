@@ -1,4 +1,5 @@
 import { withPayload } from '@payloadcms/next/withPayload'
+import { PHASE_PRODUCTION_BUILD } from 'next/constants.js'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.webgooh.com'
 
@@ -6,6 +7,10 @@ const isDev = process.env.NODE_ENV !== 'production'
 
 const CDN_HOST = 'https://webgooh.fra1.cdn.digitaloceanspaces.com'
 const TURNSTILE_HOST = 'https://challenges.cloudflare.com'
+// Web Analytics is switched on at the Cloudflare edge, which injects its beacon
+// script into every page and has it report back to this endpoint.
+const CF_INSIGHTS_SCRIPT = 'https://static.cloudflareinsights.com'
+const CF_INSIGHTS_REPORT = 'https://cloudflareinsights.com'
 
 // Deliberately nonce-free. A nonce has to be minted per request, which would
 // drag every blog and service page out of the static cache and onto the 1 vCPU
@@ -13,7 +18,7 @@ const TURNSTILE_HOST = 'https://challenges.cloudflare.com'
 // origin allowlist: only this host, the Spaces CDN and Turnstile.
 const contentSecurityPolicy = [
     "default-src 'self'",
-    `script-src 'self' 'unsafe-inline' ${TURNSTILE_HOST}${isDev ? " 'unsafe-eval'" : ''}`,
+    `script-src 'self' 'unsafe-inline' ${TURNSTILE_HOST} ${CF_INSIGHTS_SCRIPT}${isDev ? " 'unsafe-eval'" : ''}`,
     "style-src 'self' 'unsafe-inline'",
     `img-src 'self' blob: data: ${CDN_HOST}`,
     "font-src 'self' data:",
@@ -21,7 +26,7 @@ const contentSecurityPolicy = [
     // workers off blob URLs.
     "worker-src 'self' blob:",
     `media-src 'self' blob: ${CDN_HOST}`,
-    `connect-src 'self' ${TURNSTILE_HOST}${isDev ? ' ws:' : ''}`,
+    `connect-src 'self' ${TURNSTILE_HOST} ${CF_INSIGHTS_REPORT}${isDev ? ' ws:' : ''}`,
     `frame-src ${TURNSTILE_HOST}`,
     // 'self' rather than 'none': Payload's live preview iframes the site back
     // into the admin panel.
@@ -79,4 +84,18 @@ const nextConfig = {
     },
 }
 
-export default withPayload(nextConfig, { devBundleServerPackages: false })
+export default function config(phase) {
+    // The site key is inlined into the client bundle at build time. Without it
+    // the contact form could never pass Turnstile, so the build stops instead
+    // of shipping a form that silently rejects every visitor.
+    if (
+        phase === PHASE_PRODUCTION_BUILD &&
+        !process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY
+    ) {
+        throw new Error(
+            'NEXT_PUBLIC_TURNSTILE_SITE_KEY must be set for a production build.'
+        )
+    }
+
+    return withPayload(nextConfig, { devBundleServerPackages: false })
+}

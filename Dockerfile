@@ -13,7 +13,8 @@ RUN apk add --no-cache libc6-compat python3 make g++
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-ARG NEXT_PUBLIC_TURNSTILE_SITE_KEY=1x00000000000000000000AA
+# No default: next.config.mjs fails the build when the site key is missing.
+ARG NEXT_PUBLIC_TURNSTILE_SITE_KEY
 ENV NEXT_PUBLIC_TURNSTILE_SITE_KEY=$NEXT_PUBLIC_TURNSTILE_SITE_KEY
 ARG NEXT_PUBLIC_SITE_URL=https://webgooh.tech
 ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
@@ -22,8 +23,16 @@ ENV NEXT_TELEMETRY_DISABLED=1
 # what the SSG prerender bakes into the HTML.
 ENV NODE_ENV=production
 ENV PAYLOAD_SECRET=build-time-placeholder
-ENV DATABASE_URI=file:./webgooh.db
-RUN bun run build
+# SSG prerenders against a copy of the live DB, which holds leads (PII). It is
+# never COPY'd: .dockerignore keeps *.db out of the context, and the named
+# `prerender-db` context (a directory holding webgooh.db) is bind-mounted only
+# for this step, so it lands in no layer and no build cache. rw because SQLite
+# may create its -shm/-wal files beside the database; those writes are thrown
+# away with the mount.
+#   docker build --build-context prerender-db=./data .
+ENV DATABASE_URI=file:/prerender-db/webgooh.db
+RUN --mount=type=bind,from=prerender-db,target=/prerender-db,rw \
+    bun run build
 
 # ─── runner ──────────────────────────────────────────────────────────────
 FROM node:26-alpine AS runner
