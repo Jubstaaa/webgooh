@@ -8,11 +8,18 @@ import type { Project } from '@payload-types'
 import { mediaAlt, mediaUrl } from '@/lib/media'
 
 interface ProjectCardProps {
-    priority?: boolean
+    // Above-the-fold cards load their image eagerly and at high priority.
+    eager?: boolean
+    // h2 when the card list sits directly under the page's h1.
+    headingLevel?: 'h2' | 'h3'
     project: Project
 }
 
-export function ProjectCard({ priority = false, project }: ProjectCardProps) {
+export function ProjectCard({
+    eager = false,
+    headingLevel: Heading = 'h3',
+    project,
+}: ProjectCardProps) {
     const image = mediaUrl(project.image)
 
     return (
@@ -25,7 +32,8 @@ export function ProjectCard({ priority = false, project }: ProjectCardProps) {
                         fill
                         alt={mediaAlt(project.image, project.title)}
                         className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
-                        priority={priority}
+                        fetchPriority={eager ? 'high' : 'auto'}
+                        loading={eager ? 'eager' : 'lazy'}
                         sizes="(max-width: 768px) 100vw, 500px"
                         src={image}
                     />
@@ -35,9 +43,9 @@ export function ProjectCard({ priority = false, project }: ProjectCardProps) {
 
             <div className="flex flex-1 flex-col gap-2 p-5">
                 <div className="flex items-center justify-between gap-2">
-                    <h3 className="text-paper group-hover:text-brand-bright text-lg font-semibold transition-colors">
+                    <Heading className="text-paper group-hover:text-brand-bright text-lg font-semibold transition-colors">
                         {project.title}
-                    </h3>
+                    </Heading>
                     <ArrowUpRight className="text-accent size-4 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                 </div>
                 {project.client ? (

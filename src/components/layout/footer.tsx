@@ -52,12 +52,14 @@ export async function Footer() {
 
                 <div className="flex flex-col gap-3">
                     <p className="eyebrow">{'// iletişim'}</p>
-                    <a
-                        className="text-muted hover:text-paper flex items-center gap-2 text-sm transition-colors"
-                        href={`mailto:${settings.email}`}>
-                        <Mail className="text-brand-bright size-4" />
-                        {settings.email}
-                    </a>
+                    {settings.email ? (
+                        <a
+                            className="text-muted hover:text-paper flex items-center gap-2 text-sm transition-colors"
+                            href={`mailto:${settings.email}`}>
+                            <Mail className="text-brand-bright size-4" />
+                            {settings.email}
+                        </a>
+                    ) : null}
                     {settings.phonePrimary ? (
                         <a
                             className="text-muted hover:text-paper flex items-center gap-2 text-sm transition-colors"

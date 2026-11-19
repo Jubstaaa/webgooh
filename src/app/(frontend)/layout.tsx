@@ -89,10 +89,17 @@ export default async function FrontendLayout({
             data-scroll-behavior="smooth"
             lang="tr">
             <body className="min-h-dvh antialiased">
+                <a
+                    className="bg-paper text-ink focus-visible:ring-accent sr-only z-[70] rounded-full text-sm font-medium focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:px-4 focus:py-2 focus-visible:ring-2"
+                    href="#main">
+                    Ana içeriğe geç
+                </a>
                 <ScrollProgress />
                 <CustomCursor />
                 <Header />
-                <main className="pt-16">{children}</main>
+                <main className="scroll-mt-16 pt-16" id="main" tabIndex={-1}>
+                    {children}
+                </main>
                 <Footer />
                 <FloatingActions whatsapp={settings.whatsapp} />
             </body>

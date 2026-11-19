@@ -11,10 +11,10 @@ export function Logo({ className }: LogoProps) {
             className={cn('inline-flex items-center', className)}
             href="/">
             <Image
-                priority
                 alt="Webgooh — Web'in Van Gogh'u"
                 className="h-8 w-auto sm:h-9"
                 height={310}
+                loading="eager"
                 // Without this the 2164px intrinsic width makes Next offer a
                 // srcSet up to 3840, and retina screens pick it — a 3840px
                 // render for a ~224px slot. These are the real painted widths

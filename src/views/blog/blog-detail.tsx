@@ -87,9 +87,10 @@ export function BlogDetail({ post, related }: BlogDetailProps) {
                     <div className="relative mx-auto aspect-[16/9] overflow-hidden rounded-2xl">
                         <Image
                             fill
-                            priority
                             alt={mediaAlt(post.coverImage, post.title)}
                             className="object-cover"
+                            fetchPriority="high"
+                            loading="eager"
                             sizes="(max-width: 1024px) 100vw, 896px"
                             src={cover}
                         />

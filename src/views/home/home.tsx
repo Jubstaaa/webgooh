@@ -39,8 +39,8 @@ export async function Home() {
                 </div>
 
                 <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                    {services.map((service, index) => (
-                        <Reveal key={service.id} delay={(index % 3) * 0.08}>
+                    {services.map(service => (
+                        <Reveal key={service.id}>
                             <ServiceCard service={service} />
                         </Reveal>
                     ))}
@@ -65,8 +65,8 @@ export async function Home() {
                     </div>
 
                     <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                        {posts.map((post, index) => (
-                            <Reveal key={post.id} delay={(index % 3) * 0.08}>
+                        {posts.map(post => (
+                            <Reveal key={post.id}>
                                 <PostCard post={post} />
                             </Reveal>
                         ))}

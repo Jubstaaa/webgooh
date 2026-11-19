@@ -13,6 +13,7 @@ import {
     type ContactState,
     submitContact,
 } from '@/views/contact/contact.action'
+import { FormField } from '@/views/contact/form-field'
 
 interface ContactFormProps {
     services: string[]
@@ -47,7 +48,9 @@ export function ContactForm({ services }: ContactFormProps) {
 
     if (state.status === 'success') {
         return (
-            <div className="card-surface flex flex-col items-center gap-4 rounded-2xl p-10 text-center">
+            <div
+                className="card-surface flex flex-col items-center gap-4 rounded-2xl p-10 text-center"
+                role="status">
                 <CheckCircle2 className="size-12 text-emerald-400" />
                 <h3 className="text-paper text-xl font-semibold">
                     Teşekkürler!
@@ -57,124 +60,106 @@ export function ContactForm({ services }: ContactFormProps) {
         )
     }
 
+    const errors = state.errors ?? {}
+
     return (
-        <form action={formAction} className="flex flex-col gap-4">
+        <form noValidate action={formAction} className="flex flex-col gap-4">
             <div className="grid gap-4 sm:grid-cols-2">
-                <div className="flex flex-col gap-1.5">
-                    <label
-                        className="text-muted font-mono text-xs"
-                        htmlFor="name">
-                        Ad Soyad *
-                    </label>
-                    <input
+                <FormField error={errors.name} id="name" label="Ad Soyad *">
+                    {control => (
+                        <input
+                            {...control}
+                            required
+                            autoComplete="name"
+                            className={inputClass}
+                            defaultValue={state.values?.name ?? ''}
+                            maxLength={100}
+                            name="name"
+                            placeholder="Adınız"
+                        />
+                    )}
+                </FormField>
+
+                <FormField error={errors.email} id="email" label="E-posta *">
+                    {control => (
+                        <input
+                            {...control}
+                            required
+                            autoComplete="email"
+                            className={inputClass}
+                            defaultValue={state.values?.email ?? ''}
+                            maxLength={254}
+                            name="email"
+                            placeholder="ornek@email.com"
+                            type="email"
+                        />
+                    )}
+                </FormField>
+
+                <FormField error={errors.phone} id="phone" label="Telefon">
+                    {control => (
+                        <input
+                            {...control}
+                            autoComplete="tel"
+                            className={inputClass}
+                            defaultValue={state.values?.phone ?? ''}
+                            maxLength={30}
+                            name="phone"
+                            placeholder="+90 5xx xxx xx xx"
+                            type="tel"
+                        />
+                    )}
+                </FormField>
+
+                <FormField error={errors.company} id="company" label="Şirket">
+                    {control => (
+                        <input
+                            {...control}
+                            autoComplete="organization"
+                            className={inputClass}
+                            defaultValue={state.values?.company ?? ''}
+                            maxLength={150}
+                            name="company"
+                            placeholder="Şirketiniz"
+                        />
+                    )}
+                </FormField>
+            </div>
+
+            <FormField
+                error={errors.service}
+                id="service"
+                label="İlgilendiğiniz hizmet">
+                {control => (
+                    <select
+                        {...control}
+                        key={state.attempt}
+                        className={cn(inputClass, 'appearance-none')}
+                        defaultValue={state.values?.service ?? ''}
+                        name="service">
+                        <option value="">Seçiniz</option>
+                        {services.map(service => (
+                            <option key={service} value={service}>
+                                {service}
+                            </option>
+                        ))}
+                    </select>
+                )}
+            </FormField>
+
+            <FormField error={errors.message} id="message" label="Mesajınız *">
+                {control => (
+                    <textarea
+                        {...control}
                         required
-                        className={inputClass}
-                        defaultValue={state.values?.name ?? ''}
-                        id="name"
-                        name="name"
-                        placeholder="Adınız"
+                        className={cn(inputClass, 'min-h-32 resize-none')}
+                        defaultValue={state.values?.message ?? ''}
+                        maxLength={5000}
+                        name="message"
+                        placeholder="Projenizden kısaca bahsedin…"
                     />
-                    {state.errors?.name ? (
-                        <span className="text-xs text-red-400">
-                            {state.errors.name}
-                        </span>
-                    ) : null}
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                    <label
-                        className="text-muted font-mono text-xs"
-                        htmlFor="email">
-                        E-posta *
-                    </label>
-                    <input
-                        required
-                        className={inputClass}
-                        defaultValue={state.values?.email ?? ''}
-                        id="email"
-                        name="email"
-                        placeholder="ornek@email.com"
-                        type="email"
-                    />
-                    {state.errors?.email ? (
-                        <span className="text-xs text-red-400">
-                            {state.errors.email}
-                        </span>
-                    ) : null}
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                    <label
-                        className="text-muted font-mono text-xs"
-                        htmlFor="phone">
-                        Telefon
-                    </label>
-                    <input
-                        className={inputClass}
-                        defaultValue={state.values?.phone ?? ''}
-                        id="phone"
-                        name="phone"
-                        placeholder="+90 5xx xxx xx xx"
-                    />
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                    <label
-                        className="text-muted font-mono text-xs"
-                        htmlFor="company">
-                        Şirket
-                    </label>
-                    <input
-                        className={inputClass}
-                        defaultValue={state.values?.company ?? ''}
-                        id="company"
-                        name="company"
-                        placeholder="Şirketiniz"
-                    />
-                </div>
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-                <label
-                    className="text-muted font-mono text-xs"
-                    htmlFor="service">
-                    İlgilendiğiniz hizmet
-                </label>
-                <select
-                    key={state.attempt}
-                    className={cn(inputClass, 'appearance-none')}
-                    defaultValue={state.values?.service ?? ''}
-                    id="service"
-                    name="service">
-                    <option value="">Seçiniz</option>
-                    {services.map(service => (
-                        <option key={service} value={service}>
-                            {service}
-                        </option>
-                    ))}
-                </select>
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-                <label
-                    className="text-muted font-mono text-xs"
-                    htmlFor="message">
-                    Mesajınız *
-                </label>
-                <textarea
-                    required
-                    className={cn(inputClass, 'min-h-32 resize-none')}
-                    defaultValue={state.values?.message ?? ''}
-                    id="message"
-                    name="message"
-                    placeholder="Projenizden kısaca bahsedin…"
-                />
-                {state.errors?.message ? (
-                    <span className="text-xs text-red-400">
-                        {state.errors.message}
-                    </span>
-                ) : null}
-            </div>
+                )}
+            </FormField>
 
             <div aria-hidden className="hidden">
                 <label htmlFor="company_website">Web siteniz</label>
@@ -188,11 +173,16 @@ export function ContactForm({ services }: ContactFormProps) {
 
             <Turnstile />
 
-            {state.status === 'error' && state.message ? (
-                <p className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
-                    {state.message}
-                </p>
-            ) : null}
+            {/* Always mounted so the live region exists before a message
+                arrives; screen readers ignore regions inserted with content. */}
+            <div aria-live="assertive" role="alert">
+                {state.status === 'error' ? (
+                    <p className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+                        {state.message ??
+                            'Lütfen işaretli alanları düzeltip tekrar deneyin.'}
+                    </p>
+                ) : null}
+            </div>
 
             <SubmitButton />
         </form>

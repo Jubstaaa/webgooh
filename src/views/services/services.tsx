@@ -17,9 +17,9 @@ export async function Services() {
 
             <section className="container-x">
                 <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                    {services.map((service, index) => (
-                        <Reveal key={service.id} delay={(index % 3) * 0.08}>
-                            <ServiceCard service={service} />
+                    {services.map(service => (
+                        <Reveal key={service.id}>
+                            <ServiceCard headingLevel="h2" service={service} />
                         </Reveal>
                     ))}
                 </div>

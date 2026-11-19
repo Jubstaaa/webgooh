@@ -1,6 +1,5 @@
 import { ArrowRight, ShieldCheck } from 'lucide-react'
 
-import { HeroIntro, HeroItem } from '@/components/motion/hero-intro'
 import { Magnetic } from '@/components/motion/magnetic'
 import { NeuralMesh } from '@/components/motion/neural-mesh'
 import { BorderBeam } from '@/components/ui/border-beam'
@@ -46,15 +45,15 @@ export async function HomeHero() {
             />
 
             <div className="container-x grid items-center gap-14 lg:grid-cols-[1.05fr_0.95fr]">
-                <HeroIntro className="flex flex-col gap-7">
-                    <HeroItem>
+                <div className="hero-rise flex flex-col gap-7">
+                    <div>
                         <span className="border-line bg-surface/50 text-muted inline-flex items-center gap-2 rounded-full border px-4 py-1.5 font-mono text-xs">
                             <ShieldCheck className="text-accent size-3.5" />
                             yazılım · mobil · siber güvenlik
                         </span>
-                    </HeroItem>
+                    </div>
 
-                    <HeroItem>
+                    <div>
                         <h1 className="text-4xl leading-[1.05] font-semibold tracking-tight sm:text-5xl lg:text-6xl">
                             Markanızı büyüten
                             <br />
@@ -62,18 +61,18 @@ export async function HomeHero() {
                                 dijital mühendislik
                             </span>
                         </h1>
-                    </HeroItem>
+                    </div>
 
-                    <HeroItem>
+                    <div>
                         <p className="text-muted max-w-xl text-lg leading-relaxed">
                             Web ve mobil uygulamalardan kurumsal yazılıma, UX/UI
                             tasarımdan siber güvenlik ve DevOps’a kadar;
                             fikrinizi ölçeklenebilir, hızlı ve güvenli ürünlere
                             dönüştürüyoruz.
                         </p>
-                    </HeroItem>
+                    </div>
 
-                    <HeroItem className="flex flex-wrap items-center gap-3">
+                    <div className="flex flex-wrap items-center gap-3">
                         <Magnetic>
                             <ButtonLink href="/iletisim" size="lg">
                                 Projenizi konuşalım
@@ -88,11 +87,11 @@ export async function HomeHero() {
                                 Hizmetleri keşfet
                             </ButtonLink>
                         </Magnetic>
-                    </HeroItem>
-                </HeroIntro>
+                    </div>
+                </div>
 
-                <HeroIntro className="relative">
-                    <HeroItem>
+                <div className="hero-rise relative">
+                    <div>
                         <div className="card-surface shadow-brand/10 relative overflow-hidden rounded-2xl shadow-2xl">
                             <BorderBeam />
                             <div className="border-line bg-ink-soft/80 flex items-center gap-2 border-b px-4 py-3">
@@ -126,8 +125,8 @@ export async function HomeHero() {
                                 <span className="bg-accent mt-1 inline-block h-4 w-2 animate-pulse" />
                             </div>
                         </div>
-                    </HeroItem>
-                </HeroIntro>
+                    </div>
+                </div>
             </div>
         </section>
     )
