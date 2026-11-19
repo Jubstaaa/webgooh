@@ -14,13 +14,19 @@ jobs:
         steps:
             - id: metadata
               uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
-            # Patch and minor updates merge once the required check passes; majors
-            # wait for a human. Payload never auto-merges: even a minor release can
-            # expect a schema change the production database needs a migration for.
-            # Merges made with GITHUB_TOKEN start no workflows, so these ship with
-            # the next deploy.
+            # Only explicit patch and minor updates of packages merge on their own, once
+            # the required check passes. Majors, unknown update types, GitHub Actions and
+            # the Docker base image wait for a human: those run inside the deploy, next
+            # to its secrets.
+            # Payload never auto-merges either: even a minor release can expect a
+            # schema change the production database needs a migration for.
+            # Merges made with GITHUB_TOKEN start no workflows, so these ship with the
+            # next deploy.
             - if: >-
-                  steps.metadata.outputs.update-type != 'version-update:semver-major' &&
+                  (steps.metadata.outputs.update-type == 'version-update:semver-patch' ||
+                   steps.metadata.outputs.update-type == 'version-update:semver-minor') &&
+                  steps.metadata.outputs.package-ecosystem != 'github_actions' &&
+                  steps.metadata.outputs.package-ecosystem != 'docker' &&
                   !contains(steps.metadata.outputs.dependency-names, 'payload')
               env:
                   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
