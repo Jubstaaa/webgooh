@@ -1,10 +1,9 @@
 import type { Metadata } from 'next'
-
 import { notFound } from 'next/navigation'
 
+import { ReferenceDetail } from '@/app/(frontend)/referanslar/_components/reference-detail'
 import { getProjectBySlug, getProjects } from '@/lib/queries'
 import { buildMetadata } from '@/lib/seo'
-import { ReferenceDetail } from '@/views/references/reference-detail'
 
 interface PageProps {
     params: Promise<{ slug: string }>

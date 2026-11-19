@@ -1,9 +1,8 @@
 import type { Metadata } from 'next'
-
 import { notFound } from 'next/navigation'
 
+import { Blog } from '@/app/(frontend)/blog/_components/blog'
 import { getCategories } from '@/lib/queries'
-import { Blog } from '@/views/blog/blog'
 
 interface PageProps {
     params: Promise<{ slug: string }>

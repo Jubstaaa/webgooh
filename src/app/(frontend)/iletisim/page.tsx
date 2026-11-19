@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 
-import { Contact } from '@/views/contact/contact'
+import { Contact } from '@/app/(frontend)/iletisim/_components/contact'
 
 export const metadata: Metadata = {
     alternates: { canonical: '/iletisim' },

@@ -1,7 +1,7 @@
 import { unstable_cache } from 'next/cache'
 
-import { cacheTags } from '@/lib/cache-tags'
-import { getPayloadClient } from '@/lib/payload'
+import { cacheTags } from './cache-tags'
+import { getPayloadClient } from './payload'
 
 export const getSettings = unstable_cache(
     async () => {

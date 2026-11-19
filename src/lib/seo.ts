@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 
-import { type MediaLike, mediaUrl } from '@/lib/media'
+import { type MediaLike, mediaUrl } from './media'
 
 interface SeoGroup {
     description?: string | null

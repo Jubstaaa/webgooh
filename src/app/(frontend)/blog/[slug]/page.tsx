@@ -1,12 +1,10 @@
 import type { Metadata } from 'next'
-
 import { notFound } from 'next/navigation'
 
-import type { Category } from '@payload-types'
-
+import { BlogDetail } from '@/app/(frontend)/blog/_components/blog-detail'
 import { getPostBySlug, getPosts } from '@/lib/queries'
 import { buildMetadata } from '@/lib/seo'
-import { BlogDetail } from '@/views/blog/blog-detail'
+import type { Category } from '@payload-types'
 
 interface PageProps {
     params: Promise<{ slug: string }>

@@ -1,15 +1,15 @@
 import type { Metadata, Viewport } from 'next'
-
 import { Inter, JetBrains_Mono, Space_Grotesk } from 'next/font/google'
 
-import { FloatingActions } from '@/components/layout/floating-actions'
-import { Footer } from '@/components/layout/footer'
-import { Header } from '@/components/layout/header'
-import { CustomCursor } from '@/components/motion/custom-cursor'
-import { ScrollProgress } from '@/components/motion/scroll-progress'
+import { CustomCursor } from '@/app/(frontend)/_components/custom-cursor'
+import { FloatingActions } from '@/app/(frontend)/_components/floating-actions'
+import { Footer } from '@/app/(frontend)/_components/footer'
+import { Header } from '@/app/(frontend)/_components/header'
+import { ScrollProgress } from '@/app/(frontend)/_components/scroll-progress'
 import { getSettings } from '@/lib/queries'
 
 import './globals.css'
+import { SITE_URL } from '@/lib/site.mjs'
 
 const inter = Inter({
     display: 'swap',
@@ -29,7 +29,6 @@ const jetbrainsMono = JetBrains_Mono({
     variable: '--font-jetbrains',
 })
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.webgooh.com'
 const INDEXABLE = process.env.SITE_INDEXABLE === 'true'
 
 export const metadata: Metadata = {

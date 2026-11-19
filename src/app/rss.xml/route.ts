@@ -1,8 +1,7 @@
 import { Feed } from 'feed'
 
 import { getPosts } from '@/lib/queries'
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.webgooh.com'
+import { SITE_URL } from '@/lib/site.mjs'
 
 export const dynamic = 'force-static'
 

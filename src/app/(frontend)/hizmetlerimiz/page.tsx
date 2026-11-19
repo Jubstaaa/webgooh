@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 
-import { Services } from '@/views/services/services'
+import { Services } from '@/app/(frontend)/hizmetlerimiz/_components/services'
 
 export const metadata: Metadata = {
     alternates: { canonical: '/hizmetlerimiz' },

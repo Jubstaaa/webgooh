@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 
-import { About } from '@/views/about/about'
+import { About } from '@/app/(frontend)/hakkimizda/_components/about'
 
 export const metadata: Metadata = {
     alternates: { canonical: '/hakkimizda' },

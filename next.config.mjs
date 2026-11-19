@@ -1,11 +1,10 @@
 import { withPayload } from '@payloadcms/next/withPayload'
 import { PHASE_PRODUCTION_BUILD } from 'next/constants.js'
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.webgooh.com'
+import { CDN_BASE, CDN_HOSTNAME, SITE_URL } from './src/lib/site.mjs'
 
 const isDev = process.env.NODE_ENV !== 'production'
 
-const CDN_HOST = 'https://webgooh.fra1.cdn.digitaloceanspaces.com'
 const TURNSTILE_HOST = 'https://challenges.cloudflare.com'
 // Web Analytics is switched on at the Cloudflare edge, which injects its beacon
 // script into every page and has it report back to this endpoint.
@@ -20,12 +19,12 @@ const contentSecurityPolicy = [
     "default-src 'self'",
     `script-src 'self' 'unsafe-inline' ${TURNSTILE_HOST} ${CF_INSIGHTS_SCRIPT}${isDev ? " 'unsafe-eval'" : ''}`,
     "style-src 'self' 'unsafe-inline'",
-    `img-src 'self' blob: data: ${CDN_HOST}`,
+    `img-src 'self' blob: data: ${CDN_BASE}`,
     "font-src 'self' data:",
     // blob: for the admin panel, which previews uploads and runs the editor's
     // workers off blob URLs.
     "worker-src 'self' blob:",
-    `media-src 'self' blob: ${CDN_HOST}`,
+    `media-src 'self' blob: ${CDN_BASE}`,
     `connect-src 'self' ${TURNSTILE_HOST} ${CF_INSIGHTS_REPORT}${isDev ? ' ws:' : ''}`,
     `frame-src ${TURNSTILE_HOST}`,
     // 'self' rather than 'none': Payload's live preview iframes the site back
@@ -69,11 +68,7 @@ const nextConfig = {
             { protocol: 'https', hostname: 'www.webgooh.com' },
             { protocol: 'https', hostname: 'webgooh.com' },
             // Payload media + public assets, served from the Spaces CDN edge.
-            // Keep in sync with S3_BUCKET/S3_REGION in src/payload.config.ts.
-            {
-                protocol: 'https',
-                hostname: 'webgooh.fra1.cdn.digitaloceanspaces.com',
-            },
+            { protocol: 'https', hostname: CDN_HOSTNAME },
         ],
     },
     async headers() {

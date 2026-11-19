@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 
-import { Blog } from '@/views/blog/blog'
+import { Blog } from '@/app/(frontend)/blog/_components/blog'
 
 export const metadata: Metadata = {
     alternates: { canonical: '/blog' },

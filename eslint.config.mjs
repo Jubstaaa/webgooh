@@ -1,4 +1,3 @@
-import importPlugin from 'eslint-plugin-import'
 import nextConfig from 'eslint-config-next'
 import perfectionistPlugin from 'eslint-plugin-perfectionist'
 import prettierConfig from 'eslint-config-prettier'
@@ -27,7 +26,6 @@ const eslintConfig = [
         },
         plugins: {
             '@typescript-eslint': tseslint.plugin,
-            'import': importPlugin,
             'perfectionist': perfectionistPlugin,
             'prettier': prettierPlugin,
             'react': reactPlugin,
@@ -45,47 +43,39 @@ const eslintConfig = [
             '@typescript-eslint/consistent-type-imports': 'error',
             '@typescript-eslint/no-empty-object-type': 'off',
             '@typescript-eslint/no-unused-expressions': 'off',
-            'import/order': [
+            // eslint-plugin-import's order rule crashes under ESLint 10 whenever
+            // it has something to report, so ordering comes from perfectionist.
+            'perfectionist/sort-imports': [
                 'error',
                 {
-                    'groups': [
+                    customGroups: [
+                        {
+                            elementNamePattern: ['^react$', '^react-.+'],
+                            groupName: 'react',
+                        },
+                        {
+                            elementNamePattern: ['^next$', '^next/.+'],
+                            groupName: 'next',
+                        },
+                    ],
+                    groups: [
                         'builtin',
+                        'react',
+                        'next',
                         'external',
                         'internal',
-                        'parent',
-                        'sibling',
-                        'index',
+                        ['parent', 'sibling', 'index'],
+                        'unknown',
                     ],
-                    'pathGroups': [
-                        {
-                            pattern: 'react',
-                            group: 'external',
-                            position: 'before',
-                        },
-                        {
-                            pattern: 'react-*',
-                            group: 'external',
-                            position: 'before',
-                        },
-                        {
-                            pattern: 'next',
-                            group: 'external',
-                            position: 'before',
-                        },
-                        {
-                            pattern: 'next/**',
-                            group: 'external',
-                            position: 'before',
-                        },
-                        {
-                            pattern: '@/**',
-                            group: 'internal',
-                            position: 'after',
-                        },
+                    ignoreCase: true,
+                    internalPattern: [
+                        '^@/.+',
+                        '^@payload-config$',
+                        '^@payload-types$',
                     ],
-                    'pathGroupsExcludedImportTypes': ['react'],
-                    'newlines-between': 'always',
-                    'alphabetize': { order: 'asc', caseInsensitive: true },
+                    newlinesBetween: 1,
+                    order: 'asc',
+                    type: 'alphabetical',
                 },
             ],
             'perfectionist/sort-interfaces': [
