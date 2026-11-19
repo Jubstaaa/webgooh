@@ -26,7 +26,7 @@ ENV DATABASE_URI=file:./webgooh.db
 RUN bun run build
 
 # ─── runner ──────────────────────────────────────────────────────────────
-FROM node:22-alpine AS runner
+FROM node:26-alpine AS runner
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 ENV NODE_ENV=production
