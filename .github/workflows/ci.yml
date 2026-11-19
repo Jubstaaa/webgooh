@@ -27,6 +27,15 @@ jobs:
             - run: bun run lint
             - run: bun run type-check
             - run: bun run test
+            # Payload's CLI runs on Node (its tsx loader hooks do not work under
+            # Bun); 26 matches the runner image in the Dockerfile.
+            - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+              with:
+                  node-version: 26
+            # Fails when a collection or a Payload upgrade changes the schema
+            # without a committed migration: production never pushes schema, so
+            # that change would otherwise reach the live database only as errors.
+            - run: bun run migrate:check
             # Fails on any high or critical advisory (see README: Dependency audit).
             - run: bun run audit
             - name: actionlint

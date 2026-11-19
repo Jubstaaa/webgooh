@@ -40,6 +40,8 @@ user through the panel’s sign-up screen.
 | `bun run test`           | Unit tests (`bun test`)                  |
 | `bun run format`         | Prettier                                 |
 | `bun run generate:types` | Generate Payload TypeScript types        |
+| `bun run migrate:create` | Generate a migration (Node 26)           |
+| `bun run migrate:check`  | Fail if the config differs from `src/migrations` |
 
 ## Rendering & revalidation
 
@@ -97,6 +99,21 @@ src/
   lib/                       # queries, cache tags, media, seo, site constants
   access.ts                  # Payload access helpers
 ```
+
+## Database migrations
+
+Production runs with `NODE_ENV=production`, where Payload never pushes schema, so `src/migrations` is the only way a schema change reaches the live SQLite database. Pending migrations run automatically: first in the image build (`payload migrate` in the `Dockerfile`), against the copy of the live database the SSG prerender reads, and then at server start (`prodMigrations` in `src/payload.config.ts`, triggered by `src/instrumentation.ts`), before the container turns healthy. A failing migration therefore fails the build or the health check, and the deploy rolls back instead of going live.
+
+Local development keeps using push mode; never run `bun run migrate` against a database that development pushed to.
+
+### Upgrading Payload or changing a collection
+
+1. Bump every `payload` / `@payloadcms/*` package to the same version (or edit the collection), then run `bun run migrate:create <name>` under Node 26 (`fnm exec --using=26 bun run migrate:create <name>`).
+2. Review the generated SQL in `src/migrations/` and commit it with the change. CI's `bun run migrate:check` fails when the Payload config and the committed migrations disagree, which is what catches an upgrade that quietly adds a column.
+3. Before merging, take a manual run of the Cronicle "droplet backup" job; the deploy applies the migration to the live database.
+4. After the deploy, `bun run migrate:status` (or `select * from payload_migrations` on the droplet) shows it applied.
+
+The first migration is a baseline of the 3.94 schema. On a database that already has it (production) it only records itself in `payload_migrations`. On an empty one it builds the schema.
 
 ## Dependency audit
 

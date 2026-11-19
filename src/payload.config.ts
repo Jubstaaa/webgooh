@@ -17,6 +17,7 @@ import { Services } from '@/collections/services'
 import { Users } from '@/collections/users'
 import { SiteSettings } from '@/globals/site-settings'
 import { CDN_BASE, S3_BUCKET, S3_REGION, SITE_URL } from '@/lib/site.mjs'
+import { migrations } from '@/migrations'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -67,6 +68,11 @@ export default buildConfig({
         client: {
             url: process.env.DATABASE_URI || 'file:./webgooh.db',
         },
+        // Production never pushes schema, so pending migrations run when Payload
+        // initialises there: at server start (src/instrumentation.ts), before
+        // any request. The image build has already applied them to its copy of
+        // the live database (Dockerfile).
+        prodMigrations: migrations,
     }),
     editor: lexicalEditor(),
     globals: [SiteSettings],
