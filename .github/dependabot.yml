@@ -1,0 +1,16 @@
+version: 2
+updates:
+    - package-ecosystem: bun
+      directory: /
+      schedule:
+          interval: weekly
+      groups:
+          # Payload's packages must move together: mixed versions break its types.
+          payload:
+              patterns: ['payload', '@payloadcms/*']
+          next:
+              patterns: ['next', '@next/*', 'eslint-config-next']
+    - package-ecosystem: github-actions
+      directory: /
+      schedule:
+          interval: weekly
