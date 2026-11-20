@@ -1,4 +1,13 @@
-import { beforeAll, describe, expect, mock, spyOn, test } from 'bun:test'
+import {
+    afterEach,
+    beforeAll,
+    beforeEach,
+    describe,
+    expect,
+    mock,
+    spyOn,
+    test,
+} from 'bun:test'
 import {
     createLocalJWKSet,
     exportJWK,
@@ -33,16 +42,22 @@ function sign(
     claims: Record<string, unknown>,
     {
         audience = AUDIENCE,
+        expiresAt = '5m',
         issuer = TEAM_DOMAIN,
         key = trusted.privateKey,
-    }: { audience?: string; issuer?: string; key?: CryptoKey } = {}
+    }: {
+        audience?: string
+        expiresAt?: number | string
+        issuer?: string
+        key?: CryptoKey
+    } = {}
 ) {
     return new SignJWT(claims)
         .setProtectedHeader({ alg: 'RS256', kid: 'k1' })
         .setAudience(audience)
         .setIssuer(issuer)
         .setIssuedAt()
-        .setExpirationTime('5m')
+        .setExpirationTime(expiresAt)
         .sign(key)
 }
 
@@ -231,5 +246,68 @@ describe('cloudflare access strategy', () => {
             'Cloudflare Access sign-in is disabled: set CF_ACCESS_TEAM_DOMAIN and CF_ACCESS_AUD.'
         )
         consoleError.mockRestore()
+    })
+})
+
+describe('cloudflare access assertion logging', () => {
+    let consoleError: ReturnType<typeof spyOn<Console, 'error'>>
+
+    beforeEach(() => {
+        consoleError = spyOn(console, 'error').mockImplementation(() => {})
+    })
+
+    afterEach(() => {
+        consoleError.mockRestore()
+    })
+
+    async function rejected(token: string) {
+        const { result } = await authenticate(
+            { 'cf-access-jwt-assertion': token },
+            config()
+        )
+
+        expect(result.user).toBeNull()
+    }
+
+    test('stays quiet for an expired assertion', async () => {
+        await rejected(
+            await sign(
+                { email: 'a@example.com' },
+                { expiresAt: Math.floor(Date.now() / 1000) - 60 }
+            )
+        )
+
+        expect(consoleError).not.toHaveBeenCalled()
+    })
+
+    test('stays quiet for a signature outside the JWKS', async () => {
+        await rejected(
+            await sign(
+                { email: 'a@example.com' },
+                { key: untrusted.privateKey }
+            )
+        )
+
+        expect(consoleError).not.toHaveBeenCalled()
+    })
+
+    test('logs an assertion for another application, a misconfiguration', async () => {
+        await rejected(
+            await sign({ email: 'a@example.com' }, { audience: 'other-app' })
+        )
+
+        expect(consoleError).toHaveBeenCalledWith(
+            'Cloudflare Access assertion rejected',
+            expect.objectContaining({ code: 'ERR_JWT_CLAIM_VALIDATION_FAILED' })
+        )
+    })
+
+    test('logs a valid assertion that carries no email', async () => {
+        await rejected(await sign({ sub: 'service-token' }))
+
+        expect(consoleError).toHaveBeenCalledWith(
+            'Cloudflare Access assertion has no usable email claim',
+            expect.anything()
+        )
     })
 })

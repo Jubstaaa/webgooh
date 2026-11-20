@@ -1,4 +1,9 @@
-import { createRemoteJWKSet, jwtVerify, type JWTVerifyGetKey } from 'jose'
+import {
+    createRemoteJWKSet,
+    errors,
+    jwtVerify,
+    type JWTVerifyGetKey,
+} from 'jose'
 import { generatePayloadCookie, getFieldsToSign, jwtSign } from 'payload'
 import type { AuthStrategy, Payload } from 'payload'
 import { z } from 'zod'
@@ -48,21 +53,44 @@ function accessConfigFromEnv(): AccessConfig | null {
     return fromEnv
 }
 
-async function verifiedEmail(token: string, config: AccessConfig) {
-    try {
-        const { payload } = await jwtVerify(token, config.keys, {
-            algorithms: ['RS256'],
-            audience: config.audience,
-            issuer: config.issuer,
-        })
-        const claims = accessClaims.safeParse(payload)
+// An expired session or a forged signature is an ordinary unauthenticated
+// request. Anything else (wrong audience or issuer, an unreachable JWKS) means
+// the Access settings are off, so it is logged.
+function isOrdinaryRejection(error: unknown) {
+    return (
+        error instanceof errors.JWTExpired ||
+        error instanceof errors.JWSSignatureVerificationFailed
+    )
+}
 
-        return claims.success ? claims.data.email.toLowerCase() : null
-    } catch {
-        // A bad signature, audience, issuer or expiry is an ordinary
-        // unauthenticated request, not a server fault.
+async function verifiedEmail(token: string, config: AccessConfig) {
+    const payload = await jwtVerify(token, config.keys, {
+        algorithms: ['RS256'],
+        audience: config.audience,
+        issuer: config.issuer,
+    }).then(
+        verified => verified.payload,
+        (error: unknown) => {
+            if (!isOrdinaryRejection(error)) {
+                console.error('Cloudflare Access assertion rejected', error)
+            }
+
+            return null
+        }
+    )
+    if (!payload) return null
+
+    const claims = accessClaims.safeParse(payload)
+    if (!claims.success) {
+        console.error(
+            'Cloudflare Access assertion has no usable email claim',
+            claims.error
+        )
+
         return null
     }
+
+    return claims.data.email.toLowerCase()
 }
 
 // The Access policy is the only list of people worth keeping, so an address it
