@@ -39,7 +39,7 @@ jobs:
                   PACKAGE_ECOSYSTEM: ${{ steps.metadata.outputs.package-ecosystem }}
                   UPDATE_TYPE: ${{ steps.metadata.outputs.update-type }}
               run: |
-                  decision=$(bun scripts/dependabot-auto-merge.ts)
+                  decision=$(bun scripts/dependabot-auto-merge-cli.ts)
                   echo "decision=$decision" >> "$GITHUB_OUTPUT"
                   echo "Auto-merge decision: $decision"
 

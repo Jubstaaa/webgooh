@@ -64,6 +64,22 @@
     }
 }
 
+@keyframes grow-y {
+    from {
+        transform: scaleY(0);
+    }
+}
+
+@keyframes step-active {
+    from,
+    to {
+        border-color: var(--color-accent);
+        color: var(--color-accent);
+        box-shadow: 0 0 16px
+            color-mix(in oklab, var(--color-accent) 60%, transparent);
+    }
+}
+
 @keyframes shimmer {
     100% {
         transform: translateX(100%);
@@ -187,6 +203,32 @@
             animation: reveal linear both;
             animation-timeline: view();
             animation-range: entry 0% entry 60%;
+        }
+    }
+
+    /* The process timeline fills as it crosses 65% of the viewport, and a step
+       lights up while it sits in the top 45%: scroll-driven, so no JS. With
+       reduced motion, or without scroll timelines, the line is simply full and
+       the steps unlit. */
+    @supports (animation-timeline: view()) {
+        .process-timeline {
+            view-timeline: --process block;
+            view-timeline-inset: 65% 35%;
+        }
+
+        .process-fill {
+            animation: grow-y linear both;
+            animation-timeline: --process;
+        }
+
+        .process-step {
+            view-timeline: --step block;
+            view-timeline-inset: 0% 55%;
+        }
+
+        .process-dot {
+            animation: step-active linear none;
+            animation-timeline: --step;
         }
     }
 }

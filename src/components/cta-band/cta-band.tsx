@@ -5,7 +5,7 @@ import { ButtonLink } from '@/components/button'
 import { Magnetic } from '@/components/magnetic'
 import { Reveal } from '@/components/reveal'
 
-import { ParticleField } from './particle-field'
+import { LazyParticleField } from './lazy-particle-field'
 
 interface CtaBandProps {
     description?: string
@@ -20,7 +20,7 @@ export function CtaBand({
         <section className="container-x">
             <Reveal className="card-surface relative overflow-hidden rounded-3xl px-8 py-14 text-center sm:px-16">
                 <BorderBeam duration={4} />
-                <ParticleField className="opacity-60" />
+                <LazyParticleField className="opacity-60" />
                 <div
                     aria-hidden
                     className="glow absolute top-1/2 left-1/2 -z-0 h-72 w-[520px] -translate-x-1/2 -translate-y-1/2 opacity-40"

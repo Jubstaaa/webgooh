@@ -1,7 +1,7 @@
 // Decides whether a Dependabot PR may merge on its own once the required checks
 // pass. Fails closed: only an explicit 'safe' allows it, and the workflow treats
-// anything else (including this script crashing) as "needs a human".
-//   bun scripts/dependabot-auto-merge.ts   (reads the fetch-metadata outputs from env)
+// anything else (including the CLI crashing) as "needs a human". The workflow
+// runs scripts/dependabot-auto-merge-cli.ts, which reads fetch-metadata's outputs.
 
 interface Metadata {
     dependencyNames?: string
@@ -40,13 +40,4 @@ export function decideAutoMerge({
         !names.some(isHeldPackage)
 
     return safe ? 'safe' : 'review'
-}
-
-if (import.meta.main) {
-    const decision = decideAutoMerge({
-        dependencyNames: process.env.DEPENDENCY_NAMES,
-        ecosystem: process.env.PACKAGE_ECOSYSTEM,
-        updateType: process.env.UPDATE_TYPE,
-    })
-    process.stdout.write(`${decision}\n`)
 }

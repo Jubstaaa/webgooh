@@ -73,10 +73,14 @@ jobs:
             # Fails on any high or critical advisory (see README: Dependency audit).
             - run: bun run audit
             - name: gitleaks (full history)
+              # gitleaks exits 0 when git cannot read the repository ("0 commits
+              # scanned"), so the commit count is checked as well.
               run: |
-                  docker run --rm -v "$PWD:/repo:ro" \
+                  out=$(docker run --rm -v "$PWD:/repo:ro" \
                       zricethezav/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f \
-                      git --redact --exit-code 1 /repo
+                      git --redact --exit-code 1 /repo 2>&1) || { echo "$out"; exit 1; }
+                  echo "$out"
+                  echo "$out" | grep -Eq '\b[1-9][0-9]* commits scanned' || { echo '::error::gitleaks scanned no commits'; exit 1; }
             - name: Trivy (dependencies, secrets, misconfiguration)
               uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
               with:

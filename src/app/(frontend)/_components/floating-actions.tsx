@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react'
 
 import { ArrowUp } from 'lucide-react'
-import { AnimatePresence, motion } from 'motion/react'
+
+import { cn } from '@/lib/utils'
 
 interface FloatingActionsProps {
     whatsapp?: string | null
@@ -41,33 +42,31 @@ export function FloatingActions({ whatsapp }: FloatingActionsProps) {
 
     return (
         <div className="fixed right-5 bottom-5 z-50 flex flex-col items-center gap-3">
-            <AnimatePresence>
-                {showTop ? (
-                    <motion.button
-                        animate={{ opacity: 1, scale: 1 }}
-                        aria-label="Sayfa başına dön"
-                        className="border-line bg-surface/80 text-paper hover:border-brand/60 hover:text-brand-bright grid size-11 place-items-center rounded-full border backdrop-blur-md transition-colors"
-                        exit={{ opacity: 0, scale: 0.6 }}
-                        initial={{ opacity: 0, scale: 0.6 }}
-                        onClick={scrollToTop}>
-                        <ArrowUp className="size-5" />
-                    </motion.button>
-                ) : null}
-            </AnimatePresence>
+            {/* Always mounted so it can fade out; inert keeps the hidden button
+                out of the tab order. */}
+            <button
+                aria-label="Sayfa başına dön"
+                inert={!showTop}
+                className={cn(
+                    'border-line bg-surface/80 text-paper hover:border-brand/60 hover:text-brand-bright grid size-11 place-items-center rounded-full border backdrop-blur-md transition-[color,border-color,opacity,scale] duration-200',
+                    showTop ? 'scale-100 opacity-100' : 'scale-60 opacity-0'
+                )}
+                onClick={scrollToTop}>
+                <ArrowUp className="size-5" />
+            </button>
 
             {whatsappUrl ? (
-                <motion.a
+                <a
                     aria-label="WhatsApp ile yazın"
-                    className="relative grid size-14 place-items-center rounded-full bg-[#25D366] text-white shadow-lg shadow-[#25D366]/30 transition-transform hover:scale-105"
+                    className="relative grid size-14 place-items-center rounded-full bg-[#25D366] text-white shadow-lg shadow-[#25D366]/30 transition-transform hover:scale-105 active:scale-92"
                     href={whatsappUrl}
                     rel="noreferrer"
-                    target="_blank"
-                    whileTap={{ scale: 0.92 }}>
+                    target="_blank">
                     <span className="absolute inset-0 rounded-full bg-[#25D366] motion-safe:animate-ping motion-safe:opacity-40" />
                     <span className="relative">
                         <WhatsappIcon />
                     </span>
-                </motion.a>
+                </a>
             ) : null}
         </div>
     )

@@ -1,9 +1,9 @@
 import type { Metadata, Viewport } from 'next'
 
-import { CustomCursor } from '@/app/(frontend)/_components/custom-cursor'
 import { FloatingActions } from '@/app/(frontend)/_components/floating-actions'
 import { Footer } from '@/app/(frontend)/_components/footer'
 import { Header } from '@/app/(frontend)/_components/header'
+import { LazyCustomCursor } from '@/app/(frontend)/_components/lazy-custom-cursor'
 import { ScrollProgress } from '@/app/(frontend)/_components/scroll-progress'
 import { fontVariables } from '@/app/fonts'
 import { getSettings } from '@/lib/queries'
@@ -73,7 +73,7 @@ export default async function FrontendLayout({
                     Ana içeriğe geç
                 </a>
                 <ScrollProgress />
-                <CustomCursor />
+                <LazyCustomCursor />
                 <Header />
                 <main className="scroll-mt-16 pt-16" id="main" tabIndex={-1}>
                     {children}

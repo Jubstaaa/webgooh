@@ -2,8 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 
-import { useReducedMotion } from 'motion/react'
-
+import { useMediaQuery } from '@/lib/use-media-query'
 import { cn } from '@/lib/utils'
 
 interface Node {
@@ -18,7 +17,7 @@ const LINK_DISTANCE = 128
 
 export function NeuralMesh({ className }: { className?: string }) {
     const canvasRef = useRef<HTMLCanvasElement>(null)
-    const reduce = useReducedMotion()
+    const reduce = useMediaQuery('(prefers-reduced-motion: reduce)')
 
     useEffect(() => {
         const canvas = canvasRef.current
@@ -32,6 +31,7 @@ export function NeuralMesh({ className }: { className?: string }) {
         let height = 0
         let nodes: Node[] = []
         let frame = 0
+        let running = false
 
         const resize = () => {
             const rect = parent.getBoundingClientRect()
@@ -49,6 +49,9 @@ export function NeuralMesh({ className }: { className?: string }) {
                 x: Math.random() * width,
                 y: Math.random() * height,
             }))
+            // Resizing clears the canvas; repaint so a paused or reduced-motion
+            // mesh does not sit blank until the loop runs again.
+            if (!running) paint()
         }
 
         const onPointerMove = (event: PointerEvent) => {
@@ -60,7 +63,7 @@ export function NeuralMesh({ className }: { className?: string }) {
             pointer.y = y
         }
 
-        const draw = () => {
+        const paint = () => {
             ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
             ctx.clearRect(0, 0, width, height)
 
@@ -109,27 +112,41 @@ export function NeuralMesh({ className }: { className?: string }) {
                 ctx.fill()
             }
             ctx.shadowBlur = 0
+        }
 
-            frame = requestAnimationFrame(draw)
+        const loop = () => {
+            paint()
+            frame = requestAnimationFrame(loop)
         }
 
         resize()
 
-        if (reduce) {
-            draw()
-            cancelAnimationFrame(frame)
-        } else {
-            draw()
+        if (!reduce) {
             window.addEventListener('pointermove', onPointerMove, {
                 passive: true,
             })
         }
+
+        // The O(n²) link pass with shadow blur is the costliest work on the
+        // page, so the loop only runs while the hero is actually on screen.
+        const visibility = new IntersectionObserver(entries => {
+            const visible = entries.at(-1)?.isIntersecting ?? false
+            if (visible && !running) {
+                running = true
+                loop()
+            } else if (!visible && running) {
+                running = false
+                cancelAnimationFrame(frame)
+            }
+        })
+        if (!reduce) visibility.observe(parent)
 
         const observer = new ResizeObserver(resize)
         observer.observe(parent)
 
         return () => {
             cancelAnimationFrame(frame)
+            visibility.disconnect()
             observer.disconnect()
             window.removeEventListener('pointermove', onPointerMove)
         }

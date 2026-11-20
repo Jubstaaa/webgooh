@@ -6,7 +6,7 @@ import { Magnetic } from '@/components/magnetic'
 import { getContentCounts } from '@/lib/queries'
 import { SITE_URL } from '@/lib/site.mjs'
 
-import { NeuralMesh } from './neural-mesh'
+import { LazyNeuralMesh } from './lazy-neural-mesh'
 
 interface TerminalLine {
     prompt?: string
@@ -32,7 +32,7 @@ export async function HomeHero() {
 
     return (
         <section className="relative overflow-hidden pt-20 pb-0 sm:pt-28 sm:pb-24">
-            <NeuralMesh className="-z-20 opacity-70" />
+            <LazyNeuralMesh className="-z-20 opacity-70" />
             <div aria-hidden className="grid-backdrop absolute inset-0 -z-10" />
             <div
                 aria-hidden

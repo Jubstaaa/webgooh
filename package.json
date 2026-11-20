@@ -25,7 +25,7 @@
         "migrate:check": "sh scripts/check-migrations.sh",
         "payload": "payload",
         "knip": "knip",
-        "duplicates": "jscpd",
+        "duplicates": "jscpd --fail-on-empty",
         "deps:check": "depcruise src scripts"
     },
     "dependencies": {
@@ -42,7 +42,6 @@
         "graphql": "^16.15.0",
         "jose": "^6.2.18",
         "lucide-react": "1.76.0",
-        "motion": "^14.14.0",
         "next": "16.4.6",
         "payload": "3.94.0",
         "react": "^19.3.1",
@@ -55,6 +54,7 @@
         "zod": "^4.6.6"
     },
     "devDependencies": {
+        "@happy-dom/global-registrator": "^21.0.4",
         "@tailwindcss/postcss": "^4.3.5",
         "@tailwindcss/typography": "^0.5.16",
         "@types/bun": "^1.4.4",
