@@ -84,6 +84,10 @@ const nextConfig = {
     },
 }
 
+/**
+ * @param {string} phase
+ * @returns {import('next').NextConfig}
+ */
 export default function config(phase) {
     // The site key is inlined into the client bundle at build time. Without it
     // the contact form could never pass Turnstile, so the build stops instead

@@ -1,0 +1,12 @@
+{
+    "$schema": "https://unpkg.com/knip@6/schema.json",
+    "payload": false,
+    "entry": [
+        "src/payload.config.ts",
+        "src/app/(payload)/admin/importMap.js",
+        "scripts/**/*.{ts,sh}"
+    ],
+    "project": ["src/**/*.{ts,tsx,mjs,js,css}", "scripts/**/*.ts"],
+    "ignore": ["src/payload-types.ts"],
+    "ignoreDependencies": ["@payloadcms/ui"]
+}

@@ -48,9 +48,9 @@ describe('FloatingActions', () => {
 
         test('the back-to-top button scrolls to the top', () => {
             const scrolls: unknown[] = []
-            window.scrollTo = ((options: unknown) => {
+            window.scrollTo = (options?: unknown) => {
                 scrolls.push(options)
-            }) as typeof window.scrollTo
+            }
             root = createRoot(
                 document.body.appendChild(document.createElement('div'))
             )

@@ -35,9 +35,12 @@ user through the panel’s sign-up screen.
 | `bun run dev`            | Development server                       |
 | `bun run build`          | Production build (needs a migrated DB)   |
 | `bun run start`          | Production server                        |
-| `bun run lint`           | ESLint (type-aware)                      |
+| `bun run lint`           | ESLint (type-checked, no warnings)       |
 | `bun run type-check`     | `tsc --noEmit`                           |
 | `bun run test`           | Unit tests (`bun test`)                  |
+| `bun run knip`           | Dead files, exports and dependencies     |
+| `bun run duplicates`     | Copy-paste check (jscpd, fails over 3 %) |
+| `bun run deps:check`     | Import cycles, orphans, dev-only imports |
 | `bun run format`         | Prettier                                 |
 | `bun run generate:types` | Generate Payload TypeScript types        |
 | `bun run migrate:create` | Generate a migration (Node 26)           |

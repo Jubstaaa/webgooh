@@ -43,7 +43,7 @@ export function LogoutButton() {
             href={logoutUrl}
             tabIndex={0}
             title="Çıkış yap"
-            onClick={handleClick}>
+            onClick={event => void handleClick(event)}>
             <svg
                 className="icon icon--logout"
                 fill="none"

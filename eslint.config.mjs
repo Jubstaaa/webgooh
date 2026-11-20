@@ -17,6 +17,13 @@ const eslintConfig = [
         ],
     },
     ...nextConfig,
+    // Type-aware rules: the parser already builds a program for every file
+    // (projectService below), so these cost little more and catch what syntax
+    // rules cannot (unhandled promises, needless casts, unsafe any).
+    ...tseslint.configs.recommendedTypeChecked.map(config => ({
+        ...config,
+        files: ['**/*.ts', '**/*.tsx'],
+    })),
     {
         files: ['**/*.ts', '**/*.tsx'],
         languageOptions: {

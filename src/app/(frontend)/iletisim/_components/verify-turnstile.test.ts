@@ -69,9 +69,7 @@ describe('verifyTurnstile', () => {
         })
 
         expect(ok).toBe(true)
-        const body = new URLSearchParams(
-            String(fetcher.mock.calls[0]?.[1].body)
-        )
+        const body = fetcher.mock.calls[0]?.[1].body as URLSearchParams
         expect(body.get('remoteip')).toBe('203.0.113.7')
         expect(body.get('secret')).toBe('secret')
         expect(body.get('response')).toBe('token')

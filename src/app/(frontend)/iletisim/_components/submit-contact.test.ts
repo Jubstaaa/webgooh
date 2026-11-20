@@ -103,8 +103,8 @@ describe('submitContact', () => {
     test('passes the visitor IP and token to Turnstile', async () => {
         await submit(valid)
 
-        const body = siteverify.mock.calls[0]?.[1].body
-        expect(String(body)).toBe(
+        const body = siteverify.mock.calls[0]?.[1].body as URLSearchParams
+        expect(body.toString()).toBe(
             'response=token&secret=secret&remoteip=1.2.3.4'
         )
     })

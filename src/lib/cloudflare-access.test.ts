@@ -406,6 +406,8 @@ describe('cloudflare access assertion logging', () => {
     ])('summarises a registration failure: %p', async (failure, summary) => {
         const strategy = createCloudflareAccessStrategy(config)
         const payload = {
+            // Non-Error rejections are part of what is under test.
+            // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
             create: () => Promise.reject(failure),
             find: () => Promise.resolve({ docs: [] }),
         } as unknown as Payload

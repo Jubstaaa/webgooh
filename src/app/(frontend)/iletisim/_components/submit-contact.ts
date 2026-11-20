@@ -33,14 +33,14 @@ export async function submitContact(
     const attempt = (prev.attempt ?? 0) + 1
     const values = Object.fromEntries(
         ['name', 'email', 'phone', 'company', 'service', 'message'].map(
-            field => [field, String(formData.get(field) ?? '')]
+            field => [field, formText(formData, field)]
         )
     )
 
     const verified = await verifyTurnstile({
         ip: clientIp(await headers()),
         secret: process.env.TURNSTILE_SECRET_KEY,
-        token: String(formData.get('cf-turnstile-response') ?? ''),
+        token: formText(formData, 'cf-turnstile-response'),
     })
     if (!verified) {
         return {
@@ -85,4 +85,12 @@ export async function submitContact(
             values,
         }
     }
+}
+
+// Every field of this form is text; a file posted under one of its names is
+// treated as empty rather than stringified.
+function formText(formData: FormData, field: string) {
+    const value = formData.get(field)
+
+    return typeof value === 'string' ? value : ''
 }
