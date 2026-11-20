@@ -16,6 +16,9 @@ services:
         # shell inside the container instead of substituting the host's value. wget
         # here is BusyBox — -T is the timeout, the GNU long options do not exist.
         #
+        # /api/health runs a Payload query: every page is served from Next's cache
+        # and would keep answering while the database cannot be read.
+        #
         # Docker does not restart an unhealthy container, and Beszel
         # cannot alert per container, so this fills the Health column and nothing
         # more: it surfaces "process alive but application wedged", which the
@@ -25,7 +28,7 @@ services:
             test:
                 [
                     'CMD-SHELL',
-                    'wget -q -O /dev/null -T 3 "http://$$HOSTNAME:3000/" || exit 1',
+                    'wget -q -O /dev/null -T 3 "http://$$HOSTNAME:3000/api/health" || exit 1',
                 ]
             interval: 30s
             timeout: 5s
@@ -65,18 +68,19 @@ services:
             # region are compiled in (src/payload.config.ts), not passed here.
             S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID}
             S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY}
+        # The host paths default to the droplet's; CI points them at temp
+        # directories to boot the candidate image with this same file.
         volumes:
-            - /opt/webgooh/data:/app/data
-            # The whole cache directory, not just cache/images. Mounting only the
-            # subdirectory makes Docker create the parent inside the container,
-            # and it creates it as root — the app runs as uid 1001, so Next cannot
-            # add its own subdirectories and the data cache silently falls back to
-            # memory. That bit acwistanbul.com on 2026-07-26: content saved in
-            # Payload lived only in the running process, and a container recreate
-            # reverted the site to its build-time HTML while the admin panel still
-            # showed the changes.
+            - ${DATA_DIR:-/opt/webgooh/data}:/app/data
+            # Only the image optimizer's cache persists across releases: re-encoding
+            # every image on this 1 vCPU droplet is the expensive part. The data
+            # cache and ISR pages stay in the container, so each release starts
+            # from the database instead of entries a previous release wrote, which
+            # may predate a schema change. Content is not baked into the image any
+            # more, so losing them on a recreate costs one database read per page.
             #
-            # Mounting the parent gives it the host directory's 1001 ownership, so
-            # revalidated pages persist to disk and survive redeploys alongside
-            # the image cache.
-            - /opt/webgooh/cache:/app/.next/cache
+            # The image creates /app/.next/cache owned by the app user (see the
+            # Dockerfile), so this narrower mount no longer leaves a root-owned
+            # parent behind, which cost acwistanbul.com a day of CMS edits on
+            # 2026-07-26 while content was still baked in at build time.
+            - ${IMAGE_CACHE_DIR:-/opt/webgooh/cache/images}:/app/.next/cache/images
