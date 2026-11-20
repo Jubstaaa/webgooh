@@ -1,10 +1,7 @@
 'use client'
 
-import dynamic from 'next/dynamic'
+import { lazyDecorative } from '@/lib/lazy-decorative'
 
-// Decorative and invisible until the pointer moves, so it loads after the
-// page has hydrated instead of with it.
-export const LazyCustomCursor = dynamic(
-    () => import('./custom-cursor').then(module => module.CustomCursor),
-    { ssr: false }
+export const LazyCustomCursor = lazyDecorative(() =>
+    import('./custom-cursor').then(module => module.CustomCursor)
 )

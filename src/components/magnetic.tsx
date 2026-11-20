@@ -1,6 +1,8 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
+
+import { useMediaQuery } from '@/lib/use-media-query'
 
 interface MagneticProps {
     children: React.ReactNode
@@ -14,17 +16,13 @@ export function Magnetic({
     strength = 0.3,
 }: MagneticProps) {
     const ref = useRef<HTMLSpanElement>(null)
-    const enabledRef = useRef(false)
-
-    useEffect(() => {
-        enabledRef.current = window.matchMedia(
-            '(hover: hover) and (prefers-reduced-motion: no-preference)'
-        ).matches
-    }, [])
+    const enabled = useMediaQuery(
+        '(hover: hover) and (prefers-reduced-motion: no-preference)'
+    )
 
     const handlePointerMove = (event: React.PointerEvent<HTMLSpanElement>) => {
         const el = ref.current
-        if (!el || !enabledRef.current) return
+        if (!el || !enabled) return
         const rect = el.getBoundingClientRect()
         const x = (event.clientX - rect.left - rect.width / 2) * strength
         const y = (event.clientY - rect.top - rect.height / 2) * strength

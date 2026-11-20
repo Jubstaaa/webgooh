@@ -205,30 +205,31 @@
             animation-range: entry 0% entry 60%;
         }
     }
-}
 
-/* The process timeline fills as it crosses 65% of the viewport, and a step
-   lights up while it sits in the top 45%: scroll-driven, so no JS. Without
-   scroll timelines the line is simply full and the steps unlit. */
-@supports (animation-timeline: view()) {
-    .process-timeline {
-        view-timeline: --process block;
-        view-timeline-inset: 65% 35%;
-    }
+    /* The process timeline fills as it crosses 65% of the viewport, and a step
+       lights up while it sits in the top 45%: scroll-driven, so no JS. With
+       reduced motion, or without scroll timelines, the line is simply full and
+       the steps unlit. */
+    @supports (animation-timeline: view()) {
+        .process-timeline {
+            view-timeline: --process block;
+            view-timeline-inset: 65% 35%;
+        }
 
-    .process-fill {
-        animation: grow-y linear both;
-        animation-timeline: --process;
-    }
+        .process-fill {
+            animation: grow-y linear both;
+            animation-timeline: --process;
+        }
 
-    .process-step {
-        view-timeline: --step block;
-        view-timeline-inset: 0% 55%;
-    }
+        .process-step {
+            view-timeline: --step block;
+            view-timeline-inset: 0% 55%;
+        }
 
-    .process-dot {
-        animation: step-active linear none;
-        animation-timeline: --step;
+        .process-dot {
+            animation: step-active linear none;
+            animation-timeline: --step;
+        }
     }
 }
 

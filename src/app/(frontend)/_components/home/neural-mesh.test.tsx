@@ -1,100 +1,139 @@
 import { act } from 'react'
-import { createRoot } from 'react-dom/client'
+import { createRoot, type Root } from 'react-dom/client'
 
+import { GlobalRegistrator } from '@happy-dom/global-registrator'
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
-import { Window } from 'happy-dom'
 
 import { NeuralMesh } from './neural-mesh'
 
-type VisibilityCallback = (entries: { isIntersecting: boolean }[]) => void
+type VisibilityEntry = Pick<IntersectionObserverEntry, 'isIntersecting'>
 
-const stubbedGlobals = [
-    'cancelAnimationFrame',
-    'document',
-    'HTMLElement',
-    'IntersectionObserver',
-    'IS_REACT_ACT_ENVIRONMENT',
-    'requestAnimationFrame',
-    'ResizeObserver',
-    'window',
-] as const
-let savedGlobals: Map<string, PropertyDescriptor | undefined>
-let window: Window
-let reportVisibility: VisibilityCallback
+let reportVisibility: (entries: VisibilityEntry[]) => void
+let reportResize: () => void
 let scheduledFrames: number
 let cancelledFrames: number
+let paintedNodes: number
+let disconnectedObservers: number
+let root: Root
 
-function installDom() {
-    savedGlobals = new Map(
-        stubbedGlobals.map(key => [
-            key,
-            Object.getOwnPropertyDescriptor(globalThis, key),
-        ])
-    )
-    window = new Window()
+function installDom({ reducedMotion = false } = {}) {
+    GlobalRegistrator.register({ url: 'http://localhost/' })
     scheduledFrames = 0
     cancelledFrames = 0
+    paintedNodes = 0
+    disconnectedObservers = 0
 
-    window.HTMLCanvasElement.prototype.getContext = (() =>
-        new Proxy({}, { get: () => () => undefined })) as never
+    const context = new Proxy(
+        {},
+        {
+            get: (_, method) => () => {
+                if (method === 'arc') paintedNodes++
+            },
+        }
+    )
+    HTMLCanvasElement.prototype.getContext = (() => context) as never
 
     Object.assign(globalThis, {
         cancelAnimationFrame: () => {
             cancelledFrames++
         },
-        document: window.document,
-        HTMLElement: window.HTMLElement,
         IntersectionObserver: class {
-            constructor(callback: VisibilityCallback) {
+            constructor(callback: (entries: VisibilityEntry[]) => void) {
                 reportVisibility = callback
             }
-            disconnect() {}
+            disconnect() {
+                disconnectedObservers++
+            }
             observe() {}
         },
         IS_REACT_ACT_ENVIRONMENT: true,
+        matchMedia: (query: string) => ({
+            addEventListener() {},
+            matches:
+                reducedMotion && query === '(prefers-reduced-motion: reduce)',
+            removeEventListener() {},
+        }),
         requestAnimationFrame: () => ++scheduledFrames,
         ResizeObserver: class {
-            disconnect() {}
+            constructor(callback: () => void) {
+                reportResize = callback
+            }
+            disconnect() {
+                disconnectedObservers++
+            }
             observe() {}
         },
-        window: Object.assign(window, {
-            matchMedia: () => ({ matches: false }),
-        }),
     })
 }
 
 function renderMesh() {
-    const host = window.document.createElement('div')
-    window.document.body.appendChild(host)
-    const root = createRoot(host as unknown as HTMLElement)
+    const host = document.createElement('div')
+    document.body.appendChild(host)
+    root = createRoot(host)
     act(() => root.render(<NeuralMesh />))
-
-    return root
 }
 
 describe('NeuralMesh', () => {
-    beforeEach(installDom)
-    afterEach(() => {
-        void window.happyDOM.close()
-        for (const [key, descriptor] of savedGlobals) {
-            if (descriptor) Object.defineProperty(globalThis, key, descriptor)
-            else Reflect.deleteProperty(globalThis, key)
-        }
+    afterEach(async () => {
+        act(() => root.unmount())
+        await GlobalRegistrator.unregister()
     })
 
-    test('does not animate before the hero is on screen', () => {
-        renderMesh()
+    describe('with motion allowed', () => {
+        beforeEach(() => installDom())
 
-        expect(scheduledFrames).toBe(0)
+        test('does not animate before the hero is on screen', () => {
+            renderMesh()
+
+            expect(scheduledFrames).toBe(0)
+        })
+
+        test('animates while visible and stops once scrolled away', () => {
+            renderMesh()
+
+            act(() => reportVisibility([{ isIntersecting: true }]))
+            expect(scheduledFrames).toBeGreaterThan(0)
+
+            act(() => reportVisibility([{ isIntersecting: false }]))
+            expect(cancelledFrames).toBeGreaterThan(0)
+        })
+
+        test('a batch of visibility changes follows the latest one', () => {
+            renderMesh()
+
+            act(() =>
+                reportVisibility([
+                    { isIntersecting: true },
+                    { isIntersecting: false },
+                ])
+            )
+
+            expect(scheduledFrames).toBe(0)
+        })
+
+        test('unmounting stops the loop and every observer', () => {
+            renderMesh()
+            act(() => reportVisibility([{ isIntersecting: true }]))
+
+            act(() => root.unmount())
+            root = createRoot(document.createElement('div'))
+
+            expect(cancelledFrames).toBeGreaterThan(0)
+            expect(disconnectedObservers).toBe(2)
+        })
     })
 
-    test('animates while visible and stops once scrolled away', () => {
-        renderMesh()
+    describe('with reduced motion', () => {
+        beforeEach(() => installDom({ reducedMotion: true }))
 
-        act(() => reportVisibility([{ isIntersecting: true }]))
-        expect(scheduledFrames).toBeGreaterThan(0)
+        test('keeps a static frame on screen after a resize', () => {
+            renderMesh()
+            paintedNodes = 0
 
-        act(() => reportVisibility([{ isIntersecting: false }]))
-        expect(cancelledFrames).toBeGreaterThan(0)
+            act(() => reportResize())
+
+            expect(paintedNodes).toBeGreaterThan(0)
+            expect(scheduledFrames).toBe(0)
+        })
     })
 })

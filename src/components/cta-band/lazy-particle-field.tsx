@@ -1,9 +1,7 @@
 'use client'
 
-import dynamic from 'next/dynamic'
+import { lazyDecorative } from '@/lib/lazy-decorative'
 
-// Decorative canvas below the fold: it loads after the page has hydrated.
-export const LazyParticleField = dynamic(
-    () => import('./particle-field').then(module => module.ParticleField),
-    { ssr: false }
+export const LazyParticleField = lazyDecorative(() =>
+    import('./particle-field').then(module => module.ParticleField)
 )
