@@ -13,6 +13,7 @@ let reportResize: () => void
 let scheduledFrames: number
 let cancelledFrames: number
 let paintedNodes: number
+let fillStyles: unknown[]
 let disconnectedObservers: number
 let root: Root
 
@@ -21,6 +22,7 @@ function installDom({ reducedMotion = false } = {}) {
     scheduledFrames = 0
     cancelledFrames = 0
     paintedNodes = 0
+    fillStyles = []
     disconnectedObservers = 0
 
     const context = new Proxy(
@@ -28,6 +30,10 @@ function installDom({ reducedMotion = false } = {}) {
         {
             get: (_, method) => () => {
                 if (method === 'arc') paintedNodes++
+            },
+            set: (_, property, value) => {
+                if (property === 'fillStyle') fillStyles.push(value)
+                return true
             },
         }
     )
@@ -109,6 +115,30 @@ describe('NeuralMesh', () => {
             )
 
             expect(scheduledFrames).toBe(0)
+        })
+
+        test('nodes near the pointer light up', () => {
+            const random = Math.random
+            Math.random = () => 0.5
+            HTMLElement.prototype.getBoundingClientRect = () =>
+                DOMRect.fromRect({ height: 200, width: 300 })
+            try {
+                renderMesh()
+
+                act(() => {
+                    window.dispatchEvent(
+                        new PointerEvent('pointermove', {
+                            clientX: 160,
+                            clientY: 100,
+                        })
+                    )
+                    reportVisibility([{ isIntersecting: true }])
+                })
+            } finally {
+                Math.random = random
+            }
+
+            expect(fillStyles).toContain('#22d3ee')
         })
 
         test('unmounting stops the loop and every observer', () => {

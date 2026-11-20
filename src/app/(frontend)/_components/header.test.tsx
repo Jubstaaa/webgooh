@@ -56,5 +56,47 @@ describe('Header', () => {
                 document.getElementById('mobile-menu')?.hasAttribute('inert')
             ).toBe(false)
         })
+
+        test('following a menu link closes the menu', () => {
+            root = createRoot(
+                document.body.appendChild(document.createElement('div'))
+            )
+            act(() => root.render(<Header />))
+            const toggle = document.querySelector(
+                '[aria-controls="mobile-menu"]'
+            )
+            act(() => {
+                toggle?.dispatchEvent(
+                    new MouseEvent('click', { bubbles: true })
+                )
+            })
+
+            act(() => {
+                document.querySelector('#mobile-menu a')?.dispatchEvent(
+                    new MouseEvent('click', {
+                        bubbles: true,
+                        cancelable: true,
+                    })
+                )
+            })
+
+            expect(toggle?.getAttribute('aria-expanded')).toBe('false')
+        })
+
+        test('the header gains its backdrop once the page scrolls', () => {
+            root = createRoot(
+                document.body.appendChild(document.createElement('div'))
+            )
+            act(() => root.render(<Header />))
+
+            act(() => {
+                Object.defineProperty(window, 'scrollY', { value: 40 })
+                window.dispatchEvent(new Event('scroll'))
+            })
+
+            expect(document.querySelector('header')?.className).toContain(
+                'backdrop-blur-xl'
+            )
+        })
     })
 })

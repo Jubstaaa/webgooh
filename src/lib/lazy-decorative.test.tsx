@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
 
-import { loadDecorative } from './lazy-decorative'
+import { lazyDecorative, loadDecorative } from './lazy-decorative'
 
 const originalReportError = globalThis.reportError
 let reported: unknown[]
@@ -10,6 +10,14 @@ let reported: unknown[]
 function Canvas() {
     return <canvas />
 }
+
+describe('lazyDecorative', () => {
+    test('stays out of the server HTML', () => {
+        const Lazy = lazyDecorative(() => Promise.resolve(Canvas))
+
+        expect(renderToStaticMarkup(<Lazy />)).toBe('')
+    })
+})
 
 describe('loadDecorative', () => {
     beforeEach(() => {

@@ -45,6 +45,25 @@ describe('FloatingActions', () => {
 
             expect(button?.hasAttribute('inert')).toBe(false)
         })
+
+        test('the back-to-top button scrolls to the top', () => {
+            const scrolls: unknown[] = []
+            window.scrollTo = ((options: unknown) => {
+                scrolls.push(options)
+            }) as typeof window.scrollTo
+            root = createRoot(
+                document.body.appendChild(document.createElement('div'))
+            )
+            act(() => root.render(<FloatingActions />))
+
+            act(() => {
+                document
+                    .querySelector('[aria-label="Sayfa başına dön"]')
+                    ?.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+            })
+
+            expect(scrolls).toEqual([{ behavior: 'smooth', top: 0 }])
+        })
     })
 
     test('links to WhatsApp with the digits of the configured number', () => {
