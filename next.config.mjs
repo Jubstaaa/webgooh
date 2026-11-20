@@ -54,6 +54,11 @@ const securityHeaders = [
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+    experimental: {
+        // src/app/global-not-found.tsx: with two root layouts, unmatched URLs
+        // otherwise get Next's bare default 404.
+        globalNotFound: true,
+    },
     output: 'standalone',
     reactStrictMode: true,
     poweredByHeader: false,
