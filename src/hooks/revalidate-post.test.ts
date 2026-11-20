@@ -3,10 +3,14 @@ import { beforeEach, describe, expect, mock, test } from 'bun:test'
 import type { Category, Post } from '@payload-types'
 
 const revalidated: string[] = []
+const profiles: unknown[] = []
 
 void mock.module('next/cache', () => ({
     revalidatePath: (path: string) => revalidated.push(path),
-    revalidateTag: (tag: string) => revalidated.push(tag),
+    revalidateTag: (tag: string, profile: unknown) => {
+        revalidated.push(tag)
+        profiles.push(profile)
+    },
     unstable_cache: <T>(fn: T) => fn,
 }))
 
@@ -58,6 +62,16 @@ describe('postChangeTargets', () => {
         expect(targets.tags).toContain('posts')
     })
 
+    test('a published save serves stale pages while they rebuild', () => {
+        expect(postChangeTargets(post(), post()).expireNow).toBeFalsy()
+    })
+
+    test('unpublishing expires the pages at once so the next request 404s', () => {
+        expect(
+            postChangeTargets(post({ _status: 'draft' }), post()).expireNow
+        ).toBe(true)
+    })
+
     test('revalidates both slugs when a published post is renamed', () => {
         const targets = postChangeTargets(post({ slug: 'yeni' }), post())
 
@@ -77,6 +91,7 @@ describe('postChangeTargets', () => {
 describe('post hooks', () => {
     beforeEach(() => {
         revalidated.length = 0
+        profiles.length = 0
     })
 
     test('afterChange revalidates and hands the doc back', () => {
@@ -91,6 +106,7 @@ describe('post hooks', () => {
             )
         ).toBe(doc)
         expect(revalidated).toContain('/blog/ilk')
+        expect(profiles).toEqual(profiles.map(() => 'max'))
     })
 
     test('afterDelete takes the deleted post off its pages', () => {
@@ -102,5 +118,7 @@ describe('post hooks', () => {
             >[0])
         ).toBe(doc)
         expect(revalidated).toContain('post:ilk')
+        expect(profiles).toEqual(profiles.map(() => ({ expire: 0 })))
+        expect(profiles.length).toBeGreaterThan(0)
     })
 })

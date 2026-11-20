@@ -31,15 +31,17 @@ export function postTargets(doc: Partial<Post>): RevalidationTargets {
 // Either side being published means public pages may show the post: a
 // publish adds it, an unpublish has to take it back off, and a published post
 // that changes slug or category leaves the old page and category list stale.
+// An unpublish expires at once rather than serving the post while it rebuilds.
 export function postChangeTargets(
     doc: Partial<Post>,
     previousDoc?: Partial<Post>
 ): RevalidationTargets {
+    const isPublished = doc._status === 'published'
     const wasPublished = previousDoc?._status === 'published'
-    if (doc._status !== 'published' && !wasPublished) return noTargets
+    if (!isPublished && !wasPublished) return noTargets
 
     return mergeTargets(
-        postTargets(doc),
+        { ...postTargets(doc), ...(isPublished ? {} : { expireNow: true }) },
         previousDoc ? postTargets(previousDoc) : noTargets
     )
 }
@@ -56,7 +58,7 @@ export const revalidatePostAfterChange: CollectionAfterChangeHook<Post> = ({
 export const revalidatePostAfterDelete: CollectionAfterDeleteHook<Post> = ({
     doc,
 }) => {
-    revalidateTargets(postTargets(doc))
+    revalidateTargets({ ...postTargets(doc), expireNow: true })
 
     return doc
 }
