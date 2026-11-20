@@ -1,17 +1,17 @@
 import Image from 'next/image'
 import Link from 'next/link'
 
-import { ArrowLeft, Clock } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 
 import { Badge } from '@/components/badge'
 import { JsonLd } from '@/components/json-ld'
 import { PostCard } from '@/components/post-card'
+import { PostMeta } from '@/components/post-meta'
 import { RichText } from '@/components/rich-text'
 import { SectionHeading } from '@/components/section-heading'
 import { mediaAlt, mediaUrl } from '@/lib/media'
 import { readingMinutes } from '@/lib/reading-time'
 import { SITE_URL } from '@/lib/site.mjs'
-import { formatDate } from '@/lib/utils'
 import type { Post } from '@payload-types'
 
 interface BlogDetailProps {
@@ -60,19 +60,11 @@ export function BlogDetail({ post, related }: BlogDetailProps) {
                         {cat ? (
                             <Badge color={cat.color}>{cat.title}</Badge>
                         ) : null}
-                        <span className="text-faint flex items-center gap-3 font-mono text-xs">
-                            {post.publishedAt ? (
-                                <time dateTime={post.publishedAt}>
-                                    {formatDate(post.publishedAt)}
-                                </time>
-                            ) : null}
-                            {minutes ? (
-                                <span className="flex items-center gap-1">
-                                    <Clock className="size-3" /> {minutes} dk
-                                    okuma
-                                </span>
-                            ) : null}
-                        </span>
+                        <PostMeta
+                            minutes={minutes}
+                            publishedAt={post.publishedAt}
+                            readingLabel="dk okuma"
+                        />
                     </div>
                     <h1 className="text-3xl leading-tight font-semibold tracking-tight sm:text-4xl lg:text-5xl">
                         {post.title}
