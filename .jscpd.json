@@ -1,0 +1,13 @@
+{
+    "threshold": 3,
+    "minTokens": 60,
+    "reporters": ["console"],
+    "path": ["src", "scripts"],
+    "ignore": [
+        "**/migrations/**",
+        "**/payload-types.ts",
+        "**/app/(payload)/**",
+        "**/*.test.ts",
+        "**/*.test.tsx"
+    ]
+}

@@ -4,8 +4,9 @@ import { safeRevalidateTag } from '@/lib/revalidate'
 
 export function revalidateGlobal(tag: string): GlobalAfterChangeHook {
     return ({ doc }) => {
+        const saved: unknown = doc
         safeRevalidateTag(tag)
 
-        return doc
+        return saved
     }
 }

@@ -18,12 +18,13 @@ export function slugField({
         },
         hooks: {
             beforeValidate: [
-                ({ data, value }) => {
+                ({ data, value: submitted }) => {
+                    const value: unknown = submitted
                     if (typeof value === 'string' && value.length > 0) {
                         return slugify(value)
                     }
 
-                    const source = data?.[sourceField]
+                    const source: unknown = data?.[sourceField]
 
                     if (typeof source === 'string' && source.length > 0) {
                         return slugify(source)

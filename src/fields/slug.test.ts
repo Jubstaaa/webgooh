@@ -12,7 +12,9 @@ function beforeValidate(
     const [hook] = (field.hooks?.beforeValidate ?? []) as FieldHook[]
     if (!hook) throw new Error('slug field has no beforeValidate hook')
 
-    return hook({ data, value } as Parameters<FieldHook>[0])
+    const result: unknown = hook({ data, value } as Parameters<FieldHook>[0])
+
+    return result
 }
 
 describe('slugField', () => {

@@ -33,6 +33,9 @@ jobs:
             - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
               with:
                   persist-credentials: false
+                  # gitleaks scans every commit, not just the newest one: a
+                  # secret added and removed inside one PR stays in history.
+                  fetch-depth: 0
             - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
               with:
                   bun-version-file: package.json
@@ -41,6 +44,12 @@ jobs:
             - run: bun run lint
             - run: bun run type-check
             - run: bun run test
+            # Dead files, exports and dependencies (knip.json), copy-paste above 3 %
+            # (.jscpd.json), and import cycles, orphans and dev-only imports in
+            # runtime code (.dependency-cruiser.cjs).
+            - run: bun run knip
+            - run: bun run duplicates
+            - run: bun run deps:check
             # Payload's CLI runs on Node (its tsx loader hooks do not work under
             # Bun); 26 matches the runner image in the Dockerfile.
             - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
@@ -63,6 +72,20 @@ jobs:
                   git diff --exit-code -- src/payload-types.ts 'src/app/(payload)/admin/importMap.js'
             # Fails on any high or critical advisory (see README: Dependency audit).
             - run: bun run audit
+            - name: gitleaks (full history)
+              run: |
+                  docker run --rm -v "$PWD:/repo:ro" \
+                      zricethezav/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f \
+                      git --redact --exit-code 1 /repo
+            - name: Trivy (dependencies, secrets, misconfiguration)
+              uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+              with:
+                  scan-type: fs
+                  scan-ref: .
+                  scanners: vuln,secret,misconfig
+                  severity: HIGH,CRITICAL
+                  skip-dirs: node_modules
+                  exit-code: '1'
             - name: actionlint
               run: docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:1.7.12@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667 -color
 

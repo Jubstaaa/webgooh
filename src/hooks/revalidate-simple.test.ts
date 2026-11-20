@@ -18,7 +18,9 @@ describe('revalidateGlobal', () => {
     test('refreshes the tag and hands the saved doc back', () => {
         const doc = { id: 1 }
 
-        const result = revalidateGlobal('settings')({ doc } as HookArgs)
+        const result: unknown = revalidateGlobal('settings')({
+            doc,
+        } as HookArgs)
 
         expect(result).toBe(doc)
         expect(revalidated).toEqual(['settings'])

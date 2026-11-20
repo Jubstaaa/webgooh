@@ -31,9 +31,9 @@ describe('baseline migration', () => {
     it('builds the schema on an empty database', async () => {
         const db = drizzle(':memory:')
         await runBaseline(db)
-        expect(await tableNames(db)).toEqual(
-            expect.arrayContaining(['payload_migrations', 'users'])
-        )
+        const names = await tableNames(db)
+        expect(names).toContain('payload_migrations')
+        expect(names).toContain('users')
     })
 
     it('leaves a database Payload already initialised untouched', async () => {
