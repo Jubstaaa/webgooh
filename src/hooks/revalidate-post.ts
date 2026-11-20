@@ -7,8 +7,8 @@ import { cacheTags } from '@/lib/cache-tags'
 import {
     mergeTargets,
     noTargets,
-    type RevalidationTargets,
     revalidateTargets,
+    type RevalidationTargets,
 } from '@/lib/revalidate'
 import type { Post } from '@payload-types'
 

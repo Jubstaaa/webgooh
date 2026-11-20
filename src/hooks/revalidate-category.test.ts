@@ -19,7 +19,12 @@ describe('categoryChangeTargets', () => {
 
         expect(
             categoryChangeTargets({ slug: 'haberler' }, previous).tags
-        ).toEqual(['categories', 'posts', 'category:haberler', 'category:haber'])
+        ).toEqual([
+            'categories',
+            'posts',
+            'category:haberler',
+            'category:haber',
+        ])
     })
 
     test('refreshes posts when only the colour changes', () => {
