@@ -102,7 +102,7 @@ export default buildConfig({
             },
             config: {
                 // Empty only in builds and local dev, where nothing is uploaded;
-                // a production server refuses to start without them
+                // a production server fails its startup hook without them
                 // (src/lib/env.ts, checked in src/instrumentation.ts).
                 credentials: {
                     accessKeyId: process.env.S3_ACCESS_KEY_ID ?? '',

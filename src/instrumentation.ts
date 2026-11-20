@@ -6,8 +6,9 @@ export async function register() {
         return
     }
 
-    // Refuses to start with a missing secret, database or Spaces credentials,
-    // so a bad .env fails the deploy instead of the first upload.
+    // A missing secret, database or Spaces credential fails the startup hook,
+    // so every request errors and the health check rolls the deploy back,
+    // instead of the first upload failing after the release went live.
     const { parseRuntimeEnv } = await import('@/lib/env')
     parseRuntimeEnv(process.env)
 
