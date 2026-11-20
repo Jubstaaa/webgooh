@@ -9,7 +9,6 @@ import type { Service } from '@payload-types'
 
 function revalidateService(doc: Partial<Service>) {
     safeRevalidateTag(cacheTags.services)
-    safeRevalidateTag(cacheTags.sitemap)
     safeRevalidatePath('/')
 
     if (doc?.slug) {

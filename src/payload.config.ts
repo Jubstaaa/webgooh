@@ -101,9 +101,12 @@ export default buildConfig({
                 },
             },
             config: {
+                // Empty only in builds and local dev, where nothing is uploaded;
+                // a production server fails its startup hook without them
+                // (src/lib/env.ts, checked in src/instrumentation.ts).
                 credentials: {
-                    accessKeyId: process.env.S3_ACCESS_KEY_ID as string,
-                    secretAccessKey: process.env.S3_SECRET_ACCESS_KEY as string,
+                    accessKeyId: process.env.S3_ACCESS_KEY_ID ?? '',
+                    secretAccessKey: process.env.S3_SECRET_ACCESS_KEY ?? '',
                 },
                 endpoint: `https://${S3_REGION}.digitaloceanspaces.com`,
                 forcePathStyle: false,
@@ -112,7 +115,7 @@ export default buildConfig({
             enabled: s3Enabled,
         }),
     ],
-    secret: process.env.PAYLOAD_SECRET || '',
+    secret: process.env.PAYLOAD_SECRET ?? '',
     sharp,
     typescript: {
         outputFile: path.resolve(dirname, 'payload-types.ts'),

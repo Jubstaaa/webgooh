@@ -1,7 +1,14 @@
-import { createRemoteJWKSet, jwtVerify, type JWTVerifyGetKey } from 'jose'
+import {
+    createRemoteJWKSet,
+    errors,
+    jwtVerify,
+    type JWTVerifyGetKey,
+} from 'jose'
 import { generatePayloadCookie, getFieldsToSign, jwtSign } from 'payload'
 import type { AuthStrategy, Payload } from 'payload'
 import { z } from 'zod'
+
+import { errorSummary } from './error-summary'
 
 // Only the signed assertion is trusted. The plain
 // cf-access-authenticated-user-email header is just as easy to send by hand on
@@ -48,21 +55,65 @@ function accessConfigFromEnv(): AccessConfig | null {
     return fromEnv
 }
 
-async function verifiedEmail(token: string, config: AccessConfig) {
-    try {
-        const { payload } = await jwtVerify(token, config.keys, {
-            algorithms: ['RS256'],
-            audience: config.audience,
-            issuer: config.issuer,
-        })
-        const claims = accessClaims.safeParse(payload)
+// An expired session or a forged signature is an ordinary unauthenticated
+// request. Anything else (wrong audience or issuer, an unreachable JWKS) means
+// the Access settings are off, so it is logged.
+function isOrdinaryRejection(error: unknown) {
+    return (
+        error instanceof errors.JWTExpired ||
+        error instanceof errors.JWSSignatureVerificationFailed
+    )
+}
 
-        return claims.success ? claims.data.email.toLowerCase() : null
-    } catch {
-        // A bad signature, audience, issuer or expiry is an ordinary
-        // unauthenticated request, not a server fault.
+// Container logs are read outside this app, so a rejection is logged by kind
+// only: a jose error's .payload holds the token's claims, the editor's email
+// among them.
+function rejectionSummary(error: unknown) {
+    if (error instanceof errors.JWTClaimValidationFailed) {
+        const { claim, code, name, reason } = error
+
+        return { claim, code, name, reason }
+    }
+    if (error instanceof errors.JOSEError) {
+        const { code, name } = error
+
+        return { code, name }
+    }
+
+    return { name: error instanceof Error ? error.name : typeof error }
+}
+
+async function verifiedEmail(token: string, config: AccessConfig) {
+    const payload = await jwtVerify(token, config.keys, {
+        algorithms: ['RS256'],
+        audience: config.audience,
+        issuer: config.issuer,
+    }).then(
+        verified => verified.payload,
+        (error: unknown) => {
+            if (!isOrdinaryRejection(error)) {
+                console.error(
+                    'Cloudflare Access assertion rejected',
+                    rejectionSummary(error)
+                )
+            }
+
+            return null
+        }
+    )
+    if (!payload) return null
+
+    const claims = accessClaims.safeParse(payload)
+    if (!claims.success) {
+        console.error(
+            'Cloudflare Access assertion has no usable email claim',
+            claims.error.issues.map(({ code, path }) => ({ code, path }))
+        )
+
         return null
     }
+
+    return claims.data.email.toLowerCase()
 }
 
 // The Access policy is the only list of people worth keeping, so an address it
@@ -89,9 +140,14 @@ async function register({
             },
             overrideAccess: true,
         })
-    } catch {
-        // Two first requests at once: whichever lost the race reads back the row
-        // the winner wrote, since email is unique.
+    } catch (error) {
+        // Usually two first requests at once: whichever lost the race reads back
+        // the row the winner wrote, since email is unique. Anything else leaves
+        // the read-back empty, so the cause is logged rather than lost.
+        console.error(
+            'Registering a Cloudflare Access user failed',
+            errorSummary(error)
+        )
         const { docs } = await payload.find({
             collection: 'users',
             depth: 0,

@@ -54,6 +54,11 @@ const securityHeaders = [
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+    experimental: {
+        // src/app/global-not-found.tsx: with two root layouts, unmatched URLs
+        // otherwise get Next's bare default 404.
+        globalNotFound: true,
+    },
     output: 'standalone',
     reactStrictMode: true,
     poweredByHeader: false,
@@ -92,5 +97,29 @@ export default function config(phase) {
         )
     }
 
-    return withPayload(nextConfig, { devBundleServerPackages: false })
+    return scopeClientHintsToAdmin(
+        withPayload(nextConfig, { devBundleServerPackages: false })
+    )
+}
+
+// withPayload asks every path for the Sec-CH-Prefers-Color-Scheme client hint.
+// Only the admin panel picks its theme from it; on the public site, whose
+// colour scheme is fixed, Critical-CH just makes Chromium retry the first
+// navigation to send a hint nothing reads.
+function scopeClientHintsToAdmin(config) {
+    const { headers } = config
+
+    return {
+        ...config,
+        async headers() {
+            const rules = await headers()
+
+            return rules.map(rule =>
+                rule.source === '/:path*' &&
+                rule.headers.some(header => header.key === 'Accept-CH')
+                    ? { ...rule, source: '/admin/:path*' }
+                    : rule
+            )
+        },
+    }
 }

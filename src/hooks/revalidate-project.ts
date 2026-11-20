@@ -9,7 +9,6 @@ import type { Project } from '@payload-types'
 
 function revalidateProject(doc: Partial<Project>) {
     safeRevalidateTag(cacheTags.projects)
-    safeRevalidateTag(cacheTags.sitemap)
     safeRevalidatePath('/referanslar')
 
     if (doc?.slug) {

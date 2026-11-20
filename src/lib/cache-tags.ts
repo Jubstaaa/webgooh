@@ -8,5 +8,4 @@ export const cacheTags = {
     service: (slug: string) => `service:${slug}`,
     services: 'services',
     settings: 'settings',
-    sitemap: 'sitemap',
 } as const

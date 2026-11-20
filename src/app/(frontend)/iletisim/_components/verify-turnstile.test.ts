@@ -1,16 +1,28 @@
-import { beforeEach, describe, expect, mock, spyOn, test } from 'bun:test'
+import {
+    afterEach,
+    beforeEach,
+    describe,
+    expect,
+    mock,
+    spyOn,
+    test,
+} from 'bun:test'
 
 import { clientIp, verifyTurnstile } from './verify-turnstile'
 
-function siteverify(body: unknown) {
+function siteverify(body: unknown, init?: ResponseInit) {
     return mock((_url: string, _init: RequestInit) =>
-        Promise.resolve(Response.json(body))
+        Promise.resolve(Response.json(body, init))
     )
 }
 
 describe('verifyTurnstile', () => {
     beforeEach(() => {
         spyOn(console, 'error').mockImplementation(() => undefined)
+    })
+
+    afterEach(() => {
+        mock.restore()
     })
 
     test('fails closed without a secret, never calling Cloudflare', async () => {
@@ -63,6 +75,75 @@ describe('verifyTurnstile', () => {
         expect(body.get('remoteip')).toBe('203.0.113.7')
         expect(body.get('secret')).toBe('secret')
         expect(body.get('response')).toBe('token')
+    })
+})
+
+describe('verifyTurnstile logging', () => {
+    let consoleError: ReturnType<typeof spyOn<Console, 'error'>>
+
+    beforeEach(() => {
+        consoleError = spyOn(console, 'error').mockImplementation(
+            () => undefined
+        )
+    })
+
+    afterEach(() => {
+        consoleError.mockRestore()
+    })
+
+    function verify(fetcher: ReturnType<typeof siteverify>) {
+        return verifyTurnstile({ fetcher, secret: 'secret', token: 'token' })
+    }
+
+    test.each(['invalid-input-response', 'timeout-or-duplicate'])(
+        'stays quiet when a visitor token is rejected with %s',
+        async code => {
+            const ok = await verify(
+                siteverify({ 'error-codes': [code], 'success': false })
+            )
+
+            expect(ok).toBe(false)
+            expect(consoleError).not.toHaveBeenCalled()
+        }
+    )
+
+    test.each([
+        'missing-input-secret',
+        'invalid-input-secret',
+        'internal-error',
+    ])('logs a rejection caused on our side: %s', async code => {
+        const ok = await verify(
+            siteverify({ 'error-codes': [code], 'success': false })
+        )
+
+        expect(ok).toBe(false)
+        expect(consoleError).toHaveBeenCalledWith(
+            'Turnstile siteverify rejected',
+            200,
+            [code]
+        )
+    })
+
+    test('logs and fails on a non-2xx response', async () => {
+        const ok = await verify(siteverify({ success: true }, { status: 503 }))
+
+        expect(ok).toBe(false)
+        expect(consoleError).toHaveBeenCalledWith(
+            'Turnstile siteverify rejected',
+            503,
+            []
+        )
+    })
+
+    test('logs and fails on a body it cannot read', async () => {
+        const ok = await verify(siteverify({ unexpected: true }))
+
+        expect(ok).toBe(false)
+        expect(consoleError).toHaveBeenCalledWith(
+            'Turnstile siteverify rejected',
+            200,
+            []
+        )
     })
 })
 

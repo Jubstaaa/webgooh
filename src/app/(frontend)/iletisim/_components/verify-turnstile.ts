@@ -3,7 +3,18 @@ import { z } from 'zod'
 const SITEVERIFY_URL =
     'https://challenges.cloudflare.com/turnstile/v0/siteverify'
 
-const siteverifyResponse = z.object({ success: z.boolean() })
+const siteverifyResponse = z.object({
+    'error-codes': z.array(z.string()).default([]),
+    'success': z.boolean(),
+})
+
+// The only codes a visitor can cause: a bad, expired or replayed token. Any
+// other code (a missing or wrong secret, Cloudflare's internal-error) means
+// every submit is failing and someone has to look.
+const VISITOR_ERROR_CODES = new Set([
+    'invalid-input-response',
+    'timeout-or-duplicate',
+])
 
 interface VerifyTurnstileOptions {
     fetcher?: (url: string, init: RequestInit) => Promise<Response>
@@ -32,8 +43,19 @@ export async function verifyTurnstile({
     try {
         const res = await fetcher(SITEVERIFY_URL, { body, method: 'POST' })
         const parsed = siteverifyResponse.safeParse(await res.json())
+        const codes = parsed.success ? parsed.data['error-codes'] : []
 
-        return parsed.success && parsed.data.success
+        if (
+            !res.ok ||
+            !parsed.success ||
+            codes.some(code => !VISITOR_ERROR_CODES.has(code))
+        ) {
+            console.error('Turnstile siteverify rejected', res.status, codes)
+
+            return false
+        }
+
+        return parsed.data.success
     } catch (error) {
         console.error('Turnstile siteverify failed', error)
 

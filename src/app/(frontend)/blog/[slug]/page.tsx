@@ -4,7 +4,6 @@ import { notFound } from 'next/navigation'
 import { BlogDetail } from '@/app/(frontend)/blog/_components/blog-detail'
 import { getPostBySlug, getPosts } from '@/lib/queries'
 import { buildMetadata } from '@/lib/seo'
-import type { Category } from '@payload-types'
 
 interface PageProps {
     params: Promise<{ slug: string }>
@@ -13,9 +12,7 @@ interface PageProps {
 export async function generateStaticParams() {
     const posts = await getPosts()
 
-    return posts
-        .filter(post => Boolean(post.slug))
-        .map(post => ({ slug: post.slug as string }))
+    return posts.flatMap(post => (post.slug ? [{ slug: post.slug }] : []))
 }
 
 export async function generateMetadata({
@@ -40,8 +37,7 @@ export default async function PostPage({ params }: PageProps) {
 
     if (!post) notFound()
 
-    const category =
-        typeof post.category === 'object' ? (post.category as Category) : null
+    const category = typeof post.category === 'object' ? post.category : null
     const categorySlug = category?.slug ?? undefined
 
     const relatedAll = await getPosts({ categorySlug, limit: 4 })
