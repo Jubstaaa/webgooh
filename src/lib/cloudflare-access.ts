@@ -89,9 +89,11 @@ async function register({
             },
             overrideAccess: true,
         })
-    } catch {
-        // Two first requests at once: whichever lost the race reads back the row
-        // the winner wrote, since email is unique.
+    } catch (error) {
+        // Usually two first requests at once: whichever lost the race reads back
+        // the row the winner wrote, since email is unique. Anything else leaves
+        // the read-back empty, so the cause is logged rather than lost.
+        console.error('Registering a Cloudflare Access user failed', error)
         const { docs } = await payload.find({
             collection: 'users',
             depth: 0,

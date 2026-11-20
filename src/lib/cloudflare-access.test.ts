@@ -1,4 +1,4 @@
-import { beforeAll, describe, expect, mock, test } from 'bun:test'
+import { beforeAll, describe, expect, mock, spyOn, test } from 'bun:test'
 import {
     createLocalJWKSet,
     exportJWK,
@@ -144,5 +144,32 @@ describe('cloudflare access strategy', () => {
         )
 
         expect(result.user?.email).toBe('editor@example.com')
+    })
+
+    test('logs why registering a first-time user failed', async () => {
+        const failure = new Error('SQLITE_READONLY')
+        const consoleError = spyOn(console, 'error').mockImplementation(
+            () => {}
+        )
+        const payload = {
+            create: () => Promise.reject(failure),
+            find: () => Promise.resolve({ docs: [] }),
+        } as unknown as Payload
+        const strategy = createCloudflareAccessStrategy(config)
+        const token = await sign({ email: 'new@example.com' })
+
+        const result = await strategy.authenticate({
+            canSetHeaders: false,
+            headers: new Headers({ 'cf-access-jwt-assertion': token }),
+            payload,
+            strategyName: strategy.name,
+        })
+
+        expect(result.user).toBeNull()
+        expect(consoleError).toHaveBeenCalledWith(
+            'Registering a Cloudflare Access user failed',
+            failure
+        )
+        consoleError.mockRestore()
     })
 })
