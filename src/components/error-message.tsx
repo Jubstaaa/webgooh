@@ -1,7 +1,5 @@
 'use client'
 
-import { useEffect } from 'react'
-
 import { Button, ButtonLink } from '@/components/button'
 import { StatusMessage } from '@/components/status-message'
 
@@ -10,11 +8,9 @@ export interface ErrorBoundaryProps {
     retry: () => void
 }
 
-export function ErrorMessage({ error, retry }: ErrorBoundaryProps) {
-    useEffect(() => {
-        console.error(error)
-    }, [error])
-
+// Next's onCaughtError already logs what an error boundary catches to
+// console.error, in production too, so `error` is not logged again here.
+export function ErrorMessage({ retry }: ErrorBoundaryProps) {
     return (
         <StatusMessage
             code="500"

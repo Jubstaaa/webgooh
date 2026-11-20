@@ -21,7 +21,12 @@ const count = mock(({ collection }: { collection: string }) =>
 )
 
 void mock.module('@/lib/payload', () => ({
-    getPayloadClient: () => Promise.resolve({ count, find }),
+    getPayloadClient: () =>
+        Promise.resolve({
+            count,
+            find,
+            findGlobal: () => Promise.resolve({ whatsapp: '905000000000' }),
+        }),
 }))
 
 const queries = await import('./queries')
@@ -73,6 +78,38 @@ describe('getContentCounts', () => {
         })
         expect(count).toHaveBeenCalledWith({
             collection: 'posts',
+            where: { _status: { equals: 'published' } },
+        })
+    })
+})
+
+describe('single-document queries', () => {
+    test('read the site settings global', async () => {
+        expect(await queries.getSettings()).toMatchObject({
+            whatsapp: '905000000000',
+        })
+    })
+
+    test.each([
+        ['getPostBySlug', 'posts'],
+        ['getProjectBySlug', 'projects'],
+        ['getServiceBySlug', 'services'],
+    ] as const)(
+        '%s looks the slug up and misses as null',
+        async (name, collection) => {
+            expect(await queries[name]('yok')).toBeNull()
+            expect(lastFind()).toMatchObject({
+                collection,
+                limit: 1,
+                where: { slug: { equals: 'yok' } },
+            })
+        }
+    )
+
+    test('a post page only finds published posts', async () => {
+        await queries.getPostBySlug('taslak')
+
+        expect(lastFind()).toMatchObject({
             where: { _status: { equals: 'published' } },
         })
     })

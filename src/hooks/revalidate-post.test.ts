@@ -1,8 +1,21 @@
-import { describe, expect, test } from 'bun:test'
+import { beforeEach, describe, expect, mock, test } from 'bun:test'
 
 import type { Category, Post } from '@payload-types'
 
-import { postChangeTargets, postTargets } from './revalidate-post'
+const revalidated: string[] = []
+
+void mock.module('next/cache', () => ({
+    revalidatePath: (path: string) => revalidated.push(path),
+    revalidateTag: (tag: string) => revalidated.push(tag),
+    unstable_cache: <T>(fn: T) => fn,
+}))
+
+const {
+    postChangeTargets,
+    postTargets,
+    revalidatePostAfterChange,
+    revalidatePostAfterDelete,
+} = await import('./revalidate-post')
 
 const news = { slug: 'haber' } as Category
 const guides = { slug: 'rehber' } as Category
@@ -59,5 +72,36 @@ describe('postChangeTargets', () => {
 
         expect(targets.tags).toContain('category:rehber')
         expect(targets.tags).toContain('category:haber')
+    })
+})
+
+describe('post hooks', () => {
+    beforeEach(() => {
+        revalidated.length = 0
+    })
+
+    test('afterChange revalidates and hands the doc back', () => {
+        const doc = post()
+        const args = { doc, previousDoc: post({ _status: 'draft' }) }
+
+        expect(
+            revalidatePostAfterChange(
+                args as unknown as Parameters<
+                    typeof revalidatePostAfterChange
+                >[0]
+            )
+        ).toBe(doc)
+        expect(revalidated).toContain('/blog/ilk')
+    })
+
+    test('afterDelete takes the deleted post off its pages', () => {
+        const doc = post()
+
+        expect(
+            revalidatePostAfterDelete({ doc } as unknown as Parameters<
+                typeof revalidatePostAfterDelete
+            >[0])
+        ).toBe(doc)
+        expect(revalidated).toContain('post:ilk')
     })
 })

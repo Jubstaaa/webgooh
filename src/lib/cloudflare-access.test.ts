@@ -8,7 +8,10 @@ import {
 } from 'jose'
 import type { Payload } from 'payload'
 
-import { createCloudflareAccessStrategy } from './cloudflare-access'
+import {
+    cloudflareAccess,
+    createCloudflareAccessStrategy,
+} from './cloudflare-access'
 
 const TEAM_DOMAIN = 'https://team.cloudflareaccess.com'
 const AUDIENCE = 'test-audience-tag'
@@ -169,6 +172,63 @@ describe('cloudflare access strategy', () => {
         expect(consoleError).toHaveBeenCalledWith(
             'Registering a Cloudflare Access user failed',
             failure
+        )
+        consoleError.mockRestore()
+    })
+
+    test('issues a Payload session cookie when it may set headers', async () => {
+        const token = await sign({ email: 'editor@example.com' })
+        const { payload } = fakePayload()
+        Object.assign(payload, {
+            collections: {
+                users: {
+                    config: {
+                        auth: { cookies: {}, tokenExpiration: 7200 },
+                        fields: [],
+                    },
+                },
+            },
+            config: { cookiePrefix: 'payload' },
+            secret: 'test-secret',
+        })
+        const strategy = createCloudflareAccessStrategy(config)
+
+        const result = await strategy.authenticate({
+            canSetHeaders: true,
+            headers: new Headers({ 'cf-access-jwt-assertion': token }),
+            payload,
+            strategyName: strategy.name,
+        })
+
+        expect(result.user?.email).toBe('editor@example.com')
+        expect(result.responseHeaders?.get('set-cookie')).toStartWith(
+            'payload-token='
+        )
+    })
+
+    test('is switched off, and says so in production, without the Access settings', async () => {
+        const env = process.env as Record<string, string | undefined>
+        const nodeEnv = env.NODE_ENV
+        delete env.CF_ACCESS_TEAM_DOMAIN
+        delete env.CF_ACCESS_AUD
+        env.NODE_ENV = 'production'
+        const consoleError = spyOn(console, 'error').mockImplementation(
+            () => {}
+        )
+        const token = await sign({ email: 'a@example.com' })
+        const { payload } = fakePayload()
+
+        const result = await cloudflareAccess.authenticate({
+            canSetHeaders: false,
+            headers: new Headers({ 'cf-access-jwt-assertion': token }),
+            payload,
+            strategyName: cloudflareAccess.name,
+        })
+
+        env.NODE_ENV = nodeEnv
+        expect(result.user).toBeNull()
+        expect(consoleError).toHaveBeenCalledWith(
+            'Cloudflare Access sign-in is disabled: set CF_ACCESS_TEAM_DOMAIN and CF_ACCESS_AUD.'
         )
         consoleError.mockRestore()
     })
