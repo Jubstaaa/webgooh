@@ -6,7 +6,7 @@ import { ArrowUpRight, Clock } from 'lucide-react'
 import { mediaAlt, mediaUrl } from '@/lib/media'
 import { readingMinutes } from '@/lib/reading-time'
 import { formatDate } from '@/lib/utils'
-import type { Category, Post } from '@payload-types'
+import type { Post } from '@payload-types'
 
 import { Badge } from './badge'
 
@@ -23,8 +23,7 @@ export function PostCard({
     headingLevel: Heading = 'h3',
     post,
 }: PostCardProps) {
-    const cat =
-        typeof post.category === 'object' ? (post.category as Category) : null
+    const cat = typeof post.category === 'object' ? post.category : null
     const cover = mediaUrl(post.coverImage)
     const minutes = readingMinutes(post.content)
 

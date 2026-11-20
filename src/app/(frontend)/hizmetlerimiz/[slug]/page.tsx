@@ -12,9 +12,9 @@ interface PageProps {
 export async function generateStaticParams() {
     const services = await getServices()
 
-    return services
-        .filter(service => Boolean(service.slug))
-        .map(service => ({ slug: service.slug as string }))
+    return services.flatMap(service =>
+        service.slug ? [{ slug: service.slug }] : []
+    )
 }
 
 export async function generateMetadata({

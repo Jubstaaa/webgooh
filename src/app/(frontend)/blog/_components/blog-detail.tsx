@@ -12,7 +12,7 @@ import { mediaAlt, mediaUrl } from '@/lib/media'
 import { readingMinutes } from '@/lib/reading-time'
 import { SITE_URL } from '@/lib/site.mjs'
 import { formatDate } from '@/lib/utils'
-import type { Category, Post } from '@payload-types'
+import type { Post } from '@payload-types'
 
 interface BlogDetailProps {
     post: Post
@@ -22,8 +22,7 @@ interface BlogDetailProps {
 const AUTHOR = 'Webgooh'
 
 export function BlogDetail({ post, related }: BlogDetailProps) {
-    const cat =
-        typeof post.category === 'object' ? (post.category as Category) : null
+    const cat = typeof post.category === 'object' ? post.category : null
     const cover = mediaUrl(post.coverImage)
     const minutes = readingMinutes(post.content)
 
