@@ -24,11 +24,11 @@ const dirname = path.dirname(filename)
 
 const S3_MEDIA_PREFIX = 'media'
 
-// Keyed off NODE_ENV rather than the credentials: the Docker build prerenders
-// SSG pages against the live DB, and it has no credentials, so gating on those
-// would bake `/api/media/file/...` URLs into the HTML instead of CDN ones. The
-// S3 client is created lazily, so being "enabled" without credentials during the
-// build is harmless. Local dev keeps writing uploads to disk.
+// Keyed off NODE_ENV rather than the credentials: the Docker build has no
+// credentials, so gating on those would give anything it prerenders
+// `/api/media/file/...` URLs instead of CDN ones. The S3 client is created
+// lazily, so being "enabled" without credentials during the build is harmless.
+// Local dev keeps writing uploads to disk.
 const s3Enabled = process.env.NODE_ENV === 'production'
 
 export default buildConfig({
@@ -70,8 +70,8 @@ export default buildConfig({
         },
         // Production never pushes schema, so pending migrations run when Payload
         // initialises there: at server start (src/instrumentation.ts), before
-        // any request. The image build has already applied them to its copy of
-        // the live database (Dockerfile).
+        // any request. The image build migrates only its own empty database
+        // (Dockerfile); the deploy snapshots the live one before this runs.
         prodMigrations: migrations,
     }),
     editor: lexicalEditor(),
@@ -101,9 +101,12 @@ export default buildConfig({
                 },
             },
             config: {
+                // Empty only in builds and local dev, where nothing is uploaded;
+                // a production server fails its startup hook without them
+                // (src/lib/env.ts, checked in src/instrumentation.ts).
                 credentials: {
-                    accessKeyId: process.env.S3_ACCESS_KEY_ID as string,
-                    secretAccessKey: process.env.S3_SECRET_ACCESS_KEY as string,
+                    accessKeyId: process.env.S3_ACCESS_KEY_ID ?? '',
+                    secretAccessKey: process.env.S3_SECRET_ACCESS_KEY ?? '',
                 },
                 endpoint: `https://${S3_REGION}.digitaloceanspaces.com`,
                 forcePathStyle: false,
@@ -112,7 +115,7 @@ export default buildConfig({
             enabled: s3Enabled,
         }),
     ],
-    secret: process.env.PAYLOAD_SECRET || '',
+    secret: process.env.PAYLOAD_SECRET ?? '',
     sharp,
     typescript: {
         outputFile: path.resolve(dirname, 'payload-types.ts'),

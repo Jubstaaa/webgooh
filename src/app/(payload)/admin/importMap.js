@@ -24,8 +24,8 @@ import { ItalicFeatureClient as ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0
 import { LogoutButton as LogoutButton_68c6c5c648b9794861adf21c37c52584 } from '../../../components/payload/logout-button'
 import { Icon as Icon_abede1266a0d202441bb52ac6102d05c } from '../../../components/payload/icon'
 import { Logo as Logo_7c6ef851f3084cab2be74107c14f6ff2 } from '../../../components/payload/logo'
-import { S3ClientUploadHandler as S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24 } from '@payloadcms/storage-s3/client'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
+import { S3ClientUploadHandler as S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24 } from '@payloadcms/storage-s3/client'
 
 /** @type import('payload').ImportMap */
 export const importMap = {
@@ -55,6 +55,6 @@ export const importMap = {
   "/components/payload/logout-button#LogoutButton": LogoutButton_68c6c5c648b9794861adf21c37c52584,
   "/components/payload/icon#Icon": Icon_abede1266a0d202441bb52ac6102d05c,
   "/components/payload/logo#Logo": Logo_7c6ef851f3084cab2be74107c14f6ff2,
-  "@payloadcms/storage-s3/client#S3ClientUploadHandler": S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24,
-  "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
+  "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1,
+  "@payloadcms/storage-s3/client#S3ClientUploadHandler": S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24
 }

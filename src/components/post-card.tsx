@@ -1,14 +1,14 @@
 import Image from 'next/image'
 import Link from 'next/link'
 
-import { ArrowUpRight, Clock } from 'lucide-react'
+import { ArrowUpRight } from 'lucide-react'
 
 import { mediaAlt, mediaUrl } from '@/lib/media'
 import { readingMinutes } from '@/lib/reading-time'
-import { formatDate } from '@/lib/utils'
-import type { Category, Post } from '@payload-types'
+import type { Post } from '@payload-types'
 
 import { Badge } from './badge'
+import { PostMeta } from './post-meta'
 
 interface PostCardProps {
     // Above-the-fold cards load their image eagerly and at high priority.
@@ -23,8 +23,7 @@ export function PostCard({
     headingLevel: Heading = 'h3',
     post,
 }: PostCardProps) {
-    const cat =
-        typeof post.category === 'object' ? (post.category as Category) : null
+    const cat = typeof post.category === 'object' ? post.category : null
     const cover = mediaUrl(post.coverImage)
     const minutes = readingMinutes(post.content)
 
@@ -53,19 +52,11 @@ export function PostCard({
             </div>
 
             <div className="flex flex-1 flex-col gap-3 p-5">
-                <div className="text-faint flex items-center gap-3 font-mono text-xs">
-                    {post.publishedAt ? (
-                        <time dateTime={post.publishedAt}>
-                            {formatDate(post.publishedAt)}
-                        </time>
-                    ) : null}
-                    {minutes ? (
-                        <span className="flex items-center gap-1">
-                            <Clock className="size-3" />
-                            {minutes} dk
-                        </span>
-                    ) : null}
-                </div>
+                <PostMeta
+                    minutes={minutes}
+                    publishedAt={post.publishedAt}
+                    readingLabel="dk"
+                />
 
                 <Heading className="text-paper group-hover:text-brand-bright line-clamp-2 text-lg leading-snug font-semibold transition-colors">
                     {post.title}

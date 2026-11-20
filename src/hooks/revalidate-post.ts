@@ -4,34 +4,53 @@ import type {
 } from 'payload'
 
 import { cacheTags } from '@/lib/cache-tags'
-import { safeRevalidatePath, safeRevalidateTag } from '@/lib/revalidate'
+import {
+    mergeTargets,
+    noTargets,
+    revalidateTargets,
+    type RevalidationTargets,
+} from '@/lib/revalidate'
 import type { Post } from '@payload-types'
 
-function revalidatePost(doc: Partial<Post>) {
-    safeRevalidateTag(cacheTags.posts)
-    safeRevalidateTag(cacheTags.sitemap)
-
-    if (doc?.slug) {
-        safeRevalidateTag(cacheTags.post(doc.slug))
-        safeRevalidatePath(`/blog/${doc.slug}`)
-    }
-
+export function postTargets(doc: Partial<Post>): RevalidationTargets {
     const category =
-        doc?.category && typeof doc.category === 'object'
+        doc.category && typeof doc.category === 'object'
             ? doc.category.slug
             : undefined
 
-    if (category) safeRevalidateTag(cacheTags.category(category))
+    return {
+        paths: doc.slug ? [`/blog/${doc.slug}`] : [],
+        tags: [
+            cacheTags.posts,
+            ...(doc.slug ? [cacheTags.post(doc.slug)] : []),
+            ...(category ? [cacheTags.category(category)] : []),
+        ],
+    }
+}
+
+// Either side being published means public pages may show the post: a
+// publish adds it, an unpublish has to take it back off, and a published post
+// that changes slug or category leaves the old page and category list stale.
+// An unpublish expires at once rather than serving the post while it rebuilds.
+export function postChangeTargets(
+    doc: Partial<Post>,
+    previousDoc?: Partial<Post>
+): RevalidationTargets {
+    const isPublished = doc._status === 'published'
+    const wasPublished = previousDoc?._status === 'published'
+    if (!isPublished && !wasPublished) return noTargets
+
+    return mergeTargets(
+        { ...postTargets(doc), ...(isPublished ? {} : { expireNow: true }) },
+        previousDoc ? postTargets(previousDoc) : noTargets
+    )
 }
 
 export const revalidatePostAfterChange: CollectionAfterChangeHook<Post> = ({
     doc,
     previousDoc,
 }) => {
-    if (doc._status === 'published') revalidatePost(doc)
-    if (previousDoc?.slug && previousDoc.slug !== doc.slug) {
-        revalidatePost(previousDoc)
-    }
+    revalidateTargets(postChangeTargets(doc, previousDoc))
 
     return doc
 }
@@ -39,7 +58,7 @@ export const revalidatePostAfterChange: CollectionAfterChangeHook<Post> = ({
 export const revalidatePostAfterDelete: CollectionAfterDeleteHook<Post> = ({
     doc,
 }) => {
-    revalidatePost(doc)
+    revalidateTargets({ ...postTargets(doc), expireNow: true })
 
     return doc
 }

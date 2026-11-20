@@ -2,10 +2,10 @@ import type { CollectionConfig } from 'payload'
 
 import { authenticated } from '@/access'
 import { slugField } from '@/fields/slug'
-import { revalidateCollection } from '@/hooks/revalidate-simple'
-import { cacheTags } from '@/lib/cache-tags'
-
-const revalidate = revalidateCollection(cacheTags.categories)
+import {
+    revalidateCategoryAfterChange,
+    revalidateCategoryAfterDelete,
+} from '@/hooks/revalidate-category'
 
 export const Categories: CollectionConfig = {
     access: {
@@ -41,8 +41,8 @@ export const Categories: CollectionConfig = {
         },
     ],
     hooks: {
-        afterChange: [revalidate.afterChange],
-        afterDelete: [revalidate.afterDelete],
+        afterChange: [revalidateCategoryAfterChange],
+        afterDelete: [revalidateCategoryAfterDelete],
     },
     labels: {
         plural: 'Kategoriler',

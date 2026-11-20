@@ -11,9 +11,9 @@ interface PageProps {
 export async function generateStaticParams() {
     const categories = await getCategories()
 
-    return categories
-        .filter(category => Boolean(category.slug))
-        .map(category => ({ slug: category.slug as string }))
+    return categories.flatMap(category =>
+        category.slug ? [{ slug: category.slug }] : []
+    )
 }
 
 export async function generateMetadata({

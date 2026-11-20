@@ -1,33 +1,15 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter, JetBrains_Mono, Space_Grotesk } from 'next/font/google'
 
 import { FloatingActions } from '@/app/(frontend)/_components/floating-actions'
 import { Footer } from '@/app/(frontend)/_components/footer'
 import { Header } from '@/app/(frontend)/_components/header'
 import { LazyCustomCursor } from '@/app/(frontend)/_components/lazy-custom-cursor'
 import { ScrollProgress } from '@/app/(frontend)/_components/scroll-progress'
+import { fontVariables } from '@/app/fonts'
 import { getSettings } from '@/lib/queries'
 
 import './globals.css'
 import { SITE_URL } from '@/lib/site.mjs'
-
-const inter = Inter({
-    display: 'swap',
-    subsets: ['latin', 'latin-ext'],
-    variable: '--font-inter',
-})
-
-const spaceGrotesk = Space_Grotesk({
-    display: 'swap',
-    subsets: ['latin', 'latin-ext'],
-    variable: '--font-space-grotesk',
-})
-
-const jetbrainsMono = JetBrains_Mono({
-    display: 'swap',
-    subsets: ['latin', 'latin-ext'],
-    variable: '--font-jetbrains',
-})
 
 const INDEXABLE = process.env.SITE_INDEXABLE === 'true'
 
@@ -83,10 +65,7 @@ export default async function FrontendLayout({
     const settings = await getSettings()
 
     return (
-        <html
-            className={`${inter.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable}`}
-            data-scroll-behavior="smooth"
-            lang="tr">
+        <html className={fontVariables} data-scroll-behavior="smooth" lang="tr">
             <body className="min-h-dvh antialiased">
                 <a
                     className="bg-paper text-ink focus-visible:ring-accent sr-only z-[70] rounded-full text-sm font-medium focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:px-4 focus:py-2 focus-visible:ring-2"
