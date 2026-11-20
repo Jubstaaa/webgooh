@@ -1,7 +1,7 @@
 [test]
 # Plain `bun test` enforces coverage, so CI needs no extra flag. Bun applies the
 # threshold to every file the tests load, not to the total. Set just under the
-# weakest file on 2026-11-20 (lines 93.1 % in src/lib/cloudflare-access.ts,
+# weakest file on 2026-11-20 (lines 94.5 % in src/lib/cloudflare-access.ts,
 # functions 100 %); raise it as tests are added, never lower it to let a change
 # through.
 coverage = true

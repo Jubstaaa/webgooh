@@ -4,7 +4,13 @@ import {
     jwtVerify,
     type JWTVerifyGetKey,
 } from 'jose'
-import { generatePayloadCookie, getFieldsToSign, jwtSign } from 'payload'
+import {
+    APIError,
+    generatePayloadCookie,
+    getFieldsToSign,
+    jwtSign,
+    ValidationError,
+} from 'payload'
 import type { AuthStrategy, Payload } from 'payload'
 import { z } from 'zod'
 
@@ -63,6 +69,49 @@ function isOrdinaryRejection(error: unknown) {
     )
 }
 
+// Container logs are read outside this app, so these summaries carry the kind
+// of failure and never values: a jose error's .payload holds the token's
+// claims (the editor's email among them), and a Payload validation message can
+// echo the submitted address.
+function rejectionSummary(error: unknown) {
+    if (error instanceof errors.JWTClaimValidationFailed) {
+        const { claim, code, name, reason } = error
+
+        return { claim, code, name, reason }
+    }
+    if (error instanceof errors.JOSEError) {
+        const { code, name } = error
+
+        return { code, name }
+    }
+
+    return { name: error instanceof Error ? error.name : typeof error }
+}
+
+function registrationFailureSummary(error: unknown) {
+    if (error instanceof ValidationError) {
+        return {
+            fields: error.data.errors.map(field => field.path),
+            name: error.name,
+            status: error.status,
+        }
+    }
+    if (error instanceof APIError) {
+        return { name: error.name, status: error.status }
+    }
+    if (error instanceof Error) {
+        // Database drivers put a stable code (SQLITE_BUSY, …) next to a
+        // message that may quote the row.
+        const code: unknown = Reflect.get(error, 'code')
+
+        return typeof code === 'string'
+            ? { code, name: error.name }
+            : { name: error.name }
+    }
+
+    return { name: typeof error }
+}
+
 async function verifiedEmail(token: string, config: AccessConfig) {
     const payload = await jwtVerify(token, config.keys, {
         algorithms: ['RS256'],
@@ -72,7 +121,10 @@ async function verifiedEmail(token: string, config: AccessConfig) {
         verified => verified.payload,
         (error: unknown) => {
             if (!isOrdinaryRejection(error)) {
-                console.error('Cloudflare Access assertion rejected', error)
+                console.error(
+                    'Cloudflare Access assertion rejected',
+                    rejectionSummary(error)
+                )
             }
 
             return null
@@ -84,7 +136,7 @@ async function verifiedEmail(token: string, config: AccessConfig) {
     if (!claims.success) {
         console.error(
             'Cloudflare Access assertion has no usable email claim',
-            claims.error
+            claims.error.issues.map(({ code, path }) => ({ code, path }))
         )
 
         return null
@@ -121,7 +173,10 @@ async function register({
         // Usually two first requests at once: whichever lost the race reads back
         // the row the winner wrote, since email is unique. Anything else leaves
         // the read-back empty, so the cause is logged rather than lost.
-        console.error('Registering a Cloudflare Access user failed', error)
+        console.error(
+            'Registering a Cloudflare Access user failed',
+            registrationFailureSummary(error)
+        )
         const { docs } = await payload.find({
             collection: 'users',
             depth: 0,

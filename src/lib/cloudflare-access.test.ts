@@ -10,17 +10,28 @@ import {
 } from 'bun:test'
 import {
     createLocalJWKSet,
+    errors,
     exportJWK,
     generateKeyPair,
     type JWTVerifyGetKey,
     SignJWT,
 } from 'jose'
-import type { Payload } from 'payload'
+import { APIError, type Payload, ValidationError } from 'payload'
 
 import {
     cloudflareAccess,
     createCloudflareAccessStrategy,
 } from './cloudflare-access'
+
+// Errors keep their message and own fields (a jose error's claims payload,
+// a Payload error's data) when serialised, so a log leak shows up here.
+function serialized(value: unknown) {
+    return JSON.stringify(value, (_key, field: unknown) =>
+        field instanceof Error
+            ? { ...field, message: field.message, name: field.name }
+            : field
+    )
+}
 
 const TEAM_DOMAIN = 'https://team.cloudflareaccess.com'
 const AUDIENCE = 'test-audience-tag'
@@ -164,8 +175,11 @@ describe('cloudflare access strategy', () => {
         expect(result.user?.email).toBe('editor@example.com')
     })
 
-    test('logs why registering a first-time user failed', async () => {
-        const failure = new Error('SQLITE_READONLY')
+    test('logs why registering failed without the address', async () => {
+        const failure = new ValidationError({
+            collection: 'users',
+            errors: [{ message: 'new@example.com is taken', path: 'email' }],
+        })
         const consoleError = spyOn(console, 'error').mockImplementation(
             () => {}
         )
@@ -186,7 +200,42 @@ describe('cloudflare access strategy', () => {
         expect(result.user).toBeNull()
         expect(consoleError).toHaveBeenCalledWith(
             'Registering a Cloudflare Access user failed',
-            failure
+            { fields: ['email'], name: 'ValidationError', status: 400 }
+        )
+        expect(serialized(consoleError.mock.calls)).not.toContain(
+            'new@example.com'
+        )
+        consoleError.mockRestore()
+    })
+
+    test('logs a database error by its code, not its message', async () => {
+        const failure = Object.assign(
+            new Error('constraint failed for new@example.com'),
+            { code: 'SQLITE_CONSTRAINT' }
+        )
+        const consoleError = spyOn(console, 'error').mockImplementation(
+            () => {}
+        )
+        const payload = {
+            create: () => Promise.reject(failure),
+            find: () => Promise.resolve({ docs: [] }),
+        } as unknown as Payload
+        const strategy = createCloudflareAccessStrategy(config)
+
+        await strategy.authenticate({
+            canSetHeaders: false,
+            headers: new Headers({
+                'cf-access-jwt-assertion': await sign({
+                    email: 'new@example.com',
+                }),
+            }),
+            payload,
+            strategyName: strategy.name,
+        })
+
+        expect(consoleError).toHaveBeenCalledWith(
+            'Registering a Cloudflare Access user failed',
+            { code: 'SQLITE_CONSTRAINT', name: 'Error' }
         )
         consoleError.mockRestore()
     })
@@ -298,16 +347,83 @@ describe('cloudflare access assertion logging', () => {
 
         expect(consoleError).toHaveBeenCalledWith(
             'Cloudflare Access assertion rejected',
-            expect.objectContaining({ code: 'ERR_JWT_CLAIM_VALIDATION_FAILED' })
+            {
+                claim: 'aud',
+                code: 'ERR_JWT_CLAIM_VALIDATION_FAILED',
+                name: 'JWTClaimValidationFailed',
+                reason: 'check_failed',
+            }
+        )
+        expect(serialized(consoleError.mock.calls)).not.toContain(
+            'a@example.com'
         )
     })
 
     test('logs a valid assertion that carries no email', async () => {
-        await rejected(await sign({ sub: 'service-token' }))
+        await rejected(
+            await sign({ email: 'not-an-address', sub: 'service-token' })
+        )
 
         expect(consoleError).toHaveBeenCalledWith(
             'Cloudflare Access assertion has no usable email claim',
-            expect.anything()
+            [{ code: 'invalid_format', path: ['email'] }]
+        )
+        const logged = serialized(consoleError.mock.calls)
+        expect(logged).not.toContain('not-an-address')
+        expect(logged).not.toContain('service-token')
+    })
+
+    test.each([
+        [
+            new errors.JWKSTimeout(),
+            { code: 'ERR_JWKS_TIMEOUT', name: 'JWKSTimeout' },
+        ],
+        [new TypeError('fetch failed'), { name: 'TypeError' }],
+    ])('logs a key lookup failure by kind: %p', async (failure, summary) => {
+        const token = await sign({ email: 'a@example.com' })
+        const strategy = createCloudflareAccessStrategy(() => ({
+            ...config(),
+            keys: () => Promise.reject(failure),
+        }))
+        const { payload } = fakePayload()
+
+        await strategy.authenticate({
+            canSetHeaders: false,
+            headers: new Headers({ 'cf-access-jwt-assertion': token }),
+            payload,
+            strategyName: strategy.name,
+        })
+
+        expect(consoleError).toHaveBeenCalledWith(
+            'Cloudflare Access assertion rejected',
+            summary
+        )
+    })
+
+    test.each([
+        [new APIError('Forbidden', 403), { name: 'APIError', status: 403 }],
+        ['boom', { name: 'string' }],
+    ])('summarises a registration failure: %p', async (failure, summary) => {
+        const strategy = createCloudflareAccessStrategy(config)
+        const payload = {
+            create: () => Promise.reject(failure),
+            find: () => Promise.resolve({ docs: [] }),
+        } as unknown as Payload
+
+        await strategy.authenticate({
+            canSetHeaders: false,
+            headers: new Headers({
+                'cf-access-jwt-assertion': await sign({
+                    email: 'n@example.com',
+                }),
+            }),
+            payload,
+            strategyName: strategy.name,
+        })
+
+        expect(consoleError).toHaveBeenCalledWith(
+            'Registering a Cloudflare Access user failed',
+            summary
         )
     })
 })
