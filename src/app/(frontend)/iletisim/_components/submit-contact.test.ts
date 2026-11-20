@@ -17,6 +17,10 @@ void mock.module('next/headers', () => ({
     headers: () =>
         Promise.resolve(new Headers({ 'cf-connecting-ip': '1.2.3.4' })),
 }))
+const findServices = mock(() =>
+    Promise.resolve({ docs: [{ title: 'Web Geliştirme' }] })
+)
+
 // getServices goes through the real query module, so its cache wrapper is a
 // pass-through and Payload answers the services lookup too.
 void mock.module('next/cache', () => ({
@@ -28,8 +32,7 @@ void mock.module('@/lib/payload', () => ({
     getPayloadClient: () =>
         Promise.resolve({
             create,
-            find: () =>
-                Promise.resolve({ docs: [{ title: 'Web Geliştirme' }] }),
+            find: findServices,
         }),
 }))
 
@@ -68,6 +71,7 @@ beforeEach(() => {
 
 afterEach(() => {
     create.mockClear()
+    findServices.mockClear()
     siteverify.mockClear()
     consoleError.mockClear()
 })
@@ -168,6 +172,22 @@ describe('submitContact', () => {
                 service: 'Web Geliştirme',
             },
         })
+        expect(consoleError).toHaveBeenCalledWith(
+            'Saving a contact lead failed',
+            failure
+        )
+    })
+
+    test('keeps the values when the service list cannot be read', async () => {
+        const failure = new Error('SQLITE_CANTOPEN')
+        findServices.mockImplementationOnce(() => Promise.reject(failure))
+
+        const state = await submit(valid)
+
+        expect(state.status).toBe('error')
+        expect(state.message).toBe('Bir hata oluştu. Lütfen tekrar deneyin.')
+        expect(state.values?.email).toBe('ayse@example.com')
+        expect(create).not.toHaveBeenCalled()
         expect(consoleError).toHaveBeenCalledWith(
             'Saving a contact lead failed',
             failure

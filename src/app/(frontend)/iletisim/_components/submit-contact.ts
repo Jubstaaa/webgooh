@@ -50,21 +50,23 @@ export async function submitContact(
         }
     }
 
-    const services = await getServices()
-    const parsed = createContactSchema(
-        services.map(service => service.title)
-    ).safeParse(values)
+    // The service list is read from the same database as the save, so a
+    // database failure at either step keeps what the visitor typed.
+    try {
+        const services = await getServices()
+        const parsed = createContactSchema(
+            services.map(service => service.title)
+        ).safeParse(values)
 
-    if (!parsed.success) {
-        const errors: Record<string, string> = {}
-        for (const issue of parsed.error.issues) {
-            errors[String(issue.path[0])] = issue.message
+        if (!parsed.success) {
+            const errors: Record<string, string> = {}
+            for (const issue of parsed.error.issues) {
+                errors[String(issue.path[0])] = issue.message
+            }
+
+            return { attempt, errors, status: 'error', values }
         }
 
-        return { attempt, errors, status: 'error', values }
-    }
-
-    try {
         const payload = await getPayloadClient()
         await payload.create({ collection: 'leads', data: parsed.data })
 
