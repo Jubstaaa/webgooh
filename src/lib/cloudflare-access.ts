@@ -4,15 +4,11 @@ import {
     jwtVerify,
     type JWTVerifyGetKey,
 } from 'jose'
-import {
-    APIError,
-    generatePayloadCookie,
-    getFieldsToSign,
-    jwtSign,
-    ValidationError,
-} from 'payload'
+import { generatePayloadCookie, getFieldsToSign, jwtSign } from 'payload'
 import type { AuthStrategy, Payload } from 'payload'
 import { z } from 'zod'
+
+import { errorSummary } from './error-summary'
 
 // Only the signed assertion is trusted. The plain
 // cf-access-authenticated-user-email header is just as easy to send by hand on
@@ -69,10 +65,9 @@ function isOrdinaryRejection(error: unknown) {
     )
 }
 
-// Container logs are read outside this app, so these summaries carry the kind
-// of failure and never values: a jose error's .payload holds the token's
-// claims (the editor's email among them), and a Payload validation message can
-// echo the submitted address.
+// Container logs are read outside this app, so a rejection is logged by kind
+// only: a jose error's .payload holds the token's claims, the editor's email
+// among them.
 function rejectionSummary(error: unknown) {
     if (error instanceof errors.JWTClaimValidationFailed) {
         const { claim, code, name, reason } = error
@@ -86,30 +81,6 @@ function rejectionSummary(error: unknown) {
     }
 
     return { name: error instanceof Error ? error.name : typeof error }
-}
-
-function registrationFailureSummary(error: unknown) {
-    if (error instanceof ValidationError) {
-        return {
-            fields: error.data.errors.map(field => field.path),
-            name: error.name,
-            status: error.status,
-        }
-    }
-    if (error instanceof APIError) {
-        return { name: error.name, status: error.status }
-    }
-    if (error instanceof Error) {
-        // Database drivers put a stable code (SQLITE_BUSY, …) next to a
-        // message that may quote the row.
-        const code: unknown = Reflect.get(error, 'code')
-
-        return typeof code === 'string'
-            ? { code, name: error.name }
-            : { name: error.name }
-    }
-
-    return { name: typeof error }
 }
 
 async function verifiedEmail(token: string, config: AccessConfig) {
@@ -175,7 +146,7 @@ async function register({
         // the read-back empty, so the cause is logged rather than lost.
         console.error(
             'Registering a Cloudflare Access user failed',
-            registrationFailureSummary(error)
+            errorSummary(error)
         )
         const { docs } = await payload.find({
             collection: 'users',

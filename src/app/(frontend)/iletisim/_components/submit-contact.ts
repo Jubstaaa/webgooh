@@ -2,6 +2,7 @@
 
 import { headers } from 'next/headers'
 
+import { errorSummary } from '@/lib/error-summary'
 import { getPayloadClient } from '@/lib/payload'
 import { getServices } from '@/lib/queries'
 
@@ -75,7 +76,7 @@ export async function submitContact(
             status: 'success',
         }
     } catch (error) {
-        console.error('Saving a contact lead failed', error)
+        console.error('Saving a contact lead failed', errorSummary(error))
 
         return {
             attempt,

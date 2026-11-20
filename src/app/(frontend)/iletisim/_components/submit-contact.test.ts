@@ -154,7 +154,21 @@ describe('submitContact', () => {
     })
 
     test('keeps the values and logs when saving the lead fails', async () => {
-        const failure = new Error('SQLITE_BUSY')
+        // The shape the SQLite adapter throws: the query text and its bound
+        // values (the visitor's details) in message and params, the driver's
+        // code on the cause.
+        const failure = Object.assign(
+            new Error(
+                'Failed query: insert into "leads" params: ayse@example.com,0555 123 45 67'
+            ),
+            {
+                cause: Object.assign(new Error('database is locked'), {
+                    code: 'SQLITE_BUSY',
+                }),
+                name: 'DrizzleQueryError',
+                params: ['ayse@example.com', '0555 123 45 67'],
+            }
+        )
         create.mockImplementationOnce(() => Promise.reject(failure))
 
         const state = await submit(valid)
@@ -174,12 +188,17 @@ describe('submitContact', () => {
         })
         expect(consoleError).toHaveBeenCalledWith(
             'Saving a contact lead failed',
-            failure
+            { code: 'SQLITE_BUSY', name: 'DrizzleQueryError' }
         )
+        const logged = JSON.stringify(consoleError.mock.calls)
+        expect(logged).not.toContain('ayse@example.com')
+        expect(logged).not.toContain('0555 123 45 67')
     })
 
     test('keeps the values when the service list cannot be read', async () => {
-        const failure = new Error('SQLITE_CANTOPEN')
+        const failure = Object.assign(new Error('unable to open database'), {
+            code: 'SQLITE_CANTOPEN',
+        })
         findServices.mockImplementationOnce(() => Promise.reject(failure))
 
         const state = await submit(valid)
@@ -190,7 +209,7 @@ describe('submitContact', () => {
         expect(create).not.toHaveBeenCalled()
         expect(consoleError).toHaveBeenCalledWith(
             'Saving a contact lead failed',
-            failure
+            { code: 'SQLITE_CANTOPEN', name: 'Error' }
         )
     })
 })
