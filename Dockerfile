@@ -1,14 +1,17 @@
 # syntax=docker/dockerfile:1
 
+# Base images are pinned by digest (Dependabot's docker ecosystem bumps them):
+# Bun matches packageManager in package.json, Node matches CI's setup-node.
+
 # ─── deps ────────────────────────────────────────────────────────────────
-FROM oven/bun:1-alpine AS deps
+FROM oven/bun:1.4.4-alpine@sha256:4cf82f5686b196504fe119db3fcd9185b191f82ece82c40680e597228ec6070a AS deps
 RUN apk add --no-cache libc6-compat python3 make g++
 WORKDIR /app
 COPY package.json bun.lock* ./
 RUN bun install --frozen-lockfile
 
 # ─── builder ─────────────────────────────────────────────────────────────
-FROM oven/bun:1-alpine AS builder
+FROM oven/bun:1.4.4-alpine@sha256:4cf82f5686b196504fe119db3fcd9185b191f82ece82c40680e597228ec6070a AS builder
 RUN apk add --no-cache libc6-compat python3 make g++
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
@@ -23,32 +26,32 @@ ENV NEXT_TELEMETRY_DISABLED=1
 # what the SSG prerender bakes into the HTML.
 ENV NODE_ENV=production
 ENV PAYLOAD_SECRET=build-time-placeholder
-# SSG prerenders against a copy of the live DB, which holds leads (PII). It is
-# never COPY'd: .dockerignore keeps *.db out of the context, and the named
-# `prerender-db` context (a directory holding webgooh.db) is bind-mounted only
-# for this step, so it lands in no layer and no build cache. rw because SQLite
-# may create its -shm/-wal files beside the database; those writes are thrown
-# away with the mount.
-#   docker build --build-context prerender-db=./data .
-ENV DATABASE_URI=file:/prerender-db/webgooh.db
-# Pending Payload migrations are applied to the database copy once, before the
-# build: Next's page-data workers each initialise Payload in parallel, and left
-# to prodMigrations they race for SQLite's write lock (SQLITE_BUSY) or apply the
-# same migration twice. They then find nothing pending. Payload's CLI needs Node
-# (its tsx loader hooks fail under Bun), so the binary is copied in off PATH and
-# `bun run build` still runs on Bun.
-COPY --from=node:26-alpine /usr/local/bin/node /opt/node/bin/node
-RUN --mount=type=bind,from=prerender-db,target=/prerender-db,rw \
-    /opt/node/bin/node node_modules/payload/bin.js migrate \
+# The build never sees the live database (it holds leads). It prerenders only
+# what needs no content, against an empty database migrated here: CMS routes
+# render on request (README: Rendering & revalidation). The migration runs
+# once before the build because Next's page-data workers each initialise
+# Payload in parallel, and left to prodMigrations they race for SQLite's write
+# lock (SQLITE_BUSY). Payload's CLI needs Node (its tsx loader hooks fail under
+# Bun), so the binary is copied in off PATH and `bun run build` still runs on
+# Bun. The database file stays in this stage, which the runner never copies.
+ENV DATABASE_URI=file:/tmp/build.db
+COPY --from=node:26.13.1-alpine@sha256:6bd9ab43c0ec0190ca7b2d193906cb8b7edf6e7f4afa43ddeccd6452710bffb5 /usr/local/bin/node /opt/node/bin/node
+RUN /opt/node/bin/node node_modules/payload/bin.js migrate \
     && bun run build
 
 # ─── runner ──────────────────────────────────────────────────────────────
-FROM node:26-alpine AS runner
+FROM node:26.13.1-alpine@sha256:6bd9ab43c0ec0190ca7b2d193906cb8b7edf6e7f4afa43ddeccd6452710bffb5 AS runner
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
+
+# The server runs `node server.js` and nothing else. npm, corepack and yarn ship
+# in the base image with their own dependency trees (and their advisories, which
+# CI's Trivy scan fails on); removing them keeps the image to what runs.
+RUN rm -rf /usr/local/lib/node_modules /usr/local/bin/npm /usr/local/bin/npx \
+    /usr/local/bin/corepack /usr/local/bin/yarn /usr/local/bin/yarnpkg /opt/yarn-*
 
 RUN addgroup --system --gid 1001 nodejs \
     && adduser --system --uid 1001 nextjs
@@ -66,11 +69,10 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 # that cost acwistanbul.com a day of CMS edits on 2026-07-26, and this image had
 # the same gap.
 #
-# The compose file currently mounts the whole directory, whose host ownership
-# already makes this writable, so this is defence in depth rather than load
-# bearing: it keeps the image correct on its own, and correct again if the mount
-# is ever narrowed back to a subdirectory. Next's with-docker example does the
-# same thing and calls it "set the correct permission for prerender cache".
+# Load bearing: docker-compose.yml mounts only cache/images, so this is what
+# makes /app/.next/cache writable for the data cache and ISR pages. Next's
+# with-docker example does the same and calls it "set the correct permission
+# for prerender cache".
 #
 # /app/media is gone: uploads go to Spaces via @payloadcms/storage-s3, the host
 # bind mount was already dropped, and the directory sat empty in the container.

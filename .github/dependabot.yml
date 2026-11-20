@@ -39,3 +39,12 @@ updates:
       # usually caught and pulled within days.
       cooldown:
           default-days: 7
+    # The Dockerfile's base images, pinned by digest. These never auto-merge
+    # (dependabot-auto-merge.yml): the Bun image has to match packageManager and
+    # the Node image CI's setup-node, so a human moves all three together.
+    - package-ecosystem: docker
+      directory: /
+      schedule:
+          interval: weekly
+      cooldown:
+          default-days: 7

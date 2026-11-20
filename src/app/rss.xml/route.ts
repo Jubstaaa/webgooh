@@ -3,7 +3,10 @@ import { Feed } from 'feed'
 import { getPosts } from '@/lib/queries'
 import { SITE_URL } from '@/lib/site.mjs'
 
-export const dynamic = 'force-static'
+// The image is built against an empty database, so this route renders per
+// request from the tagged data cache instead of baking empty content into HTML
+// (README: Rendering & revalidation).
+export const dynamic = 'force-dynamic'
 
 export async function GET() {
     const posts = await getPosts()
