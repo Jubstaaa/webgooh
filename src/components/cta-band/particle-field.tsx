@@ -2,8 +2,6 @@
 
 import { useEffect, useRef } from 'react'
 
-import { useReducedMotion } from 'motion/react'
-
 import { cn } from '@/lib/utils'
 
 interface Particle {
@@ -16,9 +14,11 @@ interface Particle {
 
 export function ParticleField({ className }: { className?: string }) {
     const canvasRef = useRef<HTMLCanvasElement>(null)
-    const reduce = useReducedMotion()
 
     useEffect(() => {
+        const reduce = window.matchMedia(
+            '(prefers-reduced-motion: reduce)'
+        ).matches
         const canvas = canvasRef.current
         const parent = canvas?.parentElement
         const ctx = canvas?.getContext('2d')
@@ -92,7 +92,7 @@ export function ParticleField({ className }: { className?: string }) {
             observer.disconnect()
             resizeObserver.disconnect()
         }
-    }, [reduce])
+    }, [])
 
     return (
         <canvas

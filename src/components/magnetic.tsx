@@ -2,8 +2,6 @@
 
 import { useEffect, useRef } from 'react'
 
-import { useReducedMotion } from 'motion/react'
-
 interface MagneticProps {
     children: React.ReactNode
     className?: string
@@ -17,12 +15,12 @@ export function Magnetic({
 }: MagneticProps) {
     const ref = useRef<HTMLSpanElement>(null)
     const enabledRef = useRef(false)
-    const reduce = useReducedMotion()
 
     useEffect(() => {
-        enabledRef.current =
-            !reduce && window.matchMedia('(hover: hover)').matches
-    }, [reduce])
+        enabledRef.current = window.matchMedia(
+            '(hover: hover) and (prefers-reduced-motion: no-preference)'
+        ).matches
+    }, [])
 
     const handlePointerMove = (event: React.PointerEvent<HTMLSpanElement>) => {
         const el = ref.current

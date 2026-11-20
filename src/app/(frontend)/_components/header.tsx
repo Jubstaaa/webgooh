@@ -6,7 +6,6 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 import { Menu, X } from 'lucide-react'
-import { AnimatePresence, motion } from 'motion/react'
 
 import { ButtonLink } from '@/components/button'
 import { cn } from '@/lib/utils'
@@ -67,6 +66,8 @@ export function Header() {
                 </div>
 
                 <button
+                    aria-controls="mobile-menu"
+                    aria-expanded={open}
                     aria-label="Menüyü aç/kapat"
                     className="border-line text-paper grid size-10 place-items-center rounded-xl border md:hidden"
                     onClick={() => setOpen(v => !v)}>
@@ -78,38 +79,42 @@ export function Header() {
                 </button>
             </div>
 
-            <AnimatePresence>
-                {open ? (
-                    <motion.div
-                        animate={{ height: 'auto', opacity: 1 }}
-                        className="border-line bg-ink/95 overflow-hidden border-t backdrop-blur-xl md:hidden"
-                        exit={{ height: 0, opacity: 0 }}
-                        initial={{ height: 0, opacity: 0 }}>
-                        <nav className="container-x flex flex-col gap-1 py-4">
-                            {mainNav.map(item => (
-                                <Link
-                                    key={item.href}
-                                    href={item.href}
-                                    className={cn(
-                                        'rounded-xl px-4 py-3 text-base transition-colors',
-                                        isActive(item.href)
-                                            ? 'bg-surface text-paper'
-                                            : 'text-muted hover:bg-surface/60 hover:text-paper'
-                                    )}
-                                    onClick={closeMenu}>
-                                    {item.label}
-                                </Link>
-                            ))}
-                            <ButtonLink
-                                className="mt-2"
-                                href="/iletisim"
+            {/* Always mounted so the menu can animate closed; inert keeps the
+                closed links out of the tab order and the accessibility tree. */}
+            <div
+                id="mobile-menu"
+                inert={!open}
+                className={cn(
+                    'bg-ink/95 grid overflow-hidden border-t backdrop-blur-xl transition-[grid-template-rows,opacity,border-color] duration-300 md:hidden',
+                    open
+                        ? 'border-line grid-rows-[1fr] opacity-100'
+                        : 'grid-rows-[0fr] border-transparent opacity-0'
+                )}>
+                <div className="min-h-0">
+                    <nav className="container-x flex flex-col gap-1 py-4">
+                        {mainNav.map(item => (
+                            <Link
+                                key={item.href}
+                                href={item.href}
+                                className={cn(
+                                    'rounded-xl px-4 py-3 text-base transition-colors',
+                                    isActive(item.href)
+                                        ? 'bg-surface text-paper'
+                                        : 'text-muted hover:bg-surface/60 hover:text-paper'
+                                )}
                                 onClick={closeMenu}>
-                                Teklif Al
-                            </ButtonLink>
-                        </nav>
-                    </motion.div>
-                ) : null}
-            </AnimatePresence>
+                                {item.label}
+                            </Link>
+                        ))}
+                        <ButtonLink
+                            className="mt-2"
+                            href="/iletisim"
+                            onClick={closeMenu}>
+                            Teklif Al
+                        </ButtonLink>
+                    </nav>
+                </div>
+            </div>
         </header>
     )
 }

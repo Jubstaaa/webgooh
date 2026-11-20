@@ -2,8 +2,6 @@
 
 import { useEffect, useRef } from 'react'
 
-import { useReducedMotion } from 'motion/react'
-
 import { cn } from '@/lib/utils'
 
 interface TiltCardProps {
@@ -14,12 +12,12 @@ interface TiltCardProps {
 export function TiltCard({ children, className }: TiltCardProps) {
     const ref = useRef<HTMLDivElement>(null)
     const enabledRef = useRef(false)
-    const reduce = useReducedMotion()
 
     useEffect(() => {
-        enabledRef.current =
-            !reduce && window.matchMedia('(hover: hover)').matches
-    }, [reduce])
+        enabledRef.current = window.matchMedia(
+            '(hover: hover) and (prefers-reduced-motion: no-preference)'
+        ).matches
+    }, [])
 
     const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
         const el = ref.current
