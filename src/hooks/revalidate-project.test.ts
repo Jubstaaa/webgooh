@@ -27,12 +27,11 @@ beforeEach(() => {
 })
 
 describe('project revalidation', () => {
-    test('a save refreshes the list, the sitemap and the detail page', () => {
+    test('a save refreshes the list and the detail page', () => {
         change({ slug: 'a' }, { slug: 'a' })
 
         expect(revalidated).toEqual([
             'projects',
-            'sitemap',
             '/referanslar',
             'project:a',
             '/referanslar/a',

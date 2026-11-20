@@ -25,10 +25,10 @@ function post(overrides: Partial<Post> = {}): Partial<Post> {
 }
 
 describe('postTargets', () => {
-    test('covers the lists, the sitemap, the post page and its category', () => {
+    test('covers the lists, the post page and its category', () => {
         expect(postTargets(post())).toEqual({
             paths: ['/blog/ilk'],
-            tags: ['posts', 'sitemap', 'post:ilk', 'category:haber'],
+            tags: ['posts', 'post:ilk', 'category:haber'],
         })
     })
 
@@ -56,7 +56,6 @@ describe('postChangeTargets', () => {
         expect(targets.paths).toEqual(['/blog/ilk'])
         expect(targets.tags).toContain('post:ilk')
         expect(targets.tags).toContain('posts')
-        expect(targets.tags).toContain('sitemap')
     })
 
     test('revalidates both slugs when a published post is renamed', () => {

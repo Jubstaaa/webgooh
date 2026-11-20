@@ -22,7 +22,6 @@ export function postTargets(doc: Partial<Post>): RevalidationTargets {
         paths: doc.slug ? [`/blog/${doc.slug}`] : [],
         tags: [
             cacheTags.posts,
-            cacheTags.sitemap,
             ...(doc.slug ? [cacheTags.post(doc.slug)] : []),
             ...(category ? [cacheTags.category(category)] : []),
         ],

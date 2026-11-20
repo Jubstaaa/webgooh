@@ -27,12 +27,11 @@ beforeEach(() => {
 })
 
 describe('service revalidation', () => {
-    test('a save refreshes the list, the sitemap and the detail page', () => {
+    test('a save refreshes the list and the detail page', () => {
         change({ slug: 'a' }, { slug: 'a' })
 
         expect(revalidated).toEqual([
             'services',
-            'sitemap',
             '/',
             'service:a',
             '/hizmetlerimiz/a',
