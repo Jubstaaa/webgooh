@@ -18,7 +18,7 @@ export const getServices = unstable_cache(
         const payload = await getPayloadClient()
         const { docs } = await payload.find({
             collection: 'services',
-            limit: 50,
+            pagination: false,
             sort: 'order',
         })
 
@@ -49,7 +49,7 @@ export const getCategories = unstable_cache(
         const payload = await getPayloadClient()
         const { docs } = await payload.find({
             collection: 'categories',
-            limit: 100,
+            pagination: false,
             sort: 'title',
         })
 
@@ -61,17 +61,19 @@ export const getCategories = unstable_cache(
 
 interface PostQuery {
     categorySlug?: string
+    // Omitted means every published post: the sitemap, RSS and static params
+    // must not be silently cut off at Payload's default page size.
     limit?: number
 }
 
-export const getPosts = ({ categorySlug, limit = 100 }: PostQuery = {}) =>
+export const getPosts = ({ categorySlug, limit }: PostQuery = {}) =>
     unstable_cache(
         async () => {
             const payload = await getPayloadClient()
             const { docs } = await payload.find({
                 collection: 'posts',
                 depth: 1,
-                limit,
+                ...(limit ? { limit } : { pagination: false }),
                 sort: '-publishedAt',
                 where: {
                     _status: { equals: 'published' },
@@ -83,7 +85,7 @@ export const getPosts = ({ categorySlug, limit = 100 }: PostQuery = {}) =>
 
             return docs
         },
-        ['posts', categorySlug ?? 'all', String(limit)],
+        ['posts', categorySlug ?? 'all', String(limit ?? 'all')],
         {
             tags: [
                 cacheTags.posts,
@@ -118,7 +120,7 @@ export const getProjects = unstable_cache(
         const { docs } = await payload.find({
             collection: 'projects',
             depth: 1,
-            limit: 100,
+            pagination: false,
             sort: 'order',
         })
 
@@ -144,3 +146,34 @@ export const getProjectBySlug = (slug: string) =>
         ['project', slug],
         { tags: [cacheTags.projects, cacheTags.project(slug)] }
     )()
+
+export const getContentCounts = unstable_cache(
+    async () => {
+        const payload = await getPayloadClient()
+        const [posts, services, projects, categories] = await Promise.all([
+            payload.count({
+                collection: 'posts',
+                where: { _status: { equals: 'published' } },
+            }),
+            payload.count({ collection: 'services' }),
+            payload.count({ collection: 'projects' }),
+            payload.count({ collection: 'categories' }),
+        ])
+
+        return {
+            categories: categories.totalDocs,
+            posts: posts.totalDocs,
+            projects: projects.totalDocs,
+            services: services.totalDocs,
+        }
+    },
+    ['content-counts'],
+    {
+        tags: [
+            cacheTags.posts,
+            cacheTags.services,
+            cacheTags.projects,
+            cacheTags.categories,
+        ],
+    }
+)

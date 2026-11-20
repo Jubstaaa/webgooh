@@ -5,6 +5,9 @@ const revalidated: string[] = []
 void mock.module('next/cache', () => ({
     revalidatePath: (path: string) => revalidated.push(path),
     revalidateTag: (tag: string) => revalidated.push(tag),
+    // Bun keeps a mocked module's export names across files, so every
+    // mock of next/cache carries the full set the app imports.
+    unstable_cache: <T>(fn: T) => fn,
 }))
 
 const { Categories } = await import('./categories')

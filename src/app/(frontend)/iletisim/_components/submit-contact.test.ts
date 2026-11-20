@@ -17,11 +17,20 @@ void mock.module('next/headers', () => ({
     headers: () =>
         Promise.resolve(new Headers({ 'cf-connecting-ip': '1.2.3.4' })),
 }))
-void mock.module('@/lib/payload', () => ({
-    getPayloadClient: () => Promise.resolve({ create }),
+// getServices goes through the real query module, so its cache wrapper is a
+// pass-through and Payload answers the services lookup too.
+void mock.module('next/cache', () => ({
+    revalidatePath: () => {},
+    revalidateTag: () => {},
+    unstable_cache: <T>(fn: T) => fn,
 }))
-void mock.module('@/lib/queries', () => ({
-    getServices: () => Promise.resolve([{ title: 'Web Geliştirme' }]),
+void mock.module('@/lib/payload', () => ({
+    getPayloadClient: () =>
+        Promise.resolve({
+            create,
+            find: () =>
+                Promise.resolve({ docs: [{ title: 'Web Geliştirme' }] }),
+        }),
 }))
 
 const { submitContact } = await import('./submit-contact')

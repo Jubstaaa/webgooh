@@ -3,12 +3,7 @@ import { ArrowRight, ShieldCheck } from 'lucide-react'
 import { BorderBeam } from '@/components/border-beam'
 import { ButtonLink } from '@/components/button'
 import { Magnetic } from '@/components/magnetic'
-import {
-    getCategories,
-    getPosts,
-    getProjects,
-    getServices,
-} from '@/lib/queries'
+import { getContentCounts } from '@/lib/queries'
 import { SITE_URL } from '@/lib/site.mjs'
 
 import { NeuralMesh } from './neural-mesh'
@@ -20,16 +15,11 @@ interface TerminalLine {
 }
 
 export async function HomeHero() {
-    const [posts, services, projects, categories] = await Promise.all([
-        getPosts(),
-        getServices(),
-        getProjects(),
-        getCategories(),
-    ])
+    const counts = await getContentCounts()
 
     const pages =
-        6 + posts.length + services.length + projects.length + categories.length
-    const domain = SITE_URL.replace(/^https?:\/\//, '').replace(/\/$/, '')
+        6 + counts.posts + counts.services + counts.projects + counts.categories
+    const domain = new URL(SITE_URL).host
 
     const terminalLines: TerminalLine[] = [
         { prompt: '~/webgooh', text: 'deploy --prod' },
