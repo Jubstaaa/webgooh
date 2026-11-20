@@ -3,32 +3,24 @@ name: Dependabot auto-merge
 on: pull_request
 
 permissions:
-    contents: write
-    pull-requests: write
-    # gh pr checks reads the required checks through these.
-    checks: read
-    statuses: read
-    # Dispatches the deploy after merging.
-    actions: write
+    contents: read
 
 jobs:
-    auto-merge:
+    # Read-only: every action runs here, never next to the write token, because a
+    # Dependabot PR that bumps one of them runs its own version of this file.
+    decide:
         if: github.event.pull_request.user.login == 'dependabot[bot]'
         runs-on: ubuntu-latest
-        timeout-minutes: 40
+        timeout-minutes: 5
+        permissions:
+            contents: read
+            pull-requests: read
+        outputs:
+            decision: ${{ steps.decide.outputs.decision }}
         steps:
             - id: metadata
               uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
-            # Only explicit patch and minor updates of Bun packages merge on their
-            # own, once the required checks pass: see scripts/dependabot-auto-merge.ts
-            # (majors, GitHub Actions, Docker base images and any Payload package,
-            # also inside a group, wait for a human). It fails closed: only the
-            # literal output `safe` merges, and a crash fails this job.
-            # A merge made with GITHUB_TOKEN starts no workflows, so instead of --auto
-            # this waits for the required checks, merges, then dispatches the deploy
-            # (workflow_dispatch is the one event GITHUB_TOKEN may start).
-            # The base commit, not the PR head: this job holds a write token, so it
-            # only runs code that is already on main.
+            # The base commit, not the PR head: only code already on main decides.
             - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
               with:
                   ref: ${{ github.event.pull_request.base.sha }}
@@ -36,6 +28,11 @@ jobs:
             - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
               with:
                   bun-version-file: package.json
+            # Only explicit patch and minor updates of Bun packages merge on their
+            # own: see scripts/dependabot-auto-merge.ts (majors, GitHub Actions,
+            # Docker base images and any Payload package, also inside a group, wait
+            # for a human). Fails closed: only the literal output `safe` merges, and
+            # a crash fails this job, which skips the merge job.
             - id: decide
               env:
                   DEPENDENCY_NAMES: ${{ steps.metadata.outputs.dependency-names }}
@@ -45,14 +42,32 @@ jobs:
                   decision=$(bun scripts/dependabot-auto-merge.ts)
                   echo "decision=$decision" >> "$GITHUB_OUTPUT"
                   echo "Auto-merge decision: $decision"
-            - if: steps.decide.outputs.decision == 'safe'
-              env:
+
+    # Holds the write token and runs no third-party code, only gh. A merge made
+    # with GITHUB_TOKEN starts no workflows, so instead of --auto this waits for
+    # the required checks, merges, then dispatches the deploy (workflow_dispatch is
+    # the one event GITHUB_TOKEN may start).
+    merge:
+        needs: decide
+        if: needs.decide.outputs.decision == 'safe'
+        runs-on: ubuntu-latest
+        timeout-minutes: 40
+        permissions:
+            contents: write
+            pull-requests: write
+            # gh pr checks reads the required checks through these.
+            checks: read
+            statuses: read
+            # Dispatches the deploy after merging.
+            actions: write
+        steps:
+            - env:
                   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                   PR_URL: ${{ github.event.pull_request.html_url }}
                   BASE: ${{ github.event.pull_request.base.ref }}
               run: |
                   # Let the required checks register before watching them.
                   sleep 30
-                  gh pr checks "$PR_URL" --required --watch --fail-fast --interval 20
+                  gh pr checks "$PR_URL" --required --watch --fail-fast --interval 20 --repo "$GITHUB_REPOSITORY"
                   gh pr merge --merge "$PR_URL"
-                  gh workflow run deploy.yml --ref "$BASE"
+                  gh workflow run deploy.yml --ref "$BASE" --repo "$GITHUB_REPOSITORY"
