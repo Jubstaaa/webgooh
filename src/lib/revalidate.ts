@@ -18,3 +18,24 @@ export function safeRevalidatePath(path: string) {
         console.error(`Revalidating path "${path}" failed`, error)
     }
 }
+
+export interface RevalidationTargets {
+    paths: string[]
+    tags: string[]
+}
+
+export const noTargets: RevalidationTargets = { paths: [], tags: [] }
+
+export function mergeTargets(
+    ...targets: RevalidationTargets[]
+): RevalidationTargets {
+    return {
+        paths: [...new Set(targets.flatMap(target => target.paths))],
+        tags: [...new Set(targets.flatMap(target => target.tags))],
+    }
+}
+
+export function revalidateTargets({ paths, tags }: RevalidationTargets) {
+    tags.forEach(safeRevalidateTag)
+    paths.forEach(safeRevalidatePath)
+}
