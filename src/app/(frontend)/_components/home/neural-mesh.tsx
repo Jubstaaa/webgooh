@@ -2,8 +2,6 @@
 
 import { useEffect, useRef } from 'react'
 
-import { useReducedMotion } from 'motion/react'
-
 import { cn } from '@/lib/utils'
 
 interface Node {
@@ -18,9 +16,11 @@ const LINK_DISTANCE = 128
 
 export function NeuralMesh({ className }: { className?: string }) {
     const canvasRef = useRef<HTMLCanvasElement>(null)
-    const reduce = useReducedMotion()
 
     useEffect(() => {
+        const reduce = window.matchMedia(
+            '(prefers-reduced-motion: reduce)'
+        ).matches
         const canvas = canvasRef.current
         const parent = canvas?.parentElement
         const ctx = canvas?.getContext('2d')
@@ -119,21 +119,35 @@ export function NeuralMesh({ className }: { className?: string }) {
             draw()
             cancelAnimationFrame(frame)
         } else {
-            draw()
             window.addEventListener('pointermove', onPointerMove, {
                 passive: true,
             })
         }
+
+        // The O(n²) link pass with shadow blur is the costliest work on the
+        // page, so the loop only runs while the hero is actually on screen.
+        let running = false
+        const visibility = new IntersectionObserver(([entry]) => {
+            if (entry?.isIntersecting && !running) {
+                running = true
+                draw()
+            } else if (!entry?.isIntersecting && running) {
+                running = false
+                cancelAnimationFrame(frame)
+            }
+        })
+        if (!reduce) visibility.observe(parent)
 
         const observer = new ResizeObserver(resize)
         observer.observe(parent)
 
         return () => {
             cancelAnimationFrame(frame)
+            visibility.disconnect()
             observer.disconnect()
             window.removeEventListener('pointermove', onPointerMove)
         }
-    }, [reduce])
+    }, [])
 
     return (
         <canvas
