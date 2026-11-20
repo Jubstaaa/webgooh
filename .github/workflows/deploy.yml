@@ -27,7 +27,9 @@ jobs:
         # A rollback skips the gate: that SHA passed it when it was built.
         if: ${{ !inputs.image_tag }}
         uses: ./.github/workflows/ci.yml
-        secrets: inherit
+        secrets:
+            NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${{ secrets.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
+            NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
         permissions:
             contents: read
             packages: write

@@ -53,6 +53,9 @@ services:
             - '127.0.0.1:3001:3000'
         environment:
             NODE_ENV: production
+            # /api/health fails on a database without users (a wrong or empty
+            # mount); CI's candidate boots on an empty database and sets false.
+            HEALTH_REQUIRE_DATA: ${HEALTH_REQUIRE_DATA:-true}
             NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL}
             PAYLOAD_SECRET: ${PAYLOAD_SECRET}
             DATABASE_URI: file:/app/data/webgooh.db

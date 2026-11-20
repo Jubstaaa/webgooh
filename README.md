@@ -93,7 +93,10 @@ context. At start the server applies pending migrations to the real database.
   `/app/data/webgooh.db`); media is in the Spaces bucket.
 - `GET /api/health` runs a Payload query: the container healthcheck and the
   deploy's health gate both use it, so a release that cannot read its database
-  is rolled back.
+  is rolled back. With `HEALTH_REQUIRE_DATA=true` (the compose default) a
+  database without users also fails, which catches a wrong or empty mount.
+- The compose file's host paths default to the droplet's; locally (Docker
+  Desktop does not share `/opt`) set `DATA_DIR` and `IMAGE_CACHE_DIR`.
 - Pass `NEXT_PUBLIC_TURNSTILE_SITE_KEY` as a build arg and the remaining secrets as
   runtime environment variables (see `docker-compose.yml`).
 
@@ -117,6 +120,10 @@ context. At start the server applies pending migrations to the real database.
   starts `<sha>` on the newest snapshot taken while `<sha>` was running and
   discards every write made since (the replaced database is kept as
   `webgooh.db.failed-<UTC>`).
+- Rollback targets must contain `/api/health`: the deploy uploads this
+  repository's `docker-compose.yml`, whose healthcheck probes it, so an image
+  built before it existed never turns healthy. To go back that far, deploy that
+  release's `docker-compose.yml` by hand.
 
 ## Project structure
 

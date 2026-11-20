@@ -10,7 +10,14 @@ const noStore = { 'Cache-Control': 'no-store' }
 export async function GET() {
     try {
         const payload = await getPayloadClient()
-        await payload.count({ collection: 'categories' })
+        const { totalDocs } = await payload.count({ collection: 'users' })
+
+        // SQLite creates a missing file and the migrations at boot fill it with
+        // an empty schema, so a wrong mount would otherwise look healthy. CI
+        // boots on an empty database on purpose and leaves this off.
+        if (process.env.HEALTH_REQUIRE_DATA === 'true' && totalDocs === 0) {
+            throw new Error('The database has no users: wrong or empty file')
+        }
 
         return Response.json({ status: 'ok' }, { headers: noStore })
     } catch (error) {

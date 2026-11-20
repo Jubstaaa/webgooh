@@ -14,11 +14,23 @@ interface Check {
 
 const checks: Check[] = [
     { contains: '"status":"ok"', path: '/api/health', status: 200 },
-    { contains: '<h1', path: '/', status: 200 },
-    { contains: 'Blog', path: '/blog', status: 200 },
-    { path: '/hizmetlerimiz', status: 200 },
-    { path: '/referanslar', status: 200 },
-    { path: '/hakkimizda', status: 200 },
+    { contains: '<title>Webgooh — Web Yazılım', path: '/', status: 200 },
+    { contains: '<title>Blog — Webgooh', path: '/blog', status: 200 },
+    {
+        contains: '<title>Hizmetler — Webgooh',
+        path: '/hizmetlerimiz',
+        status: 200,
+    },
+    {
+        contains: '<title>Referanslar — Webgooh',
+        path: '/referanslar',
+        status: 200,
+    },
+    {
+        contains: '<title>Hakkımızda — Webgooh',
+        path: '/hakkimizda',
+        status: 200,
+    },
     { contains: 'name="email"', path: '/iletisim', status: 200 },
     { contains: '<urlset', path: '/sitemap.xml', status: 200 },
     { contains: '<rss', path: '/rss.xml', status: 200 },
@@ -35,22 +47,39 @@ const checks: Check[] = [
 
 const failures: string[] = []
 
-for (const { contains, path, status } of checks) {
-    const response = await fetch(new URL(path, base), { redirect: 'manual' })
-    const body = await response.text()
+// A hung route must fail with its path instead of stalling the job, and a
+// connection error must not hide the results collected before it.
+async function get(path: string) {
+    return fetch(new URL(path, base), {
+        redirect: 'manual',
+        signal: AbortSignal.timeout(15_000),
+    })
+}
 
-    if (response.status !== status) {
-        failures.push(`${path}: expected ${status}, got ${response.status}`)
-    } else if (contains && !body.includes(contains)) {
-        failures.push(`${path}: body does not contain ${contains}`)
-    } else {
-        process.stdout.write(`ok  ${response.status} ${path}\n`)
+for (const { contains, path, status } of checks) {
+    try {
+        const response = await get(path)
+        const body = await response.text()
+
+        if (response.status !== status) {
+            failures.push(`${path}: expected ${status}, got ${response.status}`)
+        } else if (contains && !body.includes(contains)) {
+            failures.push(`${path}: body does not contain ${contains}`)
+        } else {
+            process.stdout.write(`ok  ${response.status} ${path}\n`)
+        }
+    } catch (error) {
+        failures.push(`${path}: ${String(error)}`)
     }
 }
 
-const home = await fetch(new URL('/', base))
-if (!home.headers.get('content-security-policy')) {
-    failures.push('/: Content-Security-Policy header missing')
+try {
+    const home = await get('/')
+    if (!home.headers.get('content-security-policy')) {
+        failures.push('/: Content-Security-Policy header missing')
+    }
+} catch (error) {
+    failures.push(`/ (headers): ${String(error)}`)
 }
 
 if (failures.length > 0) {

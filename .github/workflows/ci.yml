@@ -2,8 +2,14 @@ name: CI
 
 on:
     pull_request:
-    # deploy.yml runs the same gate before every release.
+    # deploy.yml runs the same gate before every release. Only the two build-time
+    # values are passed in, so the deploy's SSH secrets never reach this job.
     workflow_call:
+        secrets:
+            NEXT_PUBLIC_TURNSTILE_SITE_KEY:
+                required: true
+            NEXT_PUBLIC_SITE_URL:
+                required: true
 
 permissions:
     contents: read
@@ -113,6 +119,7 @@ jobs:
             - name: Start candidate
               env:
                   IMAGE_TAG: candidate
+                  HEALTH_REQUIRE_DATA: 'false'
                   DATA_DIR: ${{ runner.temp }}/data
                   IMAGE_CACHE_DIR: ${{ runner.temp }}/image-cache
                   PAYLOAD_SECRET: ci-smoke
