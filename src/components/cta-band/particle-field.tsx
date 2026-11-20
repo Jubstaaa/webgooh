@@ -2,8 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 
-import { useReducedMotion } from 'motion/react'
-
+import { useMediaQuery } from '@/lib/use-media-query'
 import { cn } from '@/lib/utils'
 
 interface Particle {
@@ -16,7 +15,7 @@ interface Particle {
 
 export function ParticleField({ className }: { className?: string }) {
     const canvasRef = useRef<HTMLCanvasElement>(null)
-    const reduce = useReducedMotion()
+    const reduce = useMediaQuery('(prefers-reduced-motion: reduce)')
 
     useEffect(() => {
         const canvas = canvasRef.current
@@ -71,11 +70,12 @@ export function ParticleField({ className }: { className?: string }) {
         resize()
 
         const observer = new IntersectionObserver(
-            ([entry]) => {
-                if (entry.isIntersecting && !running) {
+            entries => {
+                const visible = entries.at(-1)?.isIntersecting ?? false
+                if (visible && !running) {
                     running = true
                     draw()
-                } else if (!entry.isIntersecting && running) {
+                } else if (!visible && running) {
                     running = false
                     cancelAnimationFrame(frame)
                 }

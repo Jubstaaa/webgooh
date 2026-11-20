@@ -1,11 +1,4 @@
-'use client'
-
-import { useRef } from 'react'
-
-import { motion, useInView, useScroll, useSpring } from 'motion/react'
-
 import { SectionHeading } from '@/components/section-heading'
-import { cn } from '@/lib/utils'
 
 interface ProcessStep {
     description: string
@@ -36,17 +29,6 @@ const processSteps: ProcessStep[] = [
 ]
 
 export function HomeProcess() {
-    const timelineRef = useRef<HTMLDivElement>(null)
-    const { scrollYProgress } = useScroll({
-        offset: ['start 65%', 'end 65%'],
-        target: timelineRef,
-    })
-    const fill = useSpring(scrollYProgress, {
-        damping: 24,
-        mass: 0.4,
-        stiffness: 80,
-    })
-
     return (
         <section className="container-x flex flex-col gap-12">
             <SectionHeading
@@ -55,14 +37,9 @@ export function HomeProcess() {
                 title="Dört adımda ürününüz"
             />
 
-            <div
-                ref={timelineRef}
-                className="relative flex flex-col gap-10 pl-10">
+            <div className="process-timeline relative flex flex-col gap-10 pl-10">
                 <div className="bg-line absolute top-1.5 bottom-1.5 left-[11px] w-0.5 overflow-hidden rounded-full">
-                    <motion.div
-                        className="from-accent via-brand to-magenta h-full w-full origin-top bg-gradient-to-b"
-                        style={{ scaleY: fill }}
-                    />
+                    <div className="process-fill from-accent via-brand to-magenta h-full w-full origin-top bg-gradient-to-b" />
                 </div>
 
                 {processSteps.map((step, index) => (
@@ -74,18 +51,9 @@ export function HomeProcess() {
 }
 
 function TimelineStep({ index, step }: { index: number; step: ProcessStep }) {
-    const ref = useRef<HTMLDivElement>(null)
-    const active = useInView(ref, { margin: '0px 0px -55% 0px' })
-
     return (
-        <div ref={ref} className="reveal relative">
-            <span
-                className={cn(
-                    'bg-ink absolute top-0.5 -left-10 grid size-6 place-items-center rounded-full border-2 font-mono text-[0.7rem] transition-all duration-300',
-                    active
-                        ? 'border-accent text-accent shadow-accent/60 shadow-[0_0_16px]'
-                        : 'border-line text-faint'
-                )}>
+        <div className="process-step reveal relative">
+            <span className="process-dot bg-ink border-line text-faint absolute top-0.5 -left-10 grid size-6 place-items-center rounded-full border-2 font-mono text-[0.7rem]">
                 {String(index + 1).padStart(2, '0')}
             </span>
             <h3 className="text-paper text-lg font-semibold">{step.title}</h3>

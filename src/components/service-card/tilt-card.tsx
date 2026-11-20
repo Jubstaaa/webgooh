@@ -1,9 +1,8 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
 
-import { useReducedMotion } from 'motion/react'
-
+import { useMediaQuery } from '@/lib/use-media-query'
 import { cn } from '@/lib/utils'
 
 interface TiltCardProps {
@@ -13,17 +12,13 @@ interface TiltCardProps {
 
 export function TiltCard({ children, className }: TiltCardProps) {
     const ref = useRef<HTMLDivElement>(null)
-    const enabledRef = useRef(false)
-    const reduce = useReducedMotion()
-
-    useEffect(() => {
-        enabledRef.current =
-            !reduce && window.matchMedia('(hover: hover)').matches
-    }, [reduce])
+    const enabled = useMediaQuery(
+        '(hover: hover) and (prefers-reduced-motion: no-preference)'
+    )
 
     const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
         const el = ref.current
-        if (!el || !enabledRef.current) return
+        if (!el || !enabled) return
         const rect = el.getBoundingClientRect()
         const px = (event.clientX - rect.left) / rect.width
         const py = (event.clientY - rect.top) / rect.height
