@@ -55,7 +55,7 @@
     },
     "devDependencies": {
         "@happy-dom/global-registrator": "^21.0.4",
-        "@jubstaa/config": "github:Jubstaaa/configs#26f273cf731f740acb5e5011b26b505b0631e943",
+        "@jubstaa/config": "^1.6.0",
         "@tailwindcss/postcss": "^4.3.5",
         "@tailwindcss/typography": "^0.5.16",
         "@types/bun": "^1.4.4",
