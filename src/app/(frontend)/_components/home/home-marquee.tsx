@@ -23,8 +23,8 @@ export function HomeMarquee() {
             <div className="animate-marquee flex w-max gap-4">
                 {[...techStack, ...techStack].map((item, index) => (
                     <span
-                        key={index}
-                        className="border-line text-muted rounded-full border px-5 py-2 font-mono text-sm whitespace-nowrap">
+                        className="border-line text-muted rounded-full border px-5 py-2 font-mono text-sm whitespace-nowrap"
+                        key={index}>
                         {item}
                     </span>
                 ))}

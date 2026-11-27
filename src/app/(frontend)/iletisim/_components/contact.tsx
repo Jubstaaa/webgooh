@@ -67,7 +67,7 @@ export async function Contact() {
                         )
 
                         return item.href ? (
-                            <a key={item.label} href={item.href}>
+                            <a href={item.href} key={item.label}>
                                 {content}
                             </a>
                         ) : (

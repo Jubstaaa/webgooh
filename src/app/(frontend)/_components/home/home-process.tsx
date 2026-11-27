@@ -43,7 +43,7 @@ export function HomeProcess() {
                 </div>
 
                 {processSteps.map((step, index) => (
-                    <TimelineStep key={step.title} index={index} step={step} />
+                    <TimelineStep index={index} key={step.title} step={step} />
                 ))}
             </div>
         </section>

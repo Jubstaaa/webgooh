@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+
 import { notFound } from 'next/navigation'
 
 import { ReferenceDetail } from '@/app/(frontend)/referanslar/_components/reference-detail'
@@ -7,14 +8,6 @@ import { buildMetadata } from '@/lib/seo'
 
 interface PageProps {
     params: Promise<{ slug: string }>
-}
-
-export async function generateStaticParams() {
-    const projects = await getProjects()
-
-    return projects.flatMap(project =>
-        project.slug ? [{ slug: project.slug }] : []
-    )
 }
 
 export async function generateMetadata({
@@ -32,6 +25,14 @@ export async function generateMetadata({
         seo: project.seo,
         title: `${project.title} — Başarı Hikayesi`,
     })
+}
+
+export async function generateStaticParams() {
+    const projects = await getProjects()
+
+    return projects.flatMap(project =>
+        project.slug ? [{ slug: project.slug }] : []
+    )
 }
 
 export default async function ReferenceDetailPage({ params }: PageProps) {

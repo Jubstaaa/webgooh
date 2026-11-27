@@ -10,14 +10,11 @@ import { createContactSchema } from './contact-schema'
 import { clientIp, verifyTurnstile } from './verify-turnstile'
 
 export interface ContactState {
-    // Bumped on every failed submit. A <select> only picks up defaultValue when
-    // it mounts, so the form keys it off this to restore the chosen service.
     attempt?: number
     errors?: Record<string, string>
     message?: string
-    status: 'idle' | 'success' | 'error'
-    // React resets an uncontrolled form once the action resolves, so a failed
-    // submit has to hand the typed values back as the new defaults.
+    status: 'error' | 'idle' | 'success'
+
     values?: Record<string, string>
 }
 
@@ -25,7 +22,6 @@ export async function submitContact(
     prev: ContactState,
     formData: FormData
 ): Promise<ContactState> {
-    // Honeypot: bots fill the hidden field — respond with a silent success.
     if (formData.get('company_website')) {
         return { message: 'Talebiniz alındı.', status: 'success' }
     }
@@ -51,8 +47,6 @@ export async function submitContact(
         }
     }
 
-    // The service list is read from the same database as the save, so a
-    // database failure at either step keeps what the visitor typed.
     try {
         const services = await getServices()
         const parsed = createContactSchema(
@@ -69,7 +63,23 @@ export async function submitContact(
         }
 
         const payload = await getPayloadClient()
-        await payload.create({ collection: 'leads', data: parsed.data })
+        await payload.create({
+            collection: 'leads',
+            data: {
+                email: parsed.data.email,
+                message: parsed.data.message,
+                name: parsed.data.name,
+                ...(parsed.data.company === undefined
+                    ? {}
+                    : { company: parsed.data.company }),
+                ...(parsed.data.phone === undefined
+                    ? {}
+                    : { phone: parsed.data.phone }),
+                ...(parsed.data.service === undefined
+                    ? {}
+                    : { service: parsed.data.service }),
+            },
+        })
 
         return {
             message: 'Talebiniz alındı. En kısa sürede size dönüş yapacağız.',
@@ -87,8 +97,6 @@ export async function submitContact(
     }
 }
 
-// Every field of this form is text; a file posted under one of its names is
-// treated as empty rather than stringified.
 function formText(formData: FormData, field: string) {
     const value = formData.get(field)
 

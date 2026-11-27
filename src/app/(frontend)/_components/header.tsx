@@ -1,11 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-
+import { Menu, X } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-
-import { Menu, X } from 'lucide-react'
+import { useEffect, useState } from 'react'
 
 import { ButtonLink } from '@/components/button'
 import { cn } from '@/lib/utils'
@@ -20,14 +18,20 @@ export function Header() {
     const [open, setOpen] = useState(false)
 
     useEffect(() => {
-        const onScroll = () => setScrolled(window.scrollY > 12)
+        const onScroll = () => {
+            setScrolled(window.scrollY > 12)
+        }
         onScroll()
         window.addEventListener('scroll', onScroll, { passive: true })
 
-        return () => window.removeEventListener('scroll', onScroll)
+        return () => {
+            window.removeEventListener('scroll', onScroll)
+        }
     }, [])
 
-    const closeMenu = () => setOpen(false)
+    const closeMenu = () => {
+        setOpen(false)
+    }
 
     const isActive = (href: string) =>
         href === '/' ? pathname === '/' : pathname.startsWith(href)
@@ -46,14 +50,14 @@ export function Header() {
                 <nav className="hidden items-center gap-1 md:flex">
                     {mainNav.map(item => (
                         <Link
-                            key={item.href}
-                            href={item.href}
                             className={cn(
                                 'rounded-full px-4 py-2 text-sm transition-colors',
                                 isActive(item.href)
                                     ? 'text-paper'
                                     : 'text-muted hover:text-paper'
-                            )}>
+                            )}
+                            href={item.href}
+                            key={item.href}>
                             {item.label}
                         </Link>
                     ))}
@@ -70,7 +74,9 @@ export function Header() {
                     aria-expanded={open}
                     aria-label="Menüyü aç/kapat"
                     className="border-line text-paper grid size-10 place-items-center rounded-xl border md:hidden"
-                    onClick={() => setOpen(v => !v)}>
+                    onClick={() => {
+                        setOpen(v => !v)
+                    }}>
                     {open ? (
                         <X className="size-5" />
                     ) : (
@@ -79,29 +85,27 @@ export function Header() {
                 </button>
             </div>
 
-            {/* Always mounted so the menu can animate closed; inert keeps the
-                closed links out of the tab order and the accessibility tree. */}
             <div
-                id="mobile-menu"
-                inert={!open}
                 className={cn(
                     'bg-ink/95 grid overflow-hidden border-t backdrop-blur-xl transition-[grid-template-rows,opacity,border-color] duration-300 md:hidden',
                     open
                         ? 'border-line grid-rows-[1fr] opacity-100'
                         : 'grid-rows-[0fr] border-transparent opacity-0'
-                )}>
+                )}
+                id="mobile-menu"
+                inert={!open}>
                 <div className="min-h-0">
                     <nav className="container-x flex flex-col gap-1 py-4">
                         {mainNav.map(item => (
                             <Link
-                                key={item.href}
-                                href={item.href}
                                 className={cn(
                                     'rounded-xl px-4 py-3 text-base transition-colors',
                                     isActive(item.href)
                                         ? 'bg-surface text-paper'
                                         : 'text-muted hover:bg-surface/60 hover:text-paper'
                                 )}
+                                href={item.href}
+                                key={item.href}
                                 onClick={closeMenu}>
                                 {item.label}
                             </Link>

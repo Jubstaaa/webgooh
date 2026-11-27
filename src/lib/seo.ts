@@ -2,18 +2,18 @@ import type { Metadata } from 'next'
 
 import { type MediaLike, mediaUrl } from './media'
 
-interface SeoGroup {
-    description?: string | null
-    image?: MediaLike
-    title?: string | null
-}
-
 interface BuildMetadataArgs {
     description: string
-    image?: MediaLike
+    image?: MediaLike | undefined
     path: string
-    seo?: SeoGroup | null
+    seo?: null | SeoGroup | undefined
     title: string
+}
+
+interface SeoGroup {
+    description?: null | string | undefined
+    image?: MediaLike | undefined
+    title?: null | string | undefined
 }
 
 export function buildMetadata({

@@ -1,7 +1,8 @@
+import type { Post } from '@payload-types'
+
 import { describe, expect, test } from 'bun:test'
 
 import { readingMinutes } from '@/lib/reading-time'
-import type { Post } from '@payload-types'
 
 function lexical(...paragraphs: string[]): Post['content'] {
     return {

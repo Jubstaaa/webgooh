@@ -1,6 +1,5 @@
-import { renderToStaticMarkup } from 'react-dom/server'
-
 import { describe, expect, test } from 'bun:test'
+import { renderToStaticMarkup } from 'react-dom/server'
 
 import { PostMeta } from './post-meta'
 

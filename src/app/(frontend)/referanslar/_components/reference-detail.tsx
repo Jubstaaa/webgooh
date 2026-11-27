@@ -1,13 +1,13 @@
-import Image from 'next/image'
-import Link from 'next/link'
+import type { Project } from '@payload-types'
 
 import { ArrowLeft, ExternalLink } from 'lucide-react'
+import Image from 'next/image'
+import Link from 'next/link'
 
 import { ButtonLink } from '@/components/button'
 import { CtaBand } from '@/components/cta-band/cta-band'
 import { RichText } from '@/components/rich-text'
 import { mediaAlt, mediaUrl } from '@/lib/media'
-import type { Project } from '@payload-types'
 
 interface ReferenceDetailProps {
     project: Project
@@ -45,8 +45,8 @@ export function ReferenceDetail({ project }: ReferenceDetailProps) {
                     <div className="flex flex-wrap items-center gap-3 pt-1">
                         {project.tags?.map(tag => (
                             <span
-                                key={tag}
-                                className="border-line text-faint rounded-full border px-3 py-1 font-mono text-xs">
+                                className="border-line text-faint rounded-full border px-3 py-1 font-mono text-xs"
+                                key={tag}>
                                 {tag}
                             </span>
                         ))}
@@ -69,10 +69,10 @@ export function ReferenceDetail({ project }: ReferenceDetailProps) {
                 <div className="container-x">
                     <div className="border-line relative mx-auto aspect-[16/9] max-w-5xl overflow-hidden rounded-2xl border">
                         <Image
-                            fill
                             alt={mediaAlt(project.image, project.title)}
                             className="object-cover object-top"
                             fetchPriority="high"
+                            fill
                             loading="eager"
                             sizes="(max-width: 1024px) 100vw, 1024px"
                             src={image}
@@ -86,8 +86,8 @@ export function ReferenceDetail({ project }: ReferenceDetailProps) {
                     <div className="card-surface grid grid-cols-2 gap-px overflow-hidden rounded-2xl md:grid-cols-4">
                         {project.stats.map(stat => (
                             <div
-                                key={stat.id}
-                                className="bg-surface/30 flex flex-col items-center gap-1 px-4 py-7 text-center">
+                                className="bg-surface/30 flex flex-col items-center gap-1 px-4 py-7 text-center"
+                                key={stat.id}>
                                 <span className="text-gradient font-display text-3xl font-bold">
                                     {stat.value}
                                 </span>

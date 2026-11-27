@@ -1,6 +1,7 @@
-import Image from 'next/image'
+import type { Service } from '@payload-types'
 
 import { Check } from 'lucide-react'
+import Image from 'next/image'
 
 import { CtaBand } from '@/components/cta-band/cta-band'
 import { JsonLd } from '@/components/json-ld'
@@ -9,7 +10,6 @@ import { RichText } from '@/components/rich-text'
 import { ServiceIcon } from '@/components/service-icon'
 import { mediaAlt, mediaUrl } from '@/lib/media'
 import { SITE_URL } from '@/lib/site.mjs'
-import type { Service } from '@payload-types'
 
 interface ServiceDetailProps {
     service: Service
@@ -46,14 +46,14 @@ export function ServiceDetail({ service }: ServiceDetailProps) {
                     {cover ? (
                         <div className="relative aspect-[16/9] overflow-hidden rounded-2xl">
                             <Image
-                                fill
-                                className="object-cover"
-                                sizes="(max-width: 1024px) 100vw, 720px"
-                                src={cover}
                                 alt={mediaAlt(
                                     service.coverImage,
                                     service.title
                                 )}
+                                className="object-cover"
+                                fill
+                                sizes="(max-width: 1024px) 100vw, 720px"
+                                src={cover}
                             />
                         </div>
                     ) : null}
@@ -76,8 +76,8 @@ export function ServiceDetail({ service }: ServiceDetailProps) {
                             <ul className="flex flex-col gap-3">
                                 {service.features.map(feature => (
                                     <li
-                                        key={feature.id}
-                                        className="text-muted flex items-start gap-2 text-sm">
+                                        className="text-muted flex items-start gap-2 text-sm"
+                                        key={feature.id}>
                                         <Check className="text-accent mt-0.5 size-4 shrink-0" />
                                         {feature.label}
                                     </li>

@@ -1,5 +1,6 @@
-import { describe, expect, test } from 'bun:test'
 import type { FieldHook, TextField } from 'payload'
+
+import { describe, expect, test } from 'bun:test'
 
 import { slugField } from './slug'
 

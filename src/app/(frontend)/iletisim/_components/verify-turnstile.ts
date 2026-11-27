@@ -8,9 +8,6 @@ const siteverifyResponse = z.object({
     'success': z.boolean(),
 })
 
-// The only codes a visitor can cause: a bad, expired or replayed token. Any
-// other code (a missing or wrong secret, Cloudflare's internal-error) means
-// every submit is failing and someone has to look.
 const VISITOR_ERROR_CODES = new Set([
     'invalid-input-response',
     'timeout-or-duplicate',
@@ -23,8 +20,10 @@ interface VerifyTurnstileOptions {
     token: string
 }
 
-// No secret means no check at all, so the form refuses every submit rather
-// than falling back to Cloudflare's always-pass test key.
+export function clientIp(headers: Headers) {
+    return headers.get('cf-connecting-ip') ?? undefined
+}
+
 export async function verifyTurnstile({
     fetcher = fetch,
     ip,
@@ -61,10 +60,4 @@ export async function verifyTurnstile({
 
         return false
     }
-}
-
-// Cloudflare sets this on every proxied request and overwrites any client
-// value; x-forwarded-for is whatever the client chose to send first.
-export function clientIp(headers: Headers) {
-    return headers.get('cf-connecting-ip') ?? undefined
 }

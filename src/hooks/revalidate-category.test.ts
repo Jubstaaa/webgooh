@@ -1,6 +1,6 @@
-import { describe, expect, test } from 'bun:test'
-
 import type { Category } from '@payload-types'
+
+import { describe, expect, test } from 'bun:test'
 
 import { categoryChangeTargets, categoryTargets } from './revalidate-category'
 

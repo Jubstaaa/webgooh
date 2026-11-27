@@ -42,14 +42,14 @@ jobs:
             - run: bun install --frozen-lockfile
             - run: bun run format:check
             - run: bun run lint
-            - run: bun run type-check
+            - run: bun run typecheck
             - run: bun run test
             # Dead files, exports and dependencies (knip.json), copy-paste above 3 %
             # (.jscpd.json), and import cycles, orphans and dev-only imports in
             # runtime code (.dependency-cruiser.cjs).
             - run: bun run knip
-            - run: bun run duplicates
-            - run: bun run deps:check
+            - run: bun run jscpd
+            - run: bun run depcruise
             # Payload's CLI runs on Node (its tsx loader hooks do not work under
             # Bun); 26 matches the runner image in the Dockerfile.
             - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
@@ -61,7 +61,7 @@ jobs:
             - run: bun run migrate:check
             # The generated types and admin import map are committed; a config
             # change that forgets to regenerate them fails here instead of
-            # type-checking against a stale schema or losing an admin component.
+            # typechecking against a stale schema or losing an admin component.
             - name: Generated Payload files are up to date
               env:
                   NODE_ENV: production

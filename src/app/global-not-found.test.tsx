@@ -1,6 +1,5 @@
-import { renderToStaticMarkup } from 'react-dom/server'
-
 import { describe, expect, mock, test } from 'bun:test'
+import { renderToStaticMarkup } from 'react-dom/server'
 
 void mock.module('@/app/fonts', () => ({ fontVariables: 'fonts' }))
 

@@ -96,9 +96,9 @@ export function ParticleField({ className }: { className?: string }) {
 
     return (
         <canvas
-            ref={canvasRef}
             aria-hidden
             className={cn('pointer-events-none absolute inset-0', className)}
+            ref={canvasRef}
         />
     )
 }

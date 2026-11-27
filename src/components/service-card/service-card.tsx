@@ -1,15 +1,14 @@
-import Link from 'next/link'
+import type { Service } from '@payload-types'
 
 import { ArrowUpRight, Check } from 'lucide-react'
+import Link from 'next/link'
 
 import { BorderBeam } from '@/components/border-beam'
 import { ServiceIcon } from '@/components/service-icon'
-import type { Service } from '@payload-types'
 
 import { TiltCard } from './tilt-card'
 
 interface ServiceCardProps {
-    // h2 when the card list sits directly under the page's h1.
     headingLevel?: 'h2' | 'h3'
     service: Service
 }
@@ -42,8 +41,8 @@ export function ServiceCard({
                     <ul className="flex flex-col gap-1.5">
                         {service.features.slice(0, 3).map(feature => (
                             <li
-                                key={feature.id}
-                                className="text-faint flex items-center gap-2 text-sm">
+                                className="text-faint flex items-center gap-2 text-sm"
+                                key={feature.id}>
                                 <Check className="text-accent size-3.5" />
                                 {feature.label}
                             </li>

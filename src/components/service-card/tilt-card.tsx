@@ -34,13 +34,13 @@ export function TiltCard({ children, className }: TiltCardProps) {
 
     return (
         <div
-            ref={ref}
             className={cn(
                 'relative transition-transform duration-200',
                 className
             )}
             onPointerLeave={handlePointerLeave}
-            onPointerMove={handlePointerMove}>
+            onPointerMove={handlePointerMove}
+            ref={ref}>
             <span
                 aria-hidden
                 className="pointer-events-none absolute inset-0 rounded-[inherit] opacity-0 transition-opacity duration-300 group-hover:opacity-100"

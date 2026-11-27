@@ -19,7 +19,7 @@ describe('parseRuntimeEnv', () => {
 
     test.each(Object.keys(complete))('rejects a missing %s', name => {
         const env: Record<string, string | undefined> = { ...complete }
-        delete env[name]
+        Reflect.deleteProperty(env, name)
 
         expect(() => parseRuntimeEnv(env)).toThrow(name)
     })

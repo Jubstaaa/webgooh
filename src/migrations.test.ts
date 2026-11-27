@@ -1,22 +1,14 @@
 import type { MigrateUpArgs } from '@payloadcms/db-sqlite'
+
 import { sql } from '@payloadcms/db-sqlite'
 import { drizzle } from '@payloadcms/db-sqlite/drizzle/libsql'
 import { describe, expect, it } from 'bun:test'
 
 import { migrations } from '@/migrations'
 
-// Kept outside src/migrations: Payload's CLI treats every .ts file there as a
-// migration.
 const [baseline] = migrations
 
 type Db = ReturnType<typeof drizzle>
-
-async function tableNames(db: Db) {
-    const rows = await db.all<{ name: string }>(
-        sql`SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name`
-    )
-    return rows.map(row => row.name)
-}
 
 function runBaseline(db: Db) {
     if (!baseline) throw new Error('No baseline migration')
@@ -25,6 +17,13 @@ function runBaseline(db: Db) {
         payload: { logger: { info: () => undefined } },
         req: {},
     } as unknown as MigrateUpArgs)
+}
+
+async function tableNames(db: Db) {
+    const rows = await db.all<{ name: string }>(
+        sql`SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name`
+    )
+    return rows.map(row => row.name)
 }
 
 describe('baseline migration', () => {

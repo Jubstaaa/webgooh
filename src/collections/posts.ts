@@ -17,7 +17,7 @@ export const Posts: CollectionConfig = {
     admin: {
         defaultColumns: ['title', 'slug', 'publishedAt', '_status'],
         livePreview: {
-            url: ({ data }) => `/blog/${data?.slug}`,
+            url: ({ data }) => `/blog/${data.slug}`,
         },
         useAsTitle: 'title',
     },
@@ -80,8 +80,7 @@ export const Posts: CollectionConfig = {
         singular: 'Yazı',
     },
     slug: 'posts',
-    // No autosave, matching the ACW panel: the same editors write for both sites,
-    // so they get the same "Taslağı kaydet / Değişiklikleri yayınla" buttons here.
+
     versions: {
         drafts: true,
         maxPerDoc: 20,

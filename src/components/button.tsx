@@ -1,6 +1,5 @@
-import Link from 'next/link'
-
 import { cva, type VariantProps } from 'class-variance-authority'
+import Link from 'next/link'
 
 import { cn } from '@/lib/utils'
 
@@ -28,13 +27,13 @@ const buttonVariants = cva(
     }
 )
 
-type ButtonVariants = VariantProps<typeof buttonVariants>
+interface ButtonLinkProps
+    extends ButtonVariants, React.ComponentProps<typeof Link> {}
 
 interface ButtonProps
     extends React.ButtonHTMLAttributes<HTMLButtonElement>, ButtonVariants {}
 
-interface ButtonLinkProps
-    extends React.ComponentProps<typeof Link>, ButtonVariants {}
+type ButtonVariants = VariantProps<typeof buttonVariants>
 
 export function Button({ className, size, variant, ...props }: ButtonProps) {
     return (

@@ -1,3 +1,5 @@
+import type { AuthStrategy, Payload } from 'payload'
+
 import {
     createRemoteJWKSet,
     errors,
@@ -5,14 +7,10 @@ import {
     type JWTVerifyGetKey,
 } from 'jose'
 import { generatePayloadCookie, getFieldsToSign, jwtSign } from 'payload'
-import type { AuthStrategy, Payload } from 'payload'
 import { z } from 'zod'
 
 import { errorSummary } from './error-summary'
 
-// Only the signed assertion is trusted. The plain
-// cf-access-authenticated-user-email header is just as easy to send by hand on
-// any path Access does not cover, so it is never read.
 const ASSERTION_HEADER = 'cf-access-jwt-assertion'
 
 const accessClaims = z.object({ email: z.email() })
@@ -25,9 +23,62 @@ interface AccessConfig {
 
 let fromEnv: AccessConfig | null | undefined
 
-// Lazy so the build, which loads this config without the Access settings, does
-// not need them; at runtime a missing value disables the strategy (password
-// login still works) instead of trusting anything.
+export function createCloudflareAccessStrategy(
+    getConfig: () => AccessConfig | null
+): AuthStrategy {
+    return {
+        authenticate: async ({ canSetHeaders, headers, payload }) => {
+            const assertion = headers.get(ASSERTION_HEADER)
+            const config = getConfig()
+
+            if (!assertion || !config) return { user: null }
+
+            const email = await verifiedEmail(assertion, config)
+
+            if (!email) return { user: null }
+
+            const { docs } = await payload.find({
+                collection: 'users',
+                depth: 0,
+                limit: 1,
+                overrideAccess: true,
+                where: { email: { equals: email } },
+            })
+
+            const found = docs[0] ?? (await register({ email, payload }))
+
+            if (!found) return { user: null }
+
+            const user = { ...found, collection: 'users' as const }
+
+            if (!canSetHeaders) return { user }
+
+            const collection = payload.collections.users
+            const { token } = await jwtSign({
+                fieldsToSign: getFieldsToSign({
+                    collectionConfig: collection.config,
+                    email,
+                    user,
+                }),
+                secret: payload.secret,
+                tokenExpiration: collection.config.auth.tokenExpiration,
+            })
+
+            return {
+                responseHeaders: new Headers({
+                    'Set-Cookie': generatePayloadCookie({
+                        collectionAuthConfig: collection.config.auth,
+                        cookiePrefix: payload.config.cookiePrefix,
+                        token,
+                    }),
+                }),
+                user,
+            }
+        },
+        name: 'cloudflare-access',
+    }
+}
+
 function accessConfigFromEnv(): AccessConfig | null {
     if (fromEnv !== undefined) return fromEnv
 
@@ -55,9 +106,6 @@ function accessConfigFromEnv(): AccessConfig | null {
     return fromEnv
 }
 
-// An expired session or a forged signature is an ordinary unauthenticated
-// request. Anything else (wrong audience or issuer, an unreachable JWKS) means
-// the Access settings are off, so it is logged.
 function isOrdinaryRejection(error: unknown) {
     return (
         error instanceof errors.JWTExpired ||
@@ -65,9 +113,40 @@ function isOrdinaryRejection(error: unknown) {
     )
 }
 
-// Container logs are read outside this app, so a rejection is logged by kind
-// only: a jose error's .payload holds the token's claims, the editor's email
-// among them.
+async function register({
+    email,
+    payload,
+}: {
+    email: string
+    payload: Payload
+}) {
+    try {
+        return await payload.create({
+            collection: 'users',
+            data: {
+                email,
+                name: email.split('@')[0] ?? email,
+                password: crypto.randomUUID(),
+            },
+            overrideAccess: true,
+        })
+    } catch (error) {
+        console.error(
+            'Registering a Cloudflare Access user failed',
+            errorSummary(error)
+        )
+        const { docs } = await payload.find({
+            collection: 'users',
+            depth: 0,
+            limit: 1,
+            overrideAccess: true,
+            where: { email: { equals: email } },
+        })
+
+        return docs[0]
+    }
+}
+
 function rejectionSummary(error: unknown) {
     if (error instanceof errors.JWTClaimValidationFailed) {
         const { claim, code, name, reason } = error
@@ -114,110 +193,6 @@ async function verifiedEmail(token: string, config: AccessConfig) {
     }
 
     return claims.data.email.toLowerCase()
-}
-
-// The Access policy is the only list of people worth keeping, so an address it
-// allows that has never signed in here gets an account on arrival rather than a
-// login form it could never pass. Everyone in the policy therefore has the run of
-// the CMS — that policy is the thing to be careful with, not this.
-//
-// The password is random and never told to anyone: signing in happens through
-// Access, and the field is only required because the collection has one.
-async function register({
-    email,
-    payload,
-}: {
-    email: string
-    payload: Payload
-}) {
-    try {
-        return await payload.create({
-            collection: 'users',
-            data: {
-                email,
-                name: email.split('@')[0],
-                password: crypto.randomUUID(),
-            },
-            overrideAccess: true,
-        })
-    } catch (error) {
-        // Usually two first requests at once: whichever lost the race reads back
-        // the row the winner wrote, since email is unique. Anything else leaves
-        // the read-back empty, so the cause is logged rather than lost.
-        console.error(
-            'Registering a Cloudflare Access user failed',
-            errorSummary(error)
-        )
-        const { docs } = await payload.find({
-            collection: 'users',
-            depth: 0,
-            limit: 1,
-            overrideAccess: true,
-            where: { email: { equals: email } },
-        })
-
-        return docs[0]
-    }
-}
-
-export function createCloudflareAccessStrategy(
-    getConfig: () => AccessConfig | null
-): AuthStrategy {
-    return {
-        authenticate: async ({ canSetHeaders, headers, payload }) => {
-            const assertion = headers.get(ASSERTION_HEADER)
-            const config = getConfig()
-
-            if (!assertion || !config) return { user: null }
-
-            const email = await verifiedEmail(assertion, config)
-
-            if (!email) return { user: null }
-
-            const { docs } = await payload.find({
-                collection: 'users',
-                depth: 0,
-                limit: 1,
-                overrideAccess: true,
-                where: { email: { equals: email } },
-            })
-
-            const found = docs[0] ?? (await register({ email, payload }))
-
-            if (!found) return { user: null }
-
-            const user = { ...found, collection: 'users' as const }
-
-            if (!canSetHeaders) return { user }
-
-            // Access guards /admin only, so the panel's own requests to /api would
-            // arrive without the header and read as logged out. Issuing the normal
-            // Payload session on the way in means everything after this behaves like
-            // an ordinary login.
-            const collection = payload.collections.users
-            const { token } = await jwtSign({
-                fieldsToSign: getFieldsToSign({
-                    collectionConfig: collection.config,
-                    email,
-                    user,
-                }),
-                secret: payload.secret,
-                tokenExpiration: collection.config.auth.tokenExpiration,
-            })
-
-            return {
-                responseHeaders: new Headers({
-                    'Set-Cookie': generatePayloadCookie({
-                        collectionAuthConfig: collection.config.auth,
-                        cookiePrefix: payload.config.cookiePrefix,
-                        token,
-                    }),
-                }),
-                user,
-            }
-        },
-        name: 'cloudflare-access',
-    }
 }
 
 export const cloudflareAccess =

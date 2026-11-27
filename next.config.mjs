@@ -6,29 +6,22 @@ import { CDN_BASE, CDN_HOSTNAME, SITE_URL } from './src/lib/site.mjs'
 const isDev = process.env.NODE_ENV !== 'production'
 
 const TURNSTILE_HOST = 'https://challenges.cloudflare.com'
-// Web Analytics is switched on at the Cloudflare edge, which injects its beacon
-// script into every page and has it report back to this endpoint.
+
 const CF_INSIGHTS_SCRIPT = 'https://static.cloudflareinsights.com'
 const CF_INSIGHTS_REPORT = 'https://cloudflareinsights.com'
 
-// Deliberately nonce-free. A nonce has to be minted per request, which would
-// drag every blog and service page out of the static cache and onto the 1 vCPU
-// droplet. So inline scripts stay allowed and the value of the policy is in the
-// origin allowlist: only this host, the Spaces CDN and Turnstile.
 const contentSecurityPolicy = [
     "default-src 'self'",
     `script-src 'self' 'unsafe-inline' ${TURNSTILE_HOST} ${CF_INSIGHTS_SCRIPT}${isDev ? " 'unsafe-eval'" : ''}`,
     "style-src 'self' 'unsafe-inline'",
     `img-src 'self' blob: data: ${CDN_BASE}`,
     "font-src 'self' data:",
-    // blob: for the admin panel, which previews uploads and runs the editor's
-    // workers off blob URLs.
+
     "worker-src 'self' blob:",
     `media-src 'self' blob: ${CDN_BASE}`,
     `connect-src 'self' ${TURNSTILE_HOST} ${CF_INSIGHTS_REPORT}${isDev ? ' ws:' : ''}`,
     `frame-src ${TURNSTILE_HOST}`,
-    // 'self' rather than 'none': Payload's live preview iframes the site back
-    // into the admin panel.
+
     "frame-ancestors 'self'",
     "form-action 'self'",
     "base-uri 'self'",
@@ -52,46 +45,31 @@ const securityHeaders = [
     },
 ]
 
-/** @type {import('next').NextConfig} */
 const nextConfig = {
-    experimental: {
-        // src/app/global-not-found.tsx: with two root layouts, unmatched URLs
-        // otherwise get Next's bare default 404.
-        globalNotFound: true,
-    },
-    output: 'standalone',
-    reactStrictMode: true,
-    poweredByHeader: false,
-    images: {
-        // webp only, deliberately. On this 1 vCPU droplet an AVIF encode costs
-        // ~3.7x the CPU of the equivalent WebP (0.58s vs 0.16s at w=828) for
-        // roughly 10% fewer bytes. The blog index asks for 17 images at once,
-        // so those encodes serialise: AVIF made the last one land at ~11s,
-        // WebP brings the whole batch under 3s.
-        formats: ['image/webp'],
-        remotePatterns: [
-            { protocol: 'https', hostname: 'www.webgooh.com' },
-            { protocol: 'https', hostname: 'webgooh.com' },
-            // Payload media + public assets, served from the Spaces CDN edge.
-            { protocol: 'https', hostname: CDN_HOSTNAME },
-        ],
-    },
-    async headers() {
-        return [{ source: '/:path*', headers: securityHeaders }]
-    },
     env: {
         NEXT_PUBLIC_SITE_URL: SITE_URL,
     },
+    experimental: {
+        globalNotFound: true,
+    },
+    async headers() {
+        return [{ headers: securityHeaders, source: '/:path*' }]
+    },
+    images: {
+        formats: ['image/webp'],
+        remotePatterns: [
+            { hostname: 'www.webgooh.com', protocol: 'https' },
+            { hostname: 'webgooh.com', protocol: 'https' },
+
+            { hostname: CDN_HOSTNAME, protocol: 'https' },
+        ],
+    },
+    output: 'standalone',
+    poweredByHeader: false,
+    reactStrictMode: true,
 }
 
-/**
- * @param {string} phase
- * @returns {import('next').NextConfig}
- */
 export default function config(phase) {
-    // The site key is inlined into the client bundle at build time. Without it
-    // the contact form could never pass Turnstile, so the build stops instead
-    // of shipping a form that silently rejects every visitor.
     if (
         phase === PHASE_PRODUCTION_BUILD &&
         !process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY
@@ -106,10 +84,6 @@ export default function config(phase) {
     )
 }
 
-// withPayload asks every path for the Sec-CH-Prefers-Color-Scheme client hint.
-// Only the admin panel picks its theme from it; on the public site, whose
-// colour scheme is fixed, Critical-CH just makes Chromium retry the first
-// navigation to send a hint nothing reads.
 function scopeClientHintsToAdmin(config) {
     const { headers } = config
 

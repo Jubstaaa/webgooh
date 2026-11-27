@@ -41,8 +41,6 @@ describe('GET /api/health', () => {
     })
 
     test('answers 503 for an empty database when data is required', async () => {
-        // A missing or wrongly mounted database file is created empty and
-        // migrated at boot; production must not report that as healthy.
         process.env.HEALTH_REQUIRE_DATA = 'true'
         count = () => Promise.resolve({ totalDocs: 0 })
         const log = spyOn(console, 'error').mockImplementation(() => {})

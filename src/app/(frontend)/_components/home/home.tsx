@@ -1,6 +1,5 @@
-import Link from 'next/link'
-
 import { ArrowRight } from 'lucide-react'
+import Link from 'next/link'
 
 import { CtaBand } from '@/components/cta-band/cta-band'
 import { PostCard } from '@/components/post-card'

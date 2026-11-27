@@ -1,9 +1,8 @@
+import { GlobalRegistrator } from '@happy-dom/global-registrator'
+import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { renderToStaticMarkup } from 'react-dom/server'
-
-import { GlobalRegistrator } from '@happy-dom/global-registrator'
-import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
 
 import { useMediaQuery } from './use-media-query'
 
@@ -13,13 +12,13 @@ let matches: boolean
 let listeners: Set<() => void>
 let root: Root
 
-function Probe() {
-    return <output>{String(useMediaQuery(QUERY))}</output>
-}
-
 function changeMedia(next: boolean) {
     matches = next
     for (const listener of listeners) listener()
+}
+
+function Probe() {
+    return <output>{String(useMediaQuery(QUERY))}</output>
 }
 
 describe('useMediaQuery', () => {

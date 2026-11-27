@@ -1,4 +1,6 @@
+import type { SiteSetting } from '@payload-types'
 import type { IconType } from 'react-icons'
+
 import {
     PiFacebookLogoBold,
     PiInstagramLogoBold,
@@ -8,15 +10,10 @@ import {
     PiYoutubeLogoBold,
 } from 'react-icons/pi'
 
-import type { SiteSetting } from '@payload-types'
-
 interface SocialsProps {
     socials: SiteSetting['socials']
 }
 
-// Brand marks come from Phosphor via react-icons: lucide dropped brand icons in
-// 1.0, and simple-icons no longer carries LinkedIn. Phosphor's bold outline is
-// the closest match to the 2px stroke of the site's lucide icons.
 const brandIcons: Record<string, IconType> = {
     facebook: PiFacebookLogoBold,
     instagram: PiInstagramLogoBold,
@@ -36,10 +33,10 @@ export function Socials({ socials }: SocialsProps) {
 
                 return (
                     <a
-                        key={social.id}
                         aria-label={social.platform}
                         className="hover:border-brand/60 hover:text-brand-bright text-muted border-line grid size-9 place-items-center rounded-full border transition-colors"
                         href={social.url}
+                        key={social.id}
                         rel="noreferrer"
                         target="_blank">
                         {Icon ? <Icon aria-hidden className="size-4" /> : null}

@@ -5,7 +5,7 @@ import { formatDate } from '@/lib/utils'
 interface PostMetaProps {
     minutes: number
     publishedAt: null | string | undefined
-    // The card says "dk", the article header has room for "dk okuma".
+
     readingLabel: string
 }
 

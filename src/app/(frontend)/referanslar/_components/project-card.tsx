@@ -1,15 +1,14 @@
+import type { Project } from '@payload-types'
+
+import { ArrowUpRight } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 
-import { ArrowUpRight } from 'lucide-react'
-
 import { mediaAlt, mediaUrl } from '@/lib/media'
-import type { Project } from '@payload-types'
 
 interface ProjectCardProps {
-    // Above-the-fold cards load their image eagerly and at high priority.
     eager?: boolean
-    // h2 when the card list sits directly under the page's h1.
+
     headingLevel?: 'h2' | 'h3'
     project: Project
 }
@@ -28,10 +27,10 @@ export function ProjectCard({
             <div className="bg-surface-2 relative aspect-[16/10] overflow-hidden">
                 {image ? (
                     <Image
-                        fill
                         alt={mediaAlt(project.image, project.title)}
                         className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
                         fetchPriority={eager ? 'high' : 'auto'}
+                        fill
                         loading={eager ? 'eager' : 'lazy'}
                         sizes="(max-width: 768px) 100vw, 500px"
                         src={image}
@@ -61,8 +60,8 @@ export function ProjectCard({
                     <div className="mt-auto flex flex-wrap gap-1.5 pt-2">
                         {project.tags.map(tag => (
                             <span
-                                key={tag}
-                                className="border-line text-faint rounded-full border px-2.5 py-0.5 font-mono text-[0.65rem]">
+                                className="border-line text-faint rounded-full border px-2.5 py-0.5 font-mono text-[0.65rem]"
+                                key={tag}>
                                 {tag}
                             </span>
                         ))}

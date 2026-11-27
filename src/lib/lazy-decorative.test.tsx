@@ -1,6 +1,5 @@
-import { renderToStaticMarkup } from 'react-dom/server'
-
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
+import { renderToStaticMarkup } from 'react-dom/server'
 
 import { lazyDecorative, loadDecorative } from './lazy-decorative'
 

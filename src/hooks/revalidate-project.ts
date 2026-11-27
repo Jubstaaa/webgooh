@@ -1,3 +1,4 @@
+import type { Project } from '@payload-types'
 import type {
     CollectionAfterChangeHook,
     CollectionAfterDeleteHook,
@@ -5,13 +6,12 @@ import type {
 
 import { cacheTags } from '@/lib/cache-tags'
 import { safeRevalidatePath, safeRevalidateTag } from '@/lib/revalidate'
-import type { Project } from '@payload-types'
 
 function revalidateProject(doc: Partial<Project>) {
     safeRevalidateTag(cacheTags.projects)
     safeRevalidatePath('/referanslar')
 
-    if (doc?.slug) {
+    if (doc.slug) {
         safeRevalidateTag(cacheTags.project(doc.slug))
         safeRevalidatePath(`/referanslar/${doc.slug}`)
     }
@@ -21,7 +21,7 @@ export const revalidateProjectAfterChange: CollectionAfterChangeHook<
     Project
 > = ({ doc, previousDoc }) => {
     revalidateProject(doc)
-    if (previousDoc?.slug && previousDoc.slug !== doc.slug) {
+    if (previousDoc.slug && previousDoc.slug !== doc.slug) {
         revalidateProject(previousDoc)
     }
 

@@ -49,8 +49,7 @@ export function NeuralMesh({ className }: { className?: string }) {
                 x: Math.random() * width,
                 y: Math.random() * height,
             }))
-            // Resizing clears the canvas; repaint so a paused or reduced-motion
-            // mesh does not sit blank until the loop runs again.
+
             if (!running) paint()
         }
 
@@ -87,6 +86,7 @@ export function NeuralMesh({ className }: { className?: string }) {
                 for (let j = i + 1; j < nodes.length; j++) {
                     const a = nodes[i]
                     const b = nodes[j]
+                    if (!a || !b) continue
                     const distance = Math.hypot(a.x - b.x, a.y - b.y)
                     if (distance < LINK_DISTANCE) {
                         const strength = 1 - distance / LINK_DISTANCE
@@ -127,8 +127,6 @@ export function NeuralMesh({ className }: { className?: string }) {
             })
         }
 
-        // The O(n²) link pass with shadow blur is the costliest work on the
-        // page, so the loop only runs while the hero is actually on screen.
         const visibility = new IntersectionObserver(entries => {
             const visible = entries.at(-1)?.isIntersecting ?? false
             if (visible && !running) {
@@ -154,9 +152,9 @@ export function NeuralMesh({ className }: { className?: string }) {
 
     return (
         <canvas
-            ref={canvasRef}
             aria-hidden
             className={cn('pointer-events-none absolute inset-0', className)}
+            ref={canvasRef}
         />
     )
 }
