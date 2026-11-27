@@ -1,6 +1,5 @@
 import { z } from 'zod'
 
-// Empty inputs arrive as '' from FormData; stored as absent rather than blank.
 const optional = <T extends z.ZodType>(schema: T) =>
     z.preprocess(value => (value === '' ? undefined : value), schema.optional())
 
@@ -25,7 +24,7 @@ export function createContactSchema(services: readonly string[]) {
         ),
         service: optional(
             z.string().refine(value => services.includes(value), {
-                message: 'Listeden bir hizmet seçin.',
+                error: 'Listeden bir hizmet seçin.',
             })
         ),
     })

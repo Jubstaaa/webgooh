@@ -1,19 +1,18 @@
+import type { Post } from '@payload-types'
+
+import { ArrowUpRight } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 
-import { ArrowUpRight } from 'lucide-react'
-
 import { mediaAlt, mediaUrl } from '@/lib/media'
 import { readingMinutes } from '@/lib/reading-time'
-import type { Post } from '@payload-types'
 
 import { Badge } from './badge'
 import { PostMeta } from './post-meta'
 
 interface PostCardProps {
-    // Above-the-fold cards load their image eagerly and at high priority.
     eager?: boolean
-    // h2 when the card list sits directly under the page's h1.
+
     headingLevel?: 'h2' | 'h3'
     post: Post
 }
@@ -34,10 +33,10 @@ export function PostCard({
             <div className="bg-surface-2 relative aspect-[16/10] overflow-hidden">
                 {cover ? (
                     <Image
-                        fill
                         alt={mediaAlt(post.coverImage, post.title)}
                         className="object-cover transition-transform duration-500 group-hover:scale-105"
                         fetchPriority={eager ? 'high' : 'auto'}
+                        fill
                         loading={eager ? 'eager' : 'lazy'}
                         sizes="(max-width: 768px) 100vw, 400px"
                         src={cover}

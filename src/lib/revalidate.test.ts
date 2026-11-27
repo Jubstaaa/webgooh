@@ -9,8 +9,7 @@ void mock.module('next/cache', () => ({
     revalidateTag: () => {
         throw outsideRequest
     },
-    // Bun keeps a mocked module's export names across files, so every
-    // mock of next/cache carries the full set the app imports.
+
     unstable_cache: <T>(fn: T) => fn,
 }))
 

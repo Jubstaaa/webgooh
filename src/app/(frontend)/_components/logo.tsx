@@ -19,10 +19,7 @@ export function Logo({ className }: LogoProps) {
                 className="h-8 w-auto sm:h-9"
                 height={310}
                 loading="eager"
-                // Without this the 2164px intrinsic width makes Next offer a
-                // srcSet up to 3840, and retina screens pick it — a 3840px
-                // render for a ~224px slot. These are the real painted widths
-                // (h-8/h-9 at a 6.98 aspect ratio).
+
                 sizes="(min-width: 640px) 251px, 223px"
                 src={`${CDN_BASE}/static/webgooh-logo.webp`}
                 width={2164}

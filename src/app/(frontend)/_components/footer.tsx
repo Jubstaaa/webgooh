@@ -1,6 +1,5 @@
-import Link from 'next/link'
-
 import { Mail, MapPin, Phone } from 'lucide-react'
+import Link from 'next/link'
 
 import { getServices, getSettings } from '@/lib/queries'
 
@@ -31,9 +30,9 @@ export async function Footer() {
                     <p className="eyebrow">{'// menü'}</p>
                     {mainNav.slice(1).map(item => (
                         <Link
-                            key={item.href}
                             className="text-muted hover:text-paper text-sm transition-colors"
-                            href={item.href}>
+                            href={item.href}
+                            key={item.href}>
                             {item.label}
                         </Link>
                     ))}
@@ -43,9 +42,9 @@ export async function Footer() {
                     <p className="eyebrow">{'// hizmetler'}</p>
                     {services.slice(0, 6).map(service => (
                         <Link
-                            key={service.id}
                             className="text-muted hover:text-paper text-sm transition-colors"
-                            href={`/hizmetlerimiz/${service.slug}`}>
+                            href={`/hizmetlerimiz/${service.slug}`}
+                            key={service.id}>
                             {service.title}
                         </Link>
                     ))}

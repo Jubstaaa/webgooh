@@ -36,15 +36,15 @@ export function Magnetic({
 
     return (
         <span
-            ref={ref}
             className={className}
+            onPointerLeave={handlePointerLeave}
+            onPointerMove={handlePointerMove}
+            ref={ref}
             style={{
                 display: 'inline-flex',
                 transition: 'transform 0.2s cubic-bezier(0.22, 1, 0.36, 1)',
                 willChange: 'transform',
-            }}
-            onPointerLeave={handlePointerLeave}
-            onPointerMove={handlePointerMove}>
+            }}>
             {children}
         </span>
     )

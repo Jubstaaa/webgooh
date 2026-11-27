@@ -4,7 +4,7 @@ interface BadgeProps extends Omit<
     React.HTMLAttributes<HTMLSpanElement>,
     'color'
 > {
-    color?: string | null
+    color?: null | string | undefined
 }
 
 export function Badge({

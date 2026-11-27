@@ -6,8 +6,6 @@ export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs))
 }
 
-// Turkish locale so ü/ö/ç become u/o/c (not the German ue/oe); "&" is dropped
-// rather than spelled "and" on a Turkish site.
 export function slugify(value: string) {
     return slugifyText(value, {
         customReplacements: [['&', ' ']],

@@ -60,10 +60,9 @@ export const getCategories = unstable_cache(
 )
 
 interface PostQuery {
-    categorySlug?: string
-    // Omitted means every published post: the sitemap, RSS and static params
-    // must not be silently cut off at Payload's default page size.
-    limit?: number
+    categorySlug?: string | undefined
+
+    limit?: number | undefined
 }
 
 export const getPosts = ({ categorySlug, limit }: PostQuery = {}) =>

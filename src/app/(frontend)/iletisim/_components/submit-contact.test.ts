@@ -21,8 +21,6 @@ const findServices = mock(() =>
     Promise.resolve({ docs: [{ title: 'Web Geliştirme' }] })
 )
 
-// getServices goes through the real query module, so its cache wrapper is a
-// pass-through and Payload answers the services lookup too.
 void mock.module('next/cache', () => ({
     revalidatePath: () => {},
     revalidateTag: () => {},
@@ -154,9 +152,6 @@ describe('submitContact', () => {
     })
 
     test('keeps the values and logs when saving the lead fails', async () => {
-        // The shape the SQLite adapter throws: the query text and its bound
-        // values (the visitor's details) in message and params, the driver's
-        // code on the cause.
         const failure = Object.assign(
             new Error(
                 'Failed query: insert into "leads" params: ayse@example.com,0555 123 45 67'

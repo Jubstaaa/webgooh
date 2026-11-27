@@ -1,18 +1,16 @@
 interface ControlProps {
-    'id': string
     'aria-describedby'?: string
     'aria-invalid'?: true
+    'id': string
 }
 
 interface FormFieldProps {
-    id: string
     children: (control: ControlProps) => React.ReactNode
     error?: string | undefined
+    id: string
     label: string
 }
 
-// The control gets its id and, when invalid, aria-invalid plus a pointer to the
-// message, so a screen reader reads the error when the field takes focus.
 export function FormField({ children, error, id, label }: FormFieldProps) {
     const errorId = `${id}-error`
 

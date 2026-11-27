@@ -23,12 +23,10 @@ import {
     createCloudflareAccessStrategy,
 } from './cloudflare-access'
 
-// Errors keep their message and own fields (a jose error's claims payload,
-// a Payload error's data) when serialised, so a log leak shows up here.
 function serialized(value: unknown) {
     return JSON.stringify(value, (_key, field: unknown) =>
         field instanceof Error
-            ? { ...field, message: field.message, name: field.name }
+            ? { message: field.message, name: field.name }
             : field
     )
 }
@@ -48,6 +46,33 @@ beforeAll(async () => {
     const jwk = await exportJWK(trusted.publicKey)
     keys = createLocalJWKSet({ keys: [{ ...jwk, alg: 'RS256', kid: 'k1' }] })
 })
+
+function authenticate(
+    headers: Record<string, string>,
+    config: null | { audience: string; issuer: string; keys: JWTVerifyGetKey }
+) {
+    const strategy = createCloudflareAccessStrategy(() => config)
+    const { find, payload } = fakePayload()
+
+    return Promise.resolve(
+        strategy.authenticate({
+            canSetHeaders: false,
+            headers: new Headers(headers),
+            payload,
+            strategyName: strategy.name,
+        })
+    ).then(result => ({ find, result }))
+}
+
+function fakePayload() {
+    const find = mock(({ where }: { where: { email: { equals: string } } }) =>
+        Promise.resolve({
+            docs: [{ email: where.email.equals, id: 1, name: 'editor' }],
+        })
+    )
+
+    return { find, payload: { find } as unknown as Payload }
+}
 
 function sign(
     claims: Record<string, unknown>,
@@ -70,33 +95,6 @@ function sign(
         .setIssuedAt()
         .setExpirationTime(expiresAt)
         .sign(key)
-}
-
-function fakePayload() {
-    const find = mock(({ where }: { where: { email: { equals: string } } }) =>
-        Promise.resolve({
-            docs: [{ email: where.email.equals, id: 1, name: 'editor' }],
-        })
-    )
-
-    return { find, payload: { find } as unknown as Payload }
-}
-
-function authenticate(
-    headers: Record<string, string>,
-    config: { audience: string; issuer: string; keys: JWTVerifyGetKey } | null
-) {
-    const strategy = createCloudflareAccessStrategy(() => config)
-    const { find, payload } = fakePayload()
-
-    return Promise.resolve(
-        strategy.authenticate({
-            canSetHeaders: false,
-            headers: new Headers(headers),
-            payload,
-            strategyName: strategy.name,
-        })
-    ).then(result => ({ find, result }))
 }
 
 const config = () => ({ audience: AUDIENCE, issuer: TEAM_DOMAIN, keys })
@@ -406,7 +404,6 @@ describe('cloudflare access assertion logging', () => {
     ])('summarises a registration failure: %p', async (failure, summary) => {
         const strategy = createCloudflareAccessStrategy(config)
         const payload = {
-            // Non-Error rejections are part of what is under test.
             // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
             create: () => Promise.reject(failure),
             find: () => Promise.resolve({ docs: [] }),

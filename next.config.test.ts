@@ -1,6 +1,5 @@
-import { PHASE_PRODUCTION_SERVER } from 'next/constants.js'
-
 import { describe, expect, test } from 'bun:test'
+import { PHASE_PRODUCTION_SERVER } from 'next/constants.js'
 
 import config from './next.config.mjs'
 
@@ -9,8 +8,10 @@ interface HeaderRule {
     source: string
 }
 
-async function headerRules() {
-    const nextConfig = config(PHASE_PRODUCTION_SERVER)
+async function headerRules(): Promise<HeaderRule[]> {
+    const nextConfig: { headers?: () => Promise<unknown> } = config(
+        PHASE_PRODUCTION_SERVER
+    )
     if (!nextConfig.headers) throw new Error('next.config has no headers()')
 
     return (await nextConfig.headers()) as HeaderRule[]

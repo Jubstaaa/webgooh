@@ -65,14 +65,14 @@ export function CustomCursor() {
     return (
         <>
             <div
-                ref={ringRef}
                 aria-hidden
                 className="border-accent/70 pointer-events-none fixed top-0 left-0 z-[70] size-8 rounded-full border opacity-0 mix-blend-screen transition-[width,height,background-color] [transition-property:width,height,background-color] duration-200 max-[820px]:hidden"
+                ref={ringRef}
             />
             <div
-                ref={dotRef}
                 aria-hidden
                 className="bg-accent pointer-events-none fixed top-0 left-0 z-[70] size-1.5 rounded-full opacity-0 mix-blend-screen max-[820px]:hidden"
+                ref={dotRef}
             />
         </>
     )

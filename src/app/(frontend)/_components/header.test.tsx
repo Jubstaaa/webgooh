@@ -1,9 +1,8 @@
+import { GlobalRegistrator } from '@happy-dom/global-registrator'
+import { afterEach, beforeEach, describe, expect, mock, test } from 'bun:test'
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { renderToStaticMarkup } from 'react-dom/server'
-
-import { GlobalRegistrator } from '@happy-dom/global-registrator'
-import { afterEach, beforeEach, describe, expect, mock, test } from 'bun:test'
 
 void mock.module('next/navigation', () => ({ usePathname: () => '/' }))
 

@@ -1,3 +1,4 @@
+import type { Service } from '@payload-types'
 import type {
     CollectionAfterChangeHook,
     CollectionAfterDeleteHook,
@@ -5,13 +6,12 @@ import type {
 
 import { cacheTags } from '@/lib/cache-tags'
 import { safeRevalidatePath, safeRevalidateTag } from '@/lib/revalidate'
-import type { Service } from '@payload-types'
 
 function revalidateService(doc: Partial<Service>) {
     safeRevalidateTag(cacheTags.services)
     safeRevalidatePath('/')
 
-    if (doc?.slug) {
+    if (doc.slug) {
         safeRevalidateTag(cacheTags.service(doc.slug))
         safeRevalidatePath(`/hizmetlerimiz/${doc.slug}`)
     }
@@ -21,7 +21,7 @@ export const revalidateServiceAfterChange: CollectionAfterChangeHook<
     Service
 > = ({ doc, previousDoc }) => {
     revalidateService(doc)
-    if (previousDoc?.slug && previousDoc.slug !== doc.slug) {
+    if (previousDoc.slug && previousDoc.slug !== doc.slug) {
         revalidateService(previousDoc)
     }
 

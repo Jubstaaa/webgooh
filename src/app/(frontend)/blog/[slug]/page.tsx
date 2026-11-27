@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+
 import { notFound } from 'next/navigation'
 
 import { BlogDetail } from '@/app/(frontend)/blog/_components/blog-detail'
@@ -7,12 +8,6 @@ import { buildMetadata } from '@/lib/seo'
 
 interface PageProps {
     params: Promise<{ slug: string }>
-}
-
-export async function generateStaticParams() {
-    const posts = await getPosts()
-
-    return posts.flatMap(post => (post.slug ? [{ slug: post.slug }] : []))
 }
 
 export async function generateMetadata({
@@ -29,6 +24,12 @@ export async function generateMetadata({
         path: `/blog/${slug}`,
         title: post.title,
     })
+}
+
+export async function generateStaticParams() {
+    const posts = await getPosts()
+
+    return posts.flatMap(post => (post.slug ? [{ slug: post.slug }] : []))
 }
 
 export default async function PostPage({ params }: PageProps) {

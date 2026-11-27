@@ -1,3 +1,4 @@
+import type { Category } from '@payload-types'
 import type {
     CollectionAfterChangeHook,
     CollectionAfterDeleteHook,
@@ -10,20 +11,6 @@ import {
     revalidateTargets,
     type RevalidationTargets,
 } from '@/lib/revalidate'
-import type { Category } from '@payload-types'
-
-// Posts embed their category (name, colour) under the posts and post:<slug>
-// tags, so a category edit has to refresh those too, not just the list.
-export function categoryTargets(doc: Partial<Category>): RevalidationTargets {
-    return {
-        paths: [],
-        tags: [
-            cacheTags.categories,
-            cacheTags.posts,
-            ...(doc.slug ? [cacheTags.category(doc.slug)] : []),
-        ],
-    }
-}
 
 export function categoryChangeTargets(
     doc: Partial<Category>,
@@ -33,6 +20,17 @@ export function categoryChangeTargets(
         categoryTargets(doc),
         previousDoc ? categoryTargets(previousDoc) : noTargets
     )
+}
+
+export function categoryTargets(doc: Partial<Category>): RevalidationTargets {
+    return {
+        paths: [],
+        tags: [
+            cacheTags.categories,
+            cacheTags.posts,
+            ...(doc.slug ? [cacheTags.category(doc.slug)] : []),
+        ],
+    }
 }
 
 export const revalidateCategoryAfterChange: CollectionAfterChangeHook<

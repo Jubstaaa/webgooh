@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+
 import { notFound } from 'next/navigation'
 
 import { Blog } from '@/app/(frontend)/blog/_components/blog'
@@ -8,12 +9,14 @@ interface PageProps {
     params: Promise<{ slug: string }>
 }
 
-export async function generateStaticParams() {
+export default async function CategoryPage({ params }: PageProps) {
+    const { slug } = await params
     const categories = await getCategories()
+    const category = categories.find(item => item.slug === slug)
 
-    return categories.flatMap(category =>
-        category.slug ? [{ slug: category.slug }] : []
-    )
+    if (!category) notFound()
+
+    return <Blog categorySlug={slug} />
 }
 
 export async function generateMetadata({
@@ -34,12 +37,10 @@ export async function generateMetadata({
     }
 }
 
-export default async function CategoryPage({ params }: PageProps) {
-    const { slug } = await params
+export async function generateStaticParams() {
     const categories = await getCategories()
-    const category = categories.find(item => item.slug === slug)
 
-    if (!category) notFound()
-
-    return <Blog categorySlug={slug} />
+    return categories.flatMap(category =>
+        category.slug ? [{ slug: category.slug }] : []
+    )
 }

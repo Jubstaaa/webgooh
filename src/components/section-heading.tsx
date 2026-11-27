@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils'
 
 interface SectionHeadingProps {
-    align?: 'left' | 'center'
+    align?: 'center' | 'left'
     description?: string
     eyebrow: string
     title: string

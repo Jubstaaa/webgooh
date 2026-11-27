@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+
 import { notFound } from 'next/navigation'
 
 import { ServiceDetail } from '@/app/(frontend)/hizmetlerimiz/_components/service-detail'
@@ -7,14 +8,6 @@ import { buildMetadata } from '@/lib/seo'
 
 interface PageProps {
     params: Promise<{ slug: string }>
-}
-
-export async function generateStaticParams() {
-    const services = await getServices()
-
-    return services.flatMap(service =>
-        service.slug ? [{ slug: service.slug }] : []
-    )
 }
 
 export async function generateMetadata({
@@ -32,6 +25,14 @@ export async function generateMetadata({
         seo: service.seo,
         title: service.title,
     })
+}
+
+export async function generateStaticParams() {
+    const services = await getServices()
+
+    return services.flatMap(service =>
+        service.slug ? [{ slug: service.slug }] : []
+    )
 }
 
 export default async function ServiceDetailPage({ params }: PageProps) {

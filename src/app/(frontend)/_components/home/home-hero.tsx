@@ -11,7 +11,7 @@ import { LazyNeuralMesh } from './lazy-neural-mesh'
 interface TerminalLine {
     prompt?: string
     text: string
-    tone?: 'ok' | 'accent'
+    tone?: 'accent' | 'ok'
 }
 
 export async function HomeHero() {
@@ -99,7 +99,7 @@ export async function HomeHero() {
                             </div>
                             <div className="relative flex flex-col gap-2 p-5 font-mono text-sm">
                                 {terminalLines.map((line, index) => (
-                                    <div key={index} className="flex gap-2">
+                                    <div className="flex gap-2" key={index}>
                                         {line.prompt ? (
                                             <span className="text-brand-bright">
                                                 {line.prompt} $

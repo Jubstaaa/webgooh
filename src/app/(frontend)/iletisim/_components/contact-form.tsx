@@ -1,9 +1,8 @@
 'use client'
 
+import { CheckCircle2, Send } from 'lucide-react'
 import { useActionState, useEffect } from 'react'
 import { useFormStatus } from 'react-dom'
-
-import { CheckCircle2, Send } from 'lucide-react'
 
 import { Button } from '@/components/button'
 import { cn } from '@/lib/utils'
@@ -20,21 +19,6 @@ const initialState: ContactState = { status: 'idle' }
 
 const inputClass =
     'w-full rounded-xl border border-line bg-surface/40 px-4 py-3 text-sm text-paper placeholder:text-faint transition-colors focus:border-brand/60 focus:outline-none focus:ring-2 focus:ring-brand/20'
-
-function SubmitButton() {
-    const { pending } = useFormStatus()
-
-    return (
-        <Button
-            className="w-full sm:w-auto"
-            disabled={pending}
-            size="lg"
-            type="submit">
-            {pending ? 'Gönderiliyor…' : 'Talebi gönder'}
-            <Send className="size-4" />
-        </Button>
-    )
-}
 
 export function ContactForm({ services }: ContactFormProps) {
     const [state, formAction] = useActionState(submitContact, initialState)
@@ -60,19 +44,19 @@ export function ContactForm({ services }: ContactFormProps) {
     const errors = state.errors ?? {}
 
     return (
-        <form noValidate action={formAction} className="flex flex-col gap-4">
+        <form action={formAction} className="flex flex-col gap-4" noValidate>
             <div className="grid gap-4 sm:grid-cols-2">
                 <FormField error={errors.name} id="name" label="Ad Soyad *">
                     {control => (
                         <input
                             {...control}
-                            required
                             autoComplete="name"
                             className={inputClass}
                             defaultValue={state.values?.name ?? ''}
                             maxLength={100}
                             name="name"
                             placeholder="Adınız"
+                            required
                         />
                     )}
                 </FormField>
@@ -81,13 +65,13 @@ export function ContactForm({ services }: ContactFormProps) {
                     {control => (
                         <input
                             {...control}
-                            required
                             autoComplete="email"
                             className={inputClass}
                             defaultValue={state.values?.email ?? ''}
                             maxLength={254}
                             name="email"
                             placeholder="ornek@email.com"
+                            required
                             type="email"
                         />
                     )}
@@ -130,9 +114,9 @@ export function ContactForm({ services }: ContactFormProps) {
                 {control => (
                     <select
                         {...control}
-                        key={state.attempt}
                         className={cn(inputClass, 'appearance-none')}
                         defaultValue={state.values?.service ?? ''}
+                        key={state.attempt}
                         name="service">
                         <option value="">Seçiniz</option>
                         {services.map(service => (
@@ -148,12 +132,12 @@ export function ContactForm({ services }: ContactFormProps) {
                 {control => (
                     <textarea
                         {...control}
-                        required
                         className={cn(inputClass, 'min-h-32 resize-none')}
                         defaultValue={state.values?.message ?? ''}
                         maxLength={5000}
                         name="message"
                         placeholder="Projenizden kısaca bahsedin…"
+                        required
                     />
                 )}
             </FormField>
@@ -170,8 +154,6 @@ export function ContactForm({ services }: ContactFormProps) {
 
             <Turnstile />
 
-            {/* Always mounted so the live region exists before a message
-                arrives; screen readers ignore regions inserted with content. */}
             <div aria-live="assertive" role="alert">
                 {state.status === 'error' ? (
                     <p className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
@@ -183,5 +165,20 @@ export function ContactForm({ services }: ContactFormProps) {
 
             <SubmitButton />
         </form>
+    )
+}
+
+function SubmitButton() {
+    const { pending } = useFormStatus()
+
+    return (
+        <Button
+            className="w-full sm:w-auto"
+            disabled={pending}
+            size="lg"
+            type="submit">
+            {pending ? 'Gönderiliyor…' : 'Talebi gönder'}
+            <Send className="size-4" />
+        </Button>
     )
 }

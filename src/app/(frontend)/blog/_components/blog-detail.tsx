@@ -1,7 +1,8 @@
-import Image from 'next/image'
-import Link from 'next/link'
+import type { Post } from '@payload-types'
 
 import { ArrowLeft } from 'lucide-react'
+import Image from 'next/image'
+import Link from 'next/link'
 
 import { Badge } from '@/components/badge'
 import { JsonLd } from '@/components/json-ld'
@@ -12,7 +13,6 @@ import { SectionHeading } from '@/components/section-heading'
 import { mediaAlt, mediaUrl } from '@/lib/media'
 import { readingMinutes } from '@/lib/reading-time'
 import { SITE_URL } from '@/lib/site.mjs'
-import type { Post } from '@payload-types'
 
 interface BlogDetailProps {
     post: Post
@@ -76,10 +76,10 @@ export function BlogDetail({ post, related }: BlogDetailProps) {
                 {cover ? (
                     <div className="relative mx-auto aspect-[16/9] overflow-hidden rounded-2xl">
                         <Image
-                            fill
                             alt={mediaAlt(post.coverImage, post.title)}
                             className="object-cover"
                             fetchPriority="high"
+                            fill
                             loading="eager"
                             sizes="(max-width: 1024px) 100vw, 896px"
                             src={cover}

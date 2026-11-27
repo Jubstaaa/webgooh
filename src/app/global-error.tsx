@@ -7,8 +7,6 @@ import {
     ErrorMessage,
 } from '@/components/error-message'
 
-// Replaces the root layout when that layout itself fails, so it brings its own
-// document, styles and fonts, and no header or footer that could fail again.
 export default function GlobalError(props: ErrorBoundaryProps) {
     return (
         <html className={fontVariables} lang="tr">

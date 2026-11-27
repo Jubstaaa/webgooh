@@ -1,6 +1,6 @@
-import { beforeEach, describe, expect, mock, test } from 'bun:test'
-
 import type { Category, Post } from '@payload-types'
+
+import { beforeEach, describe, expect, mock, test } from 'bun:test'
 
 const revalidated: string[] = []
 const profiles: unknown[] = []

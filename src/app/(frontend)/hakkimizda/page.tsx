@@ -2,9 +2,6 @@ import type { Metadata } from 'next'
 
 import { About } from '@/app/(frontend)/hakkimizda/_components/about'
 
-// The image is built against an empty database, so this route renders per
-// request from the tagged data cache instead of baking empty content into HTML
-// (README: Rendering & revalidation).
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {

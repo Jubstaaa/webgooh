@@ -1,4 +1,6 @@
-import { MigrateUpArgs, MigrateDownArgs, sql } from '@payloadcms/db-sqlite'
+import type { MigrateUpArgs, MigrateDownArgs } from '@payloadcms/db-sqlite'
+
+import { sql } from '@payloadcms/db-sqlite'
 
 export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   // Production predates migrations: its schema was pushed by Payload in dev mode

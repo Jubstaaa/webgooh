@@ -1,6 +1,3 @@
-// Smoke test for a running image: `bun scripts/smoke.ts http://127.0.0.1:3001`.
-// CI runs it against the candidate container, which boots on an empty database
-// and applies every migration at start, so it also proves a fresh install works.
 import assert from 'node:assert/strict'
 
 const base = process.argv[2]
@@ -35,11 +32,9 @@ const checks: Check[] = [
     { contains: '<urlset', path: '/sitemap.xml', status: 200 },
     { contains: '<rss', path: '/rss.xml', status: 200 },
     { path: '/robots.txt', status: 200 },
-    // The admin panel's own bundle and import map; on an empty database it
-    // offers to create the first user.
+
     { path: '/admin', status: 200 },
-    // Slug routes are generated on first request; an unknown slug must 404,
-    // not crash the render.
+
     { path: '/blog/smoke-test-missing-post', status: 404 },
     { path: '/hizmetlerimiz/smoke-test-missing-service', status: 404 },
     { path: '/smoke-test-missing-page', status: 404 },
@@ -47,8 +42,6 @@ const checks: Check[] = [
 
 const failures: string[] = []
 
-// A hung route must fail with its path instead of stalling the job, and a
-// connection error must not hide the results collected before it.
 async function get(path: string) {
     return fetch(new URL(path, base), {
         redirect: 'manual',
